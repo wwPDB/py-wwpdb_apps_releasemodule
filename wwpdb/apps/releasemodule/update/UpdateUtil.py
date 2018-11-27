@@ -23,9 +23,9 @@ __version__   = "V0.07"
 
 import os, sys, string, traceback
 
-from wwpdb.api.facade.ConfigInfo                      import ConfigInfo
-from pdbx.writer.PdbxWriter                           import PdbxWriter
-from pdbx.reader.PdbxContainers                       import *
+from wwpdb.utils.config.ConfigInfo                      import ConfigInfo
+from mmcif.io.PdbxWriter                           import PdbxWriter
+from mmcif.api.PdbxContainers                       import *
 from wwpdb.apps.entity_transform.utils.GetLogMessage  import GetLogMessage
 from wwpdb.apps.entity_transform.utils.mmCIFUtil      import mmCIFUtil
 from wwpdb.apps.releasemodule.utils.Utility           import *

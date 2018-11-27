@@ -31,7 +31,7 @@ import copy, operator, os, sys, string, traceback
 from wwpdb.apps.releasemodule.citation.FetchUtil  import FetchUtil
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
 from wwpdb.apps.releasemodule.utils.CombineDbApi  import CombineDbApi
-from wwpdb.utils.rcsb.PathInfo                    import PathInfo
+from wwpdb.io.locator.PathInfo                    import PathInfo
 #
 
 class ReadCitationFinderResult(object):

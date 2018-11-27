@@ -2,7 +2,7 @@
 import os, sys, string, traceback
 
 from pdbx_v2.trans.InstanceMapper  import InstanceMapper
-from wwpdb.api.facade.ConfigInfo   import ConfigInfo
+from wwpdb.utils.config.ConfigInfo   import ConfigInfo
 
 def Convertor(inputfile, outputfile):
     siteId = os.environ['WWPDB_SITE_ID']

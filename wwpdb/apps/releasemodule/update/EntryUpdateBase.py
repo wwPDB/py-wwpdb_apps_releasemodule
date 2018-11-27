@@ -26,7 +26,7 @@ import filecmp, ntpath, os, shutil, sys, time
 from wwpdb.apps.releasemodule.update.UpdateBase    import UpdateBase
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.wf_engine.engine.WFEapplications   import killAllWF
-from wwpdb.utils.rcsb.PathInfo                     import PathInfo
+from wwpdb.io.locator.PathInfo                     import PathInfo
 
 class EntryUpdateBase(UpdateBase):
     """ Base Class responsible for releasing/pulling back a entry

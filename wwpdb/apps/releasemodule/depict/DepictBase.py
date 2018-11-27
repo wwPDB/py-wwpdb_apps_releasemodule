@@ -25,7 +25,7 @@ import os, sys, urllib
 
 from wwpdb.apps.releasemodule.depict.ReleaseOption_v2 import ReleaseOption
 from wwpdb.apps.releasemodule.utils.ModuleBaseClass   import ModuleBaseClass
-from wwpdb.utils.rcsb.PathInfo                        import PathInfo
+from wwpdb.io.locator.PathInfo                        import PathInfo
 
 class DepictBase(ModuleBaseClass):
     """ Class responsible for generating HTML depiction.

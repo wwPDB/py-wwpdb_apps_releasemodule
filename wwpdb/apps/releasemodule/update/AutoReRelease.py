@@ -27,11 +27,11 @@ except ImportError:
 
 import operator, os, shutil, string, sys
 
-from wwpdb.api.facade.ConfigInfo import ConfigInfo
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.apps.releasemodule.update.MultiUpdateProcess import MultiUpdateProcess
 from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
-from wwpdb.utils.rcsb.PathInfo import PathInfo
-from wwpdb.utils.rcsb.WebRequest import InputRequest
+from wwpdb.io.locator.PathInfo import PathInfo
+from wwpdb.utils.session.WebRequest import InputRequest
 
 class AutoReRelease(object):
     def __init__(self, siteId=None, verbose=False, log=sys.stderr):

@@ -32,7 +32,7 @@ from wwpdb.apps.releasemodule.utils.ContentDbApi        import ContentDbApi
 from wwpdb.apps.releasemodule.utils.DBLoadUtil          import DBLoadUtil
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2      import StatusDbApi
 from wwpdb.apps.releasemodule.utils.Utility             import getCleanValue
-from wwpdb.utils.rcsb.MultiProcUtil                     import MultiProcUtil
+from rcsb.utils.multiproc.MultiProcUtil                     import MultiProcUtil
 
 class MultiUpdateProcess(UpdateBase):
     """ Class responsible for release/pull off entries

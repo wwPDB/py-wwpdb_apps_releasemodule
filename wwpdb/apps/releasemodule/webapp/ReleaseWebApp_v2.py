@@ -28,8 +28,8 @@ except ImportError:
 
 import os, sys, tarfile, types, traceback
 
-from wwpdb.api.facade.ConfigInfo                                import ConfigInfo
-from wwpdb.utils.rcsb.WebRequest                                import InputRequest,ResponseContent
+from wwpdb.utils.config.ConfigInfo                                import ConfigInfo
+from wwpdb.utils.session.WebRequest                                import InputRequest,ResponseContent
 from wwpdb.apps.releasemodule.citation.ReadCitationFinderResult_v2 import ReadCitationFinderResult
 from wwpdb.apps.releasemodule.depict.DepictAnnotatorHistory     import DepictAnnotatorHistory
 from wwpdb.apps.releasemodule.depict.DepictCitation_v2          import DepictCitation
@@ -44,7 +44,7 @@ from wwpdb.apps.releasemodule.update.MultiUpdateProcess         import MultiUpda
 from wwpdb.apps.releasemodule.update.UpdateFormParser           import UpdateFormParser
 from wwpdb.apps.releasemodule.utils.CombineDbApi                import CombineDbApi
 from wwpdb.apps.releasemodule.utils.Utility                     import FindFiles,FindLogFiles,getFileName
-from wwpdb.utils.rcsb.PathInfo                                  import PathInfo
+from wwpdb.io.locator.PathInfo                                  import PathInfo
 #
 
 class ReleaseWebApp(object):

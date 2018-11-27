@@ -24,7 +24,7 @@ __version__   = "V0.07"
 import logging, os, shutil, sys, traceback
 
 from pdbx_v2.trans.InstanceMapper                    import InstanceMapper
-from wwpdb.api.facade.ConfigInfoData                 import ConfigInfoData
+from wwpdb.utils.config.ConfigInfoData                 import ConfigInfoData
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 #from wwpdb.utils.emdb.cifEMDBTranslator.cifEMDBTranslator import CifEMDBTranslator
 from wwpdb.utils.emdb.cif_emdb_translator.cif_emdb_translator import CifEMDBTranslator

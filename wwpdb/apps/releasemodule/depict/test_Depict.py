@@ -1,6 +1,6 @@
 import os,sys
 
-from wwpdb.utils.rcsb.WebRequest import InputRequest,ResponseContent
+from wwpdb.utils.session.WebRequest import InputRequest,ResponseContent
 from wwpdb.apps.releasemodule.depict.Depict        import Depict
 from wwpdb.apps.releasemodule.utils.DBUtil         import DBUtil
 #

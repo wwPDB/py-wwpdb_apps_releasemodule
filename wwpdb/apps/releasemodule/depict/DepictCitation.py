@@ -27,7 +27,7 @@ from wwpdb.apps.releasemodule.citation.StringUtil  import calStringSimilarity
 from wwpdb.apps.releasemodule.depict.ReleaseOption import ReleaseOption
 from wwpdb.apps.releasemodule.utils.TimeUtil       import TimeUtil
 from wwpdb.apps.releasemodule.utils.Utility        import *
-from wwpdb.utils.rcsb.PathInfo                    import PathInfo
+from wwpdb.io.locator.PathInfo                    import PathInfo
 
 class DepictCitation(object):
     """ Class responsible for generating citation finder result HTML depiction.

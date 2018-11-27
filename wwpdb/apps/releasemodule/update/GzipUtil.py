@@ -23,7 +23,7 @@ __version__   = "V0.07"
 
 import gzip, os, shutil, string, sys, traceback
 
-from wwpdb.api.facade.ConfigInfo                      import ConfigInfo
+from wwpdb.utils.config.ConfigInfo                      import ConfigInfo
 from wwpdb.apps.entity_transform.utils.GetLogMessage  import GetLogMessage
 from wwpdb.apps.releasemodule.utils.DBUtil            import DBUtil
 from wwpdb.apps.releasemodule.utils.TimeUtil          import TimeUtil

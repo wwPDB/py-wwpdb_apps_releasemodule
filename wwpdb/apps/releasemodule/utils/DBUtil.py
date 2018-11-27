@@ -25,7 +25,7 @@ import os,sys
 import MySQLdb
 #
 from wwpdb.api.status.dbapi.DbConnection     import DbConnection    
-from wwpdb.api.facade.ConfigInfo             import ConfigInfo
+from wwpdb.utils.config.ConfigInfo             import ConfigInfo
 from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
 
 class DBUtil(object):

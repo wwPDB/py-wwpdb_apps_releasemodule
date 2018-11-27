@@ -28,7 +28,7 @@ except ImportError:
 
 import os, sys
 
-from wwpdb.api.facade.ConfigInfo             import ConfigInfo
+from wwpdb.utils.config.ConfigInfo             import ConfigInfo
 from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
 
 class ModuleBaseClass(object):

@@ -23,9 +23,9 @@ __version__   = "V0.07"
 
 import copy, cPickle, operator, os, sys, string, time, traceback
 
-from pdbx.reader.PdbxContainers                  import *
-from pdbx.writer.PdbxWriter                      import PdbxWriter
-from wwpdb.api.facade.ConfigInfo                 import ConfigInfo
+from mmcif.api.PdbxContainers                  import *
+from mmcif.io.PdbxWriter                      import PdbxWriter
+from wwpdb.utils.config.ConfigInfo                 import ConfigInfo
 from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
 from wwpdb.apps.releasemodule.citation.MatchMP   import MatchMP
 from wwpdb.apps.releasemodule.citation.MatchUtil import MatchUtil

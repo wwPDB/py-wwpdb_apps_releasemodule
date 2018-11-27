@@ -23,7 +23,7 @@ __version__   = "V0.07"
 
 import os, shutil, sys, string, traceback
 
-from wwpdb.api.facade.ConfigInfo                  import ConfigInfo
+from wwpdb.utils.config.ConfigInfo                  import ConfigInfo
 from wwpdb.apps.entity_transform.utils.mmCIFUtil  import mmCIFUtil
 from wwpdb.apps.releasemodule.utils.TimeUtil      import TimeUtil
 

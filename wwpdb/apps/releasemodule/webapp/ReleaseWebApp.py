@@ -25,8 +25,8 @@ import cPickle, os, sys, tarfile, time, types, string, traceback, ntpath, thread
 from json import loads, dumps
 from time import localtime, strftime
 
-from wwpdb.api.facade.ConfigInfo                                import ConfigInfo
-from wwpdb.utils.rcsb.WebRequest                                import InputRequest,ResponseContent
+from wwpdb.utils.config.ConfigInfo                                import ConfigInfo
+from wwpdb.utils.session.WebRequest                                import InputRequest,ResponseContent
 from wwpdb.apps.releasemodule.citation.ReadCitationFinderResult import ReadCitationFinderResult
 from wwpdb.apps.releasemodule.depict.Depict                     import Depict
 from wwpdb.apps.releasemodule.depict.DepictCitation             import DepictCitation
@@ -39,7 +39,7 @@ from wwpdb.apps.releasemodule.update.UpdateFile                 import UpdateFil
 from wwpdb.apps.releasemodule.utils.DBUtil                      import DBUtil
 from wwpdb.apps.releasemodule.utils.StatusDbApi                 import StatusDbApi
 from wwpdb.apps.releasemodule.utils.Utility                     import *
-from wwpdb.utils.rcsb.PathInfo                                  import PathInfo
+from wwpdb.io.locator.PathInfo                                  import PathInfo
 #
 
 class ReleaseWebApp(object):

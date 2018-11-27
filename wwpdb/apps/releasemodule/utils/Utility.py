@@ -22,7 +22,7 @@ __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
 import os, sys
-from wwpdb.api.facade.ConfigInfo  import ConfigInfo
+from wwpdb.utils.config.ConfigInfo  import ConfigInfo
 from wwpdb.apps.wf_engine.engine.dbAPI import dbAPI
 
 def isDEPLocked(depid):

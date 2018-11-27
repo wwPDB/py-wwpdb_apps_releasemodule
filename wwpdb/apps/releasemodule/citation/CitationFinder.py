@@ -28,9 +28,9 @@ except ImportError:
 
 import copy, operator, os, sys, string, time, traceback
 
-from pdbx.reader.PdbxContainers                  import *
-from pdbx.writer.PdbxWriter                      import PdbxWriter
-from wwpdb.api.facade.ConfigInfo                 import ConfigInfo
+from mmcif.api.PdbxContainers                  import *
+from mmcif.io.PdbxWriter                      import PdbxWriter
+from wwpdb.utils.config.ConfigInfo                 import ConfigInfo
 from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
 from wwpdb.apps.releasemodule.citation.FetchMP   import FetchMP
 from wwpdb.apps.releasemodule.citation.SearchMP  import SearchMP

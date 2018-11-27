@@ -28,11 +28,11 @@ except ImportError:
 
 import os, sys
 
-from pdbx_v2.reader.DataCategory                     import DataCategory
-from pdbx_v2.reader.PdbxContainers                   import DataContainer
-from pdbx_v2.writer.PdbxWriter                       import PdbxWriter
+from mmcif.api.DataCategory                     import DataCategory
+from mmcif.api.PdbxContainers                   import DataContainer
+from mmcif.io.PdbxWriter                       import PdbxWriter
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
-from wwpdb.utils.rcsb.mmCIFUtil                      import mmCIFUtil
+from wwpdb.io.file.mmCIFUtil                      import mmCIFUtil
 
 class UpdateUtil(EntryUpdateBase):
     """ Class responsible for updating model, structure-factors, nmr-restraints, and nmr-chemical-shifts files

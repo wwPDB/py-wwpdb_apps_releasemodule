@@ -24,9 +24,9 @@ __version__   = "V0.07"
 import cPickle, logging, os, shutil, sys, string, traceback
 
 from pdbx_v2.trans.InstanceMapper                    import InstanceMapper
-from wwpdb.api.facade.ConfigInfo                     import ConfigInfo
-from wwpdb.api.facade.ConfigInfoData                 import ConfigInfoData
-from wwpdb.api.status.dbapi.WfDbApi                  import WfDbApi
+from wwpdb.utils.config.ConfigInfo                     import ConfigInfo
+from wwpdb.utils.config.ConfigInfoData                 import ConfigInfoData
+from wwpdb.utils.wf.dbapi.WfDbApi                  import WfDbApi
 from wwpdb.apps.ann_tasks_v2.status.StatusHistoryUtils import StatusHistoryUtils
 from wwpdb.apps.entity_transform.utils.GetLogMessage import GetLogMessage
 from wwpdb.apps.entity_transform.utils.mmCIFUtil     import mmCIFUtil
@@ -43,8 +43,8 @@ from wwpdb.apps.releasemodule.utils.DBLoadUtil       import DBLoadUtil
 from wwpdb.apps.releasemodule.utils.Utility          import *
 from wwpdb.apps.wf_engine.engine.WFEapplications     import killAllWF
 from wwpdb.utils.emdb.cifEMDBTranslator.cifEMDBTranslator import CifEMDBTranslator
-from wwpdb.utils.rcsb.DataExchange                   import DataExchange
-from wwpdb.utils.rcsb.PathInfo                       import PathInfo
+from wwpdb.io.file.DataExchange                   import DataExchange
+from wwpdb.io.locator.PathInfo                       import PathInfo
 
 class UpdateFile(object):
     """ Class responsible for Update coordinate cif file.

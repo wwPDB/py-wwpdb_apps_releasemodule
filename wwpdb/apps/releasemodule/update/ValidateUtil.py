@@ -23,7 +23,7 @@ __version__   = "V0.07"
 
 import os, string, sys, traceback
 
-from wwpdb.utils.rcsb.RcsbDpUtility     import RcsbDpUtility
+from wwpdb.utils.dp.RcsbDpUtility     import RcsbDpUtility
 
 class ValidateUtil(object):
     """ Class responsible for new validation

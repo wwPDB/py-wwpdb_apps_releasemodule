@@ -27,7 +27,7 @@ from wwpdb.apps.releasemodule.citation.FetchUtil  import FetchUtil
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
 from wwpdb.apps.releasemodule.utils.DBUtil        import DBUtil
 from wwpdb.apps.releasemodule.utils.Utility       import isDEPLocked
-from wwpdb.utils.rcsb.PathInfo                    import PathInfo
+from wwpdb.io.locator.PathInfo                    import PathInfo
 #
 
 class ReadCitationFinderResult(object):

@@ -28,7 +28,7 @@ except ImportError:
 
 import os, sys, string, traceback
 
-from wwpdb.utils.rcsb.PathInfo  import PathInfo
+from wwpdb.io.locator.PathInfo  import PathInfo
 
 class DepictRemovalMark(object):
     """ Class responsible for generating marked pubmed ID result HTML depiction.
