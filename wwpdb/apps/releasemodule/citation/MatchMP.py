@@ -1,0 +1,120 @@
+##
+# File:  MatchMP.py
+# Date:  23-Jul-2013
+# Updates:
+##
+"""
+
+This software was developed as part of the World Wide Protein Data Bank
+Common Deposition and Annotation System Project
+
+Copyright (c) 2013 wwPDB
+
+This software is provided under a Creative Commons Attribution 3.0 Unported
+License described at http://creativecommons.org/licenses/by/3.0/.
+
+"""
+__docformat__ = "restructuredtext en"
+__author__    = "Zukang Feng"
+__email__     = "zfeng@rcsb.rutgers.edu"
+__license__   = "Creative Commons Attribution 3.0 Unported"
+__version__   = "V0.07"
+
+import os,sys,multiprocessing,traceback
+
+from wwpdb.apps.releasemodule.citation.MatchUtil  import MatchUtil
+
+class MatchWorker(multiprocessing.Process):
+    """
+    """
+    def __init__(self, termMap=None, pubmedInfo=None, taskQueue=None, resultQueue=None, \
+                 log=sys.stderr, verbose=False):
+        multiprocessing.Process.__init__(self)
+        self.__termMap = termMap
+        self.__pubmedInfo = pubmedInfo
+        self.__taskQueue=taskQueue
+        self.__resultQueue=resultQueue
+        self.__lfh=log
+        self.__verbose=verbose
+
+    def getMatchList(self,entry):
+        mUtil = MatchUtil(entry=entry, termMap=self.__termMap, pubmedInfo=self.__pubmedInfo, \
+                          log=self.__lfh, verbose=self.__verbose)
+        mUtil.run()
+        return mUtil.getMatchList()
+
+    def run(self):
+        processName=self.name
+        while True:
+            nextList=self.__taskQueue.get()
+            # end of queue condition
+            if nextList is None:
+                break
+            #
+            resultList = []
+            for entry in nextList:
+                list = self.getMatchList(entry)
+                if not list:
+                    continue
+                #
+                resultList.append([entry['structure_id'], list])
+            #
+            self.__resultQueue.put(resultList)
+        #
+
+class MatchMP(object):
+    """
+    """
+    def __init__(self, entryList=None, termMap=None, pubmedInfo=None, log=sys.stderr, verbose=False):
+        """
+        """
+        self.__entryList = entryList
+        self.__termMap = termMap
+        self.__pubmedInfo = pubmedInfo
+        self.__lfh = log
+        self.__verbose = verbose
+        self.__matchResultMap = {}
+
+    def run(self):
+        numProc = multiprocessing.cpu_count() * 2
+        #
+        subLists = [self.__entryList[i::numProc] for i in xrange(numProc)]
+        #
+        taskQueue = multiprocessing.Queue()
+        resultQueue = multiprocessing.Queue()
+        #
+        workers = [ MatchWorker(termMap=self.__termMap, pubmedInfo=self.__pubmedInfo, taskQueue=taskQueue, \
+                    resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) for i in xrange(numProc) ]
+        #
+        for w in workers:
+            w.start()
+        #
+        for subList in subLists:
+            taskQueue.put(subList)
+        #
+        for i in xrange(numProc):
+            taskQueue.put(None)
+        #
+        for i in xrange(len(subLists)):
+            lists = resultQueue.get()
+            if not lists:
+                continue
+            #
+            for list in lists:
+                self.__matchResultMap[list[0]] = list[1]
+            # 
+        #
+        try:
+            for w in workers:
+                w.terminate()
+                w.join(1)
+            #
+        except:
+            if self.__verbose:
+                traceback.print_exc(file=self.__lfh)
+            #
+        #
+
+    def getMatchResultMap(self):
+        return self.__matchResultMap
+
