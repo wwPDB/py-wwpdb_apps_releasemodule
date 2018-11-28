@@ -39,7 +39,7 @@ from wwpdb.apps.releasemodule.update.GzipMP          import GzipMP
 from wwpdb.apps.releasemodule.update.UpdateCifMP     import UpdateCifMP
 from wwpdb.apps.releasemodule.update.UpdateMP        import UpdateMP
 from wwpdb.apps.releasemodule.update.UpdateUtil      import UpdateUtil
-from wwpdb.apps.releasemodule.utils.DBLoadUtil       import DBLoadUtil
+from wwpdb.utils.db.DBLoadUtil       import DBLoadUtil
 from wwpdb.apps.releasemodule.utils.Utility          import *
 from wwpdb.apps.wf_engine.engine.WFEapplications     import killAllWF
 from wwpdb.utils.emdb.cifEMDBTranslator.cifEMDBTranslator import CifEMDBTranslator

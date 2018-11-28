@@ -35,7 +35,7 @@ from wwpdb.apps.releasemodule.update.EntryPullProcess import EntryPullProcess
 from wwpdb.apps.releasemodule.update.EntryUpdateProcess import EntryUpdateProcess
 from wwpdb.apps.releasemodule.update.UpdateBase import UpdateBase
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
-from wwpdb.apps.releasemodule.utils.DBLoadUtil import DBLoadUtil
+from wwpdb.utils.db.DBLoadUtil import DBLoadUtil
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.releasemodule.utils.Utility import getCleanValue
 
