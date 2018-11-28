@@ -110,4 +110,4 @@ class JournalAbbrev(object):
 
 if __name__ == '__main__':
     c=JournalAbbrev(ciffile='/net/wwpdb_da/da_top/tools-centos-6/packages/annotation/data/ascii/ndb_refn.cif', verbose=True, log=sys.stderr)
-    print c.GetJoinQuoterList(',\n')
+    print(c.GetJoinQuoterList(',\n'))

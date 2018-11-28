@@ -532,4 +532,4 @@ class CombineDbApi(object):
 if __name__ == '__main__':
     siteId = os.getenv('WWPDB_SITE_ID')
     c=CombineDbApi(siteId=siteId, verbose=True, log=sys.stderr)
-    print c.getFunctionCall(True, 'getAnnoList', [])
+    print(c.getFunctionCall(True, 'getAnnoList', []))

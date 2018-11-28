@@ -365,5 +365,5 @@ def FindReleaseFiles(siteId, entry_dir):
 
 if __name__ == "__main__":
     list = FindFiles(sys.argv[1])
-    print len(list)
-    print list
+    print(len(list))
+    print(list)

@@ -1067,10 +1067,10 @@ if __name__ == "__main__":
     for dir in list:
         for k,v in dir.items():
             if (type(v) == types.TupleType) or (type(v) == types.ListType) or (type(v) == types.DictType):
-                print k + '='
-                print v
+                print(k + '=')
+                print(v)
             else:
-                print k + '=' + str(v)
+                print(k + '=' + str(v))
             #
         #
     #

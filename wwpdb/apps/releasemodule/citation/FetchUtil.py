@@ -125,6 +125,6 @@ if __name__ == '__main__':
     cf = FetchUtil(idList=['23542341','23326635'],log=sys.stderr, verbose=False)
     cf.doFetch()
     list = cf.getPubmedInfoList()
-    print list
+    print(list)
     dir = cf.getPubmedInfoMap()
-    print dir
+    print(dir)

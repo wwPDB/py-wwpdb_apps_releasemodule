@@ -372,4 +372,4 @@ if __name__ == '__main__':
     cReader = ReadCitationFinderResult(pickleFile=sys.argv[1], verbose=False, log=sys.stderr)
     list = cReader.getEntryList(sys.argv[2])
     for id in list:
-        print id
+        print(id)

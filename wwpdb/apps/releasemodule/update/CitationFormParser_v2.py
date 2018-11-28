@@ -85,7 +85,7 @@ class CitationFormParser(InputFormParser):
         allow_citation_ids = self.__getAllowCitationIDs()
         #
         lists = []
-	for ids in pubmed_list:
+        for ids in pubmed_list:
             if not ids:
                 continue
             #
