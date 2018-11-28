@@ -24,7 +24,7 @@ __version__   = "V0.07"
 import os,sys
 import MySQLdb
 #
-from wwpdb.api.status.dbapi.DbConnection     import DbConnection    
+from wwpdb.utils.wf.dbapi.DbConnection     import DbConnection    
 from wwpdb.utils.config.ConfigInfo             import ConfigInfo
 from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
 

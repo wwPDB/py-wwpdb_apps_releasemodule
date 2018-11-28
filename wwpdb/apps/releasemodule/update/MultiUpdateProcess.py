@@ -21,18 +21,24 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import multiprocessing, os, sys, time, traceback
+import multiprocessing
+import os
+import sys
+import time
+import traceback
 
-from wwpdb.apps.ann_tasks_v2.status.StatusHistoryUtils  import StatusHistoryUtils
-from wwpdb.apps.msgmodule.io.MessagingIo                import MessagingIo
-from wwpdb.apps.releasemodule.update.EntryPullProcess   import EntryPullProcess
+from rcsb.utils.multiproc.MultiProcUtil import MultiProcUtil
+from wwpdb.apps.msgmodule.io.MessagingIo import MessagingIo
+from wwpdb.utils.db.StatusHistoryUtils import StatusHistoryUtils
+
+from wwpdb.apps.releasemodule.update.EntryPullProcess import EntryPullProcess
 from wwpdb.apps.releasemodule.update.EntryUpdateProcess import EntryUpdateProcess
-from wwpdb.apps.releasemodule.update.UpdateBase         import UpdateBase
-from wwpdb.apps.releasemodule.utils.ContentDbApi        import ContentDbApi
-from wwpdb.apps.releasemodule.utils.DBLoadUtil          import DBLoadUtil
-from wwpdb.apps.releasemodule.utils.StatusDbApi_v2      import StatusDbApi
-from wwpdb.apps.releasemodule.utils.Utility             import getCleanValue
-from rcsb.utils.multiproc.MultiProcUtil                     import MultiProcUtil
+from wwpdb.apps.releasemodule.update.UpdateBase import UpdateBase
+from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
+from wwpdb.apps.releasemodule.utils.DBLoadUtil import DBLoadUtil
+from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
+from wwpdb.apps.releasemodule.utils.Utility import getCleanValue
+
 
 class MultiUpdateProcess(UpdateBase):
     """ Class responsible for release/pull off entries

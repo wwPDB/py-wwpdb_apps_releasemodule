@@ -23,13 +23,13 @@ __version__   = "V0.07"
 
 import cPickle, logging, os, shutil, sys, string, traceback
 
-from pdbx_v2.trans.InstanceMapper                    import InstanceMapper
-from wwpdb.utils.config.ConfigInfo                     import ConfigInfo
-from wwpdb.utils.config.ConfigInfoData                 import ConfigInfoData
-from wwpdb.utils.wf.dbapi.WfDbApi                  import WfDbApi
-from wwpdb.apps.ann_tasks_v2.status.StatusHistoryUtils import StatusHistoryUtils
-from wwpdb.apps.entity_transform.utils.GetLogMessage import GetLogMessage
-from wwpdb.apps.entity_transform.utils.mmCIFUtil     import mmCIFUtil
+from mmcif_utils.trans.InstanceMapper                import InstanceMapper
+from wwpdb.utils.config.ConfigInfo                   import ConfigInfo
+from wwpdb.utils.config.ConfigInfoData               import ConfigInfoData
+from wwpdb.utils.wf.dbapi.WfDbApi                    import WfDbApi
+from wwpdb.utils.db.StatusHistoryUtils               import StatusHistoryUtils
+from wwpdb.apps.releasemodule.utils.GetLogMessage import GetLogMessage
+from wwpdb.io.file.mmCIFUtil                         import mmCIFUtil
 from wwpdb.apps.msgmodule.io.MessagingIo             import MessagingIo
 from wwpdb.apps.releasemodule.update.ArchiveFileUtil import ArchiveFileUtil
 from wwpdb.apps.releasemodule.update.CheckMP         import CheckMP
@@ -43,7 +43,7 @@ from wwpdb.apps.releasemodule.utils.DBLoadUtil       import DBLoadUtil
 from wwpdb.apps.releasemodule.utils.Utility          import *
 from wwpdb.apps.wf_engine.engine.WFEapplications     import killAllWF
 from wwpdb.utils.emdb.cifEMDBTranslator.cifEMDBTranslator import CifEMDBTranslator
-from wwpdb.io.file.DataExchange                   import DataExchange
+from wwpdb.io.file.DataExchange                      import DataExchange
 from wwpdb.io.locator.PathInfo                       import PathInfo
 
 class UpdateFile(object):

@@ -21,13 +21,17 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import logging, os, shutil, sys, traceback
+import os
+import sys
+import traceback
 
-from pdbx_v2.trans.InstanceMapper                    import InstanceMapper
-from wwpdb.utils.config.ConfigInfoData                 import ConfigInfoData
-from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
-#from wwpdb.utils.emdb.cifEMDBTranslator.cifEMDBTranslator import CifEMDBTranslator
+from mmcif_utils.trans.InstanceMapper import InstanceMapper
+from wwpdb.utils.config.ConfigInfoData import ConfigInfoData
+# from wwpdb.utils.emdb.cifEMDBTranslator.cifEMDBTranslator import CifEMDBTranslator
 from wwpdb.utils.emdb.cif_emdb_translator.cif_emdb_translator import CifEMDBTranslator
+
+from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
+
 
 class EmReleaseUtil(EntryUpdateBase):
     """ Class responsible for release/pull off entries

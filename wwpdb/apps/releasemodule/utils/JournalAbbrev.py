@@ -24,7 +24,7 @@ __version__   = "V0.07"
 import os,sys
 #
 from wwpdb.utils.config.ConfigInfo                 import ConfigInfo
-from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
+from wwpdb.io.file.mmCIFUtil                       import mmCIFUtil
 
 class JournalAbbrev(object):
     """

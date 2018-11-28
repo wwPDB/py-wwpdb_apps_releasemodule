@@ -23,11 +23,12 @@ __version__   = "V0.07"
 
 import os, sys, string, traceback
 
-from wwpdb.utils.config.ConfigInfo                      import ConfigInfo
-from mmcif.io.PdbxWriter                           import PdbxWriter
-from mmcif.api.PdbxContainers                       import *
-from wwpdb.apps.entity_transform.utils.GetLogMessage  import GetLogMessage
-from wwpdb.apps.entity_transform.utils.mmCIFUtil      import mmCIFUtil
+from wwpdb.utils.config.ConfigInfo                    import ConfigInfo
+from mmcif.io.PdbxWriter                              import PdbxWriter
+from mmcif.api.PdbxContainers                         import *
+from mmcif.api.DataCategory                           import DataCategory
+from wwpdb.apps.releasemodule.utils.GetLogMessage     import GetLogMessage
+from wwpdb.io.file.mmCIFUtil                          import mmCIFUtil
 from wwpdb.apps.releasemodule.utils.Utility           import *
 
 class UpdateUtil(object):
