@@ -46,7 +46,7 @@ setup(
     install_requires=['mmcif', 'wwpdb.apps.msgmodule', 'wwpdb.apps.wf_engine',
                       'wwpdb.io', 'wwpdb.utils.config', 'wwpdb.utils.dp',
                       'wwpdb.utils.emdb', 'wwpdb.utils.session',
-                      'wwpdb.utils.wf', 'mmcif.utils'],
+                      'wwpdb.utils.wf', 'mmcif.utils', 'wwpdb.utils.db >= 0.8'],
     packages=find_packages(exclude=['wwpdb.apps.tests-releasemodule',
                                     'mock-data']),
     # Enables Manifest to be used
