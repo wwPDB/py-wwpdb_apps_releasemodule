@@ -202,7 +202,7 @@ class CitationFinder(object):
         if not self.__authorList:
             return
         #
-        aSearch = SearchMP(termList=self.__authorList, log=self.__lfh, verbose=self.__verbose)
+        aSearch = SearchMP(siteId = self.__siteId, termList=self.__authorList, log=self.__lfh, verbose=self.__verbose)
         aSearch.run()
         self.__termMap = aSearch.getTermMap()
 
@@ -229,7 +229,7 @@ class CitationFinder(object):
         if not self.__pubmedIdList:
             return
         #
-        pFetch = FetchMP(idList=self.__pubmedIdList, log=self.__lfh, verbose=self.__verbose)
+        pFetch = FetchMP(siteId = self.__siteId, idList=self.__pubmedIdList, log=self.__lfh, verbose=self.__verbose)
         pFetch.run()
         self.__pubmedInfo = pFetch.getPubmedInfoMap()
 

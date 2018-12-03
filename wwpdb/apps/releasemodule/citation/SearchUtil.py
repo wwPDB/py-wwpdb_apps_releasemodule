@@ -25,11 +25,12 @@ import os,sys
 
 from wwpdb.apps.releasemodule.citation.SearchResultParser import SearchResultParser
 from wwpdb.apps.releasemodule.utils.Utility               import *
+from wwpdb.api.facade.ConfigInfo                          import ConfigInfo
 
 class SearchUtil(object):
     """
     """
-    def __init__(self, path='.', processLabel='', term=None, log=sys.stderr, verbose=False):
+    def __init__(self, path='.', processLabel='', term=None, siteId = None, log=sys.stderr, verbose=False):
         """
         """
         self.__sessionPath = path
@@ -38,13 +39,19 @@ class SearchUtil(object):
         self.__lfh = log
         self.__verbose = verbose
         self.__pubmedIdList = []
+        self.__cI = ConfigInfo(siteId)
+        self.__apikey = self.__cI.get('NCBI_API_KEY')
 
     def doSearch(self):
         """ Create NCBI webservice URL and run pubmed author search webservice
         """
         # NCBI esearch URL
+        if self.__apikey:
+            api = "&api_key=" + self.__apikey
+        else:
+            api =""
         query = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?" \
-              + "db=pubmed&term=" + self.__term + "&reldate=730&retmax=10000&retmode=xml"
+              + "db=pubmed&term=" + self.__term + "&reldate=730&retmax=10000&retmode=xml" + api
         #
         if self.__processLabel:
             scriptfile = 'search_' + self.__processLabel + '.csh'

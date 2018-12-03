@@ -24,12 +24,14 @@ __version__   = "V0.07"
 import os,sys,multiprocessing,traceback
 
 from wwpdb.apps.releasemodule.citation.SearchUtil  import SearchUtil
+from wwpdb.apps.releasemodule.utils.MultiProcLimit import MultiProcLimit
+from wwpdb.api.facade.ConfigInfo                   import ConfigInfo
 
 class SearchWorker(multiprocessing.Process):
     """
     """
-    def __init__(self, path='.', processLabel='', taskQueue=None, resultQueue=None, \
-                 log=sys.stderr, verbose=False):
+    def __init__(self, path='.', processLabel='', siteId = None, taskQueue=None, resultQueue=None, \
+                 mpl = None, log=sys.stderr, verbose=False):
         multiprocessing.Process.__init__(self)
         self.__sessionPath = path
         self.__processLabel = processLabel
@@ -37,10 +39,15 @@ class SearchWorker(multiprocessing.Process):
         self.__resultQueue=resultQueue
         self.__lfh=log
         self.__verbose=verbose
+        self.__mpl = mpl
+        self.__siteId = siteId
 
     def fetchEntryList(self,term):
         search = SearchUtil(path=self.__sessionPath, processLabel=self.__processLabel, \
-                          term=term, log=self.__lfh, verbose=self.__verbose)
+                          term=term, siteId = self.__siteId, log=self.__lfh, verbose=self.__verbose)
+        # Speed limit
+        if self.__mpl:
+            self.__mpl.waitnext()
         search.doSearch()
         return search.getPubmedIdList()
 
@@ -69,17 +76,28 @@ class SearchWorker(multiprocessing.Process):
 class SearchMP(object):
     """
     """
-    def __init__(self, path='.', termList=None, log=sys.stderr, verbose=False):
+    def __init__(self, path='.', termList=None, siteId = None, log=sys.stderr, verbose=False):
         """
         """
+        self.__siteId = siteId
         self.__sessionPath = path
         self.__termList = termList
         self.__lfh = log
         self.__verbose = verbose
         self.__termMap = {}
+        self.__cI = ConfigInfo(self.__siteId)
+        self.__apikey = self.__cI.get('NCBI_API_KEY')
 
     def run(self):
         numProc = multiprocessing.cpu_count() * 2
+        # Leave room for other processes
+        if self.__apikey:
+            rate = 8
+        else:
+            rate = 1
+        # Extra in case processing from previous result still going on
+        numProc = min(numProc, rate + 1)
+        mpl = MultiProcLimit(rate)
         #
         subLists = [self.__termList[i::numProc] for i in xrange(numProc)]
         #
@@ -87,7 +105,8 @@ class SearchMP(object):
         resultQueue = multiprocessing.Queue()
         #
         workers = [ SearchWorker(path=self.__sessionPath, processLabel=str(i+1), taskQueue=taskQueue, \
-                       resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) \
+                       resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose, \
+                       siteId = self.__siteId, mpl = mpl) \
                        for i in xrange(numProc) ]
         #
         for w in workers:

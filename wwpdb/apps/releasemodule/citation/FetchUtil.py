@@ -29,7 +29,7 @@ from wwpdb.apps.releasemodule.utils.Utility              import *
 class FetchUtil(object):
     """
     """
-    def __init__(self, path='.', processLabel='', idList=None, log=sys.stderr, verbose=False):
+    def __init__(self, path='.', processLabel='', idList=None, siteId = None, mpl = None, log=sys.stderr, verbose=False):
         """
         """
         self.__sessionPath = path
@@ -39,6 +39,9 @@ class FetchUtil(object):
         self.__verbose = verbose
         self.__pubmedInfoList = []
         #self.__pubmedInfoMap = {}
+        self.__cI = ConfigInfo(siteId)
+        self.__apikey = self.__cI.get('NCBI_API_KEY')
+        self.__mpl = mpl
 
     def doFetch(self):
         """ Run NCBI Pubmed fetch
@@ -80,9 +83,13 @@ class FetchUtil(object):
     def _runNCBIFetchCommand(self, ids):
         """ Create NCBI webservice URL and run webservice
         """
+        if self.__apikey:
+            api = "&api_key=" + self.__apikey
+        else:
+            api =""
         # NCBI fetch URL
         query = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=" \
-              + ids + "&retmode=xml&rettype=abstract"
+              + ids + "&retmode=xml&rettype=abstract" + api
         #
         if self.__processLabel:
             scriptfile = 'fetch_' + self.__processLabel + '.csh'
@@ -99,7 +106,9 @@ class FetchUtil(object):
         f.write('#\n')
         f.write('/usr/bin/curl -g "' + query + '" > ' + xmlfile + '\n')
         f.close()
-        #
+        # Speed limit requests
+        if self.__mpl:
+            self.__mpl.waitnext()
         RunScript(self.__sessionPath, scriptfile, logfile)
         self._readFetchResultXml(xmlfile)
 
