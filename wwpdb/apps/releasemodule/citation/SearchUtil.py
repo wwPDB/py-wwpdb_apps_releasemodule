@@ -25,7 +25,7 @@ import os,sys
 
 from wwpdb.apps.releasemodule.citation.SearchResultParser import SearchResultParser
 from wwpdb.apps.releasemodule.utils.Utility               import *
-from wwpdb.api.facade.ConfigInfo                          import ConfigInfo
+from wwpdb.utils.config.ConfigInfo                          import ConfigInfo
 
 class SearchUtil(object):
     """

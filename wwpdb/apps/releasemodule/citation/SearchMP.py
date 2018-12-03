@@ -25,7 +25,7 @@ import os,sys,multiprocessing,traceback
 
 from wwpdb.apps.releasemodule.citation.SearchUtil  import SearchUtil
 from wwpdb.apps.releasemodule.utils.MultiProcLimit import MultiProcLimit
-from wwpdb.api.facade.ConfigInfo                   import ConfigInfo
+from wwpdb.utils.config.ConfigInfo                   import ConfigInfo
 
 class SearchWorker(multiprocessing.Process):
     """
