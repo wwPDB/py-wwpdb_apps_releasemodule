@@ -87,12 +87,16 @@ class SearchMP(object):
         self.__termMap = {}
         self.__cI = ConfigInfo(self.__siteId)
         self.__apikey = self.__cI.get('NCBI_API_KEY')
+        self.__apirate = self.__cI.get('NCBI_API_RATE')
 
     def run(self):
         numProc = multiprocessing.cpu_count() * 2
         # Leave room for other processes
         if self.__apikey:
-            rate = 8
+            if self.__apirate:
+                rate = int(self.__apirate)
+            else:
+                rate = 8
         else:
             rate = 1
         # Extra in case processing from previous result still going on

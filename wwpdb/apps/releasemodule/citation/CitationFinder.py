@@ -28,10 +28,10 @@ except ImportError:
 
 import copy, operator, os, sys, string, time, traceback
 
-from mmcif.api.PdbxContainers                  import *
-from mmcif.io.PdbxWriter                      import PdbxWriter
-from wwpdb.utils.config.ConfigInfo                 import ConfigInfo
-from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
+from mmcif.api.PdbxContainers                    import DataContainer
+from mmcif.api.DataCategory                      import DataCategory
+from mmcif.io.PdbxWriter                         import PdbxWriter
+from wwpdb.io.file.mmCIFUtil                     import mmCIFUtil
 from wwpdb.apps.releasemodule.citation.FetchMP   import FetchMP
 from wwpdb.apps.releasemodule.citation.SearchMP  import SearchMP
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
