@@ -75,13 +75,20 @@ class ContentDbApi(object):
                                     "where structure_id in ( '%s' ) order by structure_id",
       "SELECT_LAST_PDBX_AUDIT_REVISION_HISTORY" : "select structure_id, ordinal, revision_date from pdbx_audit_revision_history where " +
                                                   "structure_id = '%s' order by ordinal desc limit 1",
-      "SELECT_ALL_EXPIRED_ENTRY" : "select structure_id from rcsb_status where ( initial_deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
-                                            " ( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or " +
-                                            " ( date_hold_coordinates < curdate() ) ) order by structure_id",
-      "SELECT_EXPIRED_ENTRY_BY_ANNOTATOR" : "select structure_id from rcsb_status where ( rcsb_annotator = '%s' ) and " +
-                                            " ( initial_deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
-                                            " ( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or " +
-                                            " ( date_hold_coordinates < curdate() ) ) order by structure_id",
+      "SELECT_ALL_EXPIRED_PDB_ENTRY" : "select structure_id from rcsb_status where ( initial_deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) " +
+                                       "and ( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or " +
+                                       " ( date_hold_coordinates < curdate() ) ) order by structure_id",
+      "SELECT_ALL_EXPIRED_EM_ENTRY" : "select r.structure_id from rcsb_status r, em_admin e where (r.structure_id = e.structure_id) and " +
+                                      "((r.pdb_id is null) or (r.pdb_id = '')) and (e.deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
+                                      "(e.current_status in ( 'AUTH', 'HPUB', 'HOLD' ) ) order by r.structure_id",
+      "SELECT_EXPIRED_PDB_ENTRY_BY_ANNOTATOR" : "select structure_id from rcsb_status where ( rcsb_annotator = '%s' ) and " +
+                                                "( initial_deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
+                                                "( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or " +
+                                                "( date_hold_coordinates < curdate() ) ) order by structure_id",
+      "SELECT_EXPIRED_EM_ENTRY_BY_ANNOTATOR" : "select r.structure_id from rcsb_status r, em_admin e where (r.structure_id = e.structure_id) and " +
+                                               "(r.rcsb_annotator = '%s' ) and ((r.pdb_id is null) or (r.pdb_id = '')) and " +
+                                               "(e.deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
+                                               "(e.current_status in ( 'AUTH', 'HPUB', 'HOLD' ) ) order by r.structure_id",
     }
     #
     def __init__(self, siteId=None, verbose=False, log=sys.stderr):
@@ -143,9 +150,15 @@ class ContentDbApi(object):
 
     def getExpiredEntryList(self, annotator):
         if annotator.strip().upper() == "ALL":
-            return self.__getSelectedIDList('SELECT_ALL_EXPIRED_ENTRY', ())
+            pdbList = self.__getSelectedIDList('SELECT_ALL_EXPIRED_PDB_ENTRY', ())
+            emList = self.__getSelectedIDList('SELECT_ALL_EXPIRED_EM_ENTRY', ())
+            pdbList.extend(emList)
+            return sorted(set(pdbList))
         else:
-            return self.__getSelectedIDList('SELECT_EXPIRED_ENTRY_BY_ANNOTATOR', (annotator))
+            pdbList = self.__getSelectedIDList('SELECT_EXPIRED_PDB_ENTRY_BY_ANNOTATOR', (annotator))
+            emList = self.__getSelectedIDList('SELECT_EXPIRED_EM_ENTRY_BY_ANNOTATOR', (annotator))
+            pdbList.extend(emList)
+            return sorted(set(pdbList))
 
     def getCitation(self, entry_id):
         rows = self.__dbApi.selectData(key='SELECT_PRIMARY_CITATION', parameter=(entry_id))

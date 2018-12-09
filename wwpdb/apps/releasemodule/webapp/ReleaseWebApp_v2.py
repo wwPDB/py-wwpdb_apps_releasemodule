@@ -468,11 +468,9 @@ class ReleaseWebAppWorker(object):
         if entryList:
             rC.setText(text=self.__depcitRequestForm(entryList))
         else:
-            myDir = {}
-            myDir['sessionid'] = self.__sessionId
-            myDir['annotator'] = self.__annotator
-            myDir['task']      = str(self.__reqObj.getValue('task'))
-            rC.setText(text=self.__processTemplate('request/input_form_tmplt.html', myDir))
+            returnText = '<h1 style="text-align:center">' + str(self.__reqObj.getValue('task')) + '</h1></br>' \
+                       + '<h2 style="text-align:center">No entry found.</h2>'
+            rC.setText(text=returnText)
         #
         return rC
 

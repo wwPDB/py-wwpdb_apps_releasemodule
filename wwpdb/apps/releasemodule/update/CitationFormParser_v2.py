@@ -150,7 +150,7 @@ class CitationFormParser(InputFormParser):
         #
         for id_list in pubmed_info_list:
             if (not pubmedInfoMap) or (not id_list[0] in pubmedInfoMap):
-                self._errorContent += 'No pumbed information for ID: ' + id_list[0] + '.\n'
+                self._errorContent += 'No pubmed information for ID: ' + id_list[0] + '.\n'
                 continue
             #
             dir = pubmedInfoMap[id_list[0]]
