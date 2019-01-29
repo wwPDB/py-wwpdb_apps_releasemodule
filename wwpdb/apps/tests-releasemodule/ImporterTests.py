@@ -53,6 +53,8 @@ from wwpdb.apps.releasemodule.webapp.ReleaseWebApp_v2 import ReleaseWebApp
 from wwpdb.apps.releasemodule.citation.CitationFinder import CitationFinder
 from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
 from wwpdb.apps.releasemodule.citation.FetchMP import FetchMP
+from wwpdb.apps.releasemodule.citation.MonitorCitationUpdate import MonitorCitationUpdate
+
 
 class ImportTests(unittest.TestCase):
     def setUp(self):
