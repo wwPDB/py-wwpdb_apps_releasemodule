@@ -188,6 +188,8 @@ class AutoReRelease(object):
                 newDataDict["status_code"] = "REREL"
                 newDataDict["directory"] = "modified"
                 newDataDict["option"] = "citation_update"
+                if ("emdb_id" in newDataDict) and newDataDict["emdb_id"]:
+                    newDataDict["emdb_release"] = True
                 #
                 pubmedInfo["id"] = "primary"
                 newDataDict["pubmed"] = [ pubmedInfo ]
