@@ -426,7 +426,8 @@ class EntryUpdateProcess(EntryUpdateBase):
     def __isLegacyEntry(self):
         sList = self._entryId.split('_')
         idNum = int(sList[1])
-        if idNum < 1000200000 or (idNum > 1290000000 and idNum < 1300000001):
+        #if (idNum > 1000000001 and idNum < 1000200000) or (idNum > 1290000000 and idNum < 1300000001):
+        if idNum > 1000000001 and idNum < 1000200000:
             return True
         #
         return False
