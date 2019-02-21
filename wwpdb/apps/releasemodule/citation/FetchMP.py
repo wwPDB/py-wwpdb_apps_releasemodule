@@ -158,11 +158,11 @@ if __name__ == '__main__':
     f.close()
     #
     idlist = data.split('\n')
-    print 'idlist=' + str(len(idlist)) 
+    print('idlist=' + str(len(idlist)))
     cf = FetchMP(idList=idlist,log=sys.stderr, verbose=False)
     cf.run()
     dir = cf.getPubmedInfoMap()
-    print 'dir=' + str(len(dir))
+    print('dir=' + str(len(dir)))
     #
     #for k,v in dir.items():
     #    print v
