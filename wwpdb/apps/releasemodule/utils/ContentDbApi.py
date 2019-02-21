@@ -56,7 +56,7 @@ class ContentDbApi(object):
                                     "c.publication journal_abbrev, c.volume_no journal_volume, c.first_page page_first, c.last_page page_last, " +
                                     "c.year, c.pdbx_database_id_PubMed, c.pdbx_database_id_DOI, r.author_approval_type from rcsb_status r, " +
                                     "citation c where c.structure_id = r.structure_id and r.exp_method != 'theoretical model' and " +
-                                    "c.jrnl_serial_no = 1 and r.initial_deposition_date >= DATE_SUB(curdate(), interval 1460 day) and " +
+                                    "c.jrnl_serial_no = 1 and r.initial_deposition_date >= DATE_SUB(curdate(), interval 3650 day) and " +
                                     "r.status_code in ('HOLD','HPUB','AUTH','POLC','REPL','REL','PROC','WAIT') and (c.publication = " +
                                     "'TO BE PUBLISHED' or c.publication = '' or c.publication is null or c.first_page = '' or c.first_page " +
                                     "is null or c.volume_no = '' or c.volume_no is null) order by r.structure_id",
