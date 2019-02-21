@@ -85,4 +85,4 @@ if __name__ == '__main__':
     cf = SearchUtil(term='Badger+J[au]',log=sys.stderr, verbose=False)
     cf.doSearch()
     list = cf.getPubmedIdList()
-    print list
+    print(list)
