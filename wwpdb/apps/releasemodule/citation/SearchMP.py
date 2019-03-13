@@ -152,10 +152,10 @@ if __name__ == '__main__':
     #
     termlist = data.split('\n')
     termlist.remove('')
-    print 'termlist=' + str(len(termlist)) 
+    print('termlist=' + str(len(termlist)))
     cf = SearchMP(termList=termlist,log=sys.stderr, verbose=False)
     cf.run()
     dir = cf.getTermMap()
-    print 'dir=' + str(len(dir))
-    print dir
+    print('dir=' + str(len(dir)))
+    print(dir)
     #
