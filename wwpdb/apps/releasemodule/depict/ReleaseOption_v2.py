@@ -132,7 +132,7 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
                 val_list.append(model_list[4])
             #
         #
-    elif ('emdb_release' in dataDict) and dataDict['emdb_release']:
+    elif ('emdb_release' in dataDict) and dataDict['emdb_release'] and (not isWdrnEntry):
         value = 'EMHEADERUpdate'
         val_list = model_list[1:2]
         if citationFlag:
@@ -140,7 +140,7 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
         #
     #
     if not val_list:
-        '',False
+        '',False,''
     #
     if selectedOptions:
         value = ''
@@ -157,19 +157,19 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
     return text,pre_select_flag,value
 
 def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag):
-    exp_list = [ [ 'recvd_struct_fact',     'status_sf_', 'SF',
+    exp_list = [ [ 'recvd_struct_fact',     'status_sf_', 'SF', 'status_code_sf',
                    [ [ 'REL_added',         'Release SF'    ],
                      [ 'REREL_modified',    'Re-release SF' ],
                      [ 'OBS_obsolete',      'Obsolete SF'   ] ] ],
-                 [ 'recvd_em_map',          'status_em_', 'EM',
+                 [ 'recvd_em_map',          'status_em_', 'EM', 'status_code_em',
                    [ [ 'REL_added',         'Release EM'    ],
                      [ 'REREL_modified',    'Re-release EM' ],
                      [ 'OBS_obsolete',      'Obsolete EM'   ] ] ],
-                 [ 'recvd_nmr_constraints', 'status_mr_', 'MR',
+                 [ 'recvd_nmr_constraints', 'status_mr_', 'MR', 'status_code_mr',
                    [ [ 'REL_added',         'Release MR'    ],
                      [ 'REREL_modified',    'Re-release MR' ],
                      [ 'OBS_obsolete',      'Obsolete MR'   ] ] ],
-                 [ 'recvd_chemical_shifts', 'status_cs_', 'CS',
+                 [ 'recvd_chemical_shifts', 'status_cs_', 'CS', 'status_code_cs',
                    [ [ 'REL_added',         'Release CS'    ],
                      [ 'REREL_modified',    'Re-release CS' ],
                      [ 'OBS_obsolete',      'Obsolete CS'   ] ] ] ]
@@ -189,19 +189,26 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
             releaseFlag = newReleaseEmFlag
             obsoleteFlag = reObsoleteEmFlag
         #
+        isWdrnEntry = False
+        if (t_list[3] in dataDict) and (dataDict[t_list[3]].upper() == 'WDRN'):
+            isWdrnEntry = True
+        #
         value = ''
-        display_list = t_list[3][1:]
+        display_list = t_list[4][1:]
         if obsoleteFlag:
-            display_list = t_list[3][2:]
+            display_list = t_list[4][2:]
+        elif isWdrnEntry:
+            value = ''
+            display_list = []
         elif releaseFlag:
-            value = t_list[3][0][0]
-            display_list = t_list[3][0:1]
+            value = t_list[4][0][0]
+            display_list = t_list[4][0:1]
         elif selectedOptions:
             if (t_list[1] in selectedOptions) and selectedOptions[t_list[1]]:
                 value = selectedOptions[t_list[1]]
             #
         elif (not 'pdb_id' in dataDict) or (not dataDict['pdb_id']):
-            value = t_list[3][1][0]
+            value = t_list[4][1][0]
         #
         select_text,label = getReleaseManu(t_list[1] + dataDict['structure_id'], value, display_list, '')
         text += t_list[2] + ': &nbsp; ' + select_text
