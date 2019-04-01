@@ -65,92 +65,92 @@ class CitationFinder(object):
         self._getcandidateList()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '__candidateList=' + str(len(self.__candidateList))
-        print diffTime
+        print('__candidateList=' + str(len(self.__candidateList)))
+        print(diffTime)
         #
         Time1 = time.time()
         self._getAnnotatorList()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '__annotatorList=' + str(len(self.__annotatorList))
-        print diffTime
+        print('__annotatorList=' + str(len(self.__annotatorList)))
+        print(diffTime)
         #
         Time1 = time.time()
         self._getAuthorList()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '__authorList=' + str(len(self.__authorList))
-        print diffTime
+        print('__authorList=' + str(len(self.__authorList)))
+        print(diffTime)
         #
         Time1 = time.time()
         self._runAuthorSearch()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '__termMap=' + str(len(self.__termMap))
-        print diffTime
+        print('__termMap=' + str(len(self.__termMap)))
+        print(diffTime)
         #
         Time1 = time.time()
         self._getPubmedIdList()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '__pubmedIdList=' + str(len(self.__pubmedIdList))
-        print diffTime
+        print('__pubmedIdList=' + str(len(self.__pubmedIdList)))
+        print(diffTime)
         #
         Time1 = time.time()
         self._runPubmedFetch()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '__pubmedInfo=' + str(len(self.__pubmedInfo))
-        print diffTime
+        print('__pubmedInfo=' + str(len(self.__pubmedInfo)))
+        print(diffTime)
         #
         Time1 = time.time()
         self._writeResultCif()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '_writeResultCif'
-        print diffTime
+        print('_writeResultCif')
+        print(diffTime)
         #
         Time1 = time.time()
         self._runCitationMatch()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '_runCitationMatch'
-        print diffTime
+        print('_runCitationMatch')
+        print(diffTime)
         #
         Time1 = time.time()
         self._readCitationMatchResult()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '_readCitationMatchResult'
-        print diffTime
+        print('_readCitationMatchResult')
+        print(diffTime)
         #
         Time1 = time.time()
         self._sortMatchResultMap()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '_sortMatchResultMap'
-        print diffTime
+        print('_sortMatchResultMap')
+        print(diffTime)
         #
         Time1 = time.time()
         self._getMatchList()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '_getMatchList'
-        print diffTime
+        print('_getMatchList')
+        print(diffTime)
         #
         Time1 = time.time()
         self._sortEntryMap()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '_sortEntryMap'
-        print diffTime
+        print('_sortEntryMap')
+        print(diffTime)
         #
         Time1 = time.time()
         self._writeResult()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print '_writeResult'
-        print diffTime
+        print('_writeResult')
+        print(diffTime)
 
     def getResult(self):
         return self.__annotEntryMap
@@ -438,7 +438,7 @@ class CitationFinder(object):
         #
 
     def _writeResult(self):
-        print '__annotEntryMap=' + str(len(self.__annotEntryMap))
+        print('__annotEntryMap=' + str(len(self.__annotEntryMap)))
         fb = open(self.__resultfile, 'wb')
         pickle.dump(self.__annotEntryMap, fb)
         fb.close()
@@ -450,4 +450,4 @@ if __name__ == '__main__':
     cf.searchPubmed()
     endTime=time.time()
     diffTime = endTime - startTime
-    print diffTime
+    print(diffTime)

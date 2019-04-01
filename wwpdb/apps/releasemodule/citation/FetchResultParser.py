@@ -57,6 +57,7 @@ class UniCodeHandler(object):
             u'\u00DB' : 'U',
             u'\u00DC' : 'U',
             u'\u00DD' : 'Y',
+            u'\u00DF' : 'ss',
             u'\u00E0' : 'a',
             u'\u00E1' : 'a',
             u'\u00E2' : 'a',
@@ -134,6 +135,7 @@ class UniCodeHandler(object):
             u'\u012E' : 'I',
             u'\u012F' : 'i',
             u'\u0130' : 'I',
+            u'\u0131' : 'i',
             u'\u0134' : 'J',
             u'\u0135' : 'j',
             u'\u0136' : 'K',
@@ -1007,7 +1009,8 @@ class FetchResultParser(object):
                     initial = self._processNodes(childnode.childNodes, False)
                 elif childnode.tagName == 'Suffix':
                     suffix = self._processNodes(childnode.childNodes, False)
-                    if suffix and (not suffix.endswith('.')):
+                    #if suffix and (not suffix.endswith('.')):
+                    if (suffix == 'Jr') or (suffix == 'Sr'):
                         suffix += '.'
                     #
                 elif childnode.tagName == 'Identifier':

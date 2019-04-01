@@ -56,6 +56,7 @@ class DepictCitation(DepictBase):
             pubmedInfoMap = self.__getRequestPubmedInfoMap()
             myD['entry_info'] = self.__getRequestEntryInfo()
             myD['finder_summary'] = ''
+        #
         myD['idlist'] = ' '.join(self._IdList)
         #
         self.__writePubmedInfo(pubmedInfoMap, pubmed_file)
@@ -123,8 +124,10 @@ class DepictCitation(DepictBase):
             if 'citation_author' in dataDict:
                 dataDict['author'] = ','.join(dataDict['citation_author'])
             #
-            myD['auth_citation_info'] = self.__depictCitationInfo(dataDict, c_items, dataDict['structure_id'], \
-                                       'citation_finder/author_citation_tmplt.html', False)
+            extraD = {}
+            extraD['structure_id'] = dataDict['structure_id']
+            extraD['keep_citation'] = self.__getKeepCitationValue(dataDict['pubmed'][0], dataDict)
+            myD['auth_citation_info'] = self.__depictCitationInfo(dataDict, c_items, extraD, 'citation_finder/author_citation_tmplt.html', False)
             #
             if not self._skipReleaseOptionFlag:
                  myD['release_option'] = self._getReleaseOption(dataDict, selectedData, True)
@@ -138,6 +141,14 @@ class DepictCitation(DepictBase):
             self._IdList.append('entry_' + dataDict['structure_id'])
         #
         return text
+
+    def __getKeepCitationValue(self, pubmed_Citation, curr_Citation):
+        if ("pdbx_database_id_DOI" in pubmed_Citation) and pubmed_Citation["pdbx_database_id_DOI"] and \
+           ("pdbx_database_id_DOI" in curr_Citation) and curr_Citation["pdbx_database_id_DOI"] and \
+           (pubmed_Citation["pdbx_database_id_DOI"] != curr_Citation["pdbx_database_id_DOI"]):
+            return  'checked'
+        #
+        return ''
 
     def __getFinderSummary(self):
         myD = {}
@@ -223,11 +234,24 @@ class DepictCitation(DepictBase):
             c_title = ''
             authFlag = False 
             if ('auth_citation' in entry) and (citation_id in entry['auth_citation']):
-                c_title = entry['auth_citation'][citation_id]['title']
+                if 'title' in entry['auth_citation'][citation_id]:
+                    c_title = entry['auth_citation'][citation_id]['title']
+                #
                 authFlag = True
                 myD['auth_citation'] = '&nbsp;'
-                myD['auth_citation_info'] = self.__depictCitationInfo(entry['auth_citation'][citation_id], \
-                         c_items, entry['structure_id'], 'citation_request/citation_content_tmplt.html', False)
+                #
+                extraD = {}
+                extraD['structure_id'] = entry['structure_id']
+                extraD['citation_id'] = citation_id
+                extraD['begin_keep_comment'] = ''
+                extraD['end_keep_comment'] = ''
+                if ('pubmed' in entry) and (citation_id in entry['pubmed']):
+                    extraD['keep_citation'] = self.__getKeepCitationValue(entry['pubmed'][citation_id], entry['auth_citation'][citation_id])
+                else:
+                    extraD['keep_citation'] = ''
+                #
+                myD['auth_citation_info'] = self.__depictCitationInfo(entry['auth_citation'][citation_id], c_items, extraD, \
+                                                         'citation_request/citation_content_tmplt.html', False)
             else:
                 myD['auth_citation'] = 'None'
                 myD['auth_citation_info'] = ''
@@ -245,8 +269,14 @@ class DepictCitation(DepictBase):
                     myD['pubmed_citation'] = self.__checkMarkedUnwantedPubMed(entry['structure_id'], \
                                               str(entry['pubmed'][citation_id]['pdbx_database_id_PubMed']))
                 #
-                myD['pubmed_citation_info'] = self.__depictCitationInfo(entry['pubmed'][citation_id], 
-                         c_items, entry['structure_id'], 'citation_request/citation_content_tmplt.html', True)
+                extraD = {}
+                extraD['structure_id'] = entry['structure_id']
+                extraD['citation_id'] = citation_id
+                extraD['begin_keep_comment'] = '<!--'
+                extraD['end_keep_comment'] = '-->'
+                extraD['keep_citation'] = ''
+                myD['pubmed_citation_info'] = self.__depictCitationInfo(entry['pubmed'][citation_id], c_items, extraD, \
+                                                           'citation_request/citation_content_tmplt.html', True)
             else:
                 myD['checkbox'] = '&nbsp; &nbsp; &nbsp;'
                 myD['pubmed_citation'] = 'None'
@@ -303,7 +333,7 @@ class DepictCitation(DepictBase):
             return '#FFCC00'
         return '#996600'
 
-    def __depictCitationInfo(self, dataDict, items, structure_id, tmpltFile, textFlag):
+    def __depictCitationInfo(self, dataDict, items, extraD, tmpltFile, textFlag):
         myD = {}
         for item in items:
             val = 'None'
@@ -316,21 +346,23 @@ class DepictCitation(DepictBase):
                 val = val.replace(',', ', ')
                 if textFlag:
                     if ('author_list' in dataDict) and dataDict['author_list']:
-                        val = self.__depictCitationAuthor(structure_id, dataDict['pdbx_database_id_PubMed'], dataDict['citation_id'], dataDict['author_list'])
+                        val = self.__depictCitationAuthor(extraD['structure_id'],  dataDict['pdbx_database_id_PubMed'], dataDict['citation_id'], dataDict['author_list'])
                     else:
-                        val = self.__getTextArea('author', structure_id, dataDict['pdbx_database_id_PubMed'], dataDict['citation_id'], val)
+                        val = self.__getTextArea('author', extraD['structure_id'], dataDict['pdbx_database_id_PubMed'], dataDict['citation_id'], val)
                     #
                 #
             elif item == 'title':
                 if textFlag:
-                    val = self.__getTextArea('title', structure_id, dataDict['pdbx_database_id_PubMed'], dataDict['citation_id'], val)
+                    val = self.__getTextArea('title', extraD['structure_id'], dataDict['pdbx_database_id_PubMed'], dataDict['citation_id'], val)
                 #
             elif item == 'pdbx_database_id_PubMed':
-                myD['structure_id'] = structure_id
+                myD['structure_id'] = extraD['structure_id']
                 myD['pubmed_id'] = val
                 val = self.__processPubmedURL(val)
             elif item == 'pdbx_database_id_DOI':
                 val = self.__processDOIURL(val)
+            elif item in extraD:
+                val = extraD[item]
             #
             myD[item] = val
         #
@@ -356,8 +388,7 @@ class DepictCitation(DepictBase):
         myD = {}
         myD['count'] = str(count)
         myD['structure_id'] = structure_id
-        myD['pubmed_citation_info'] = self.__depictCitationInfo(dataDict, c_items, structure_id, \
-                                               'citation_finder/pubmed_citation_tmplt.html', True)
+        myD['pubmed_citation_info'] = self.__depictCitationInfo(dataDict, c_items, myD, 'citation_finder/pubmed_citation_tmplt.html', True)
         if checkFlag:
             myD['check_option'] = 'checked'
         else:

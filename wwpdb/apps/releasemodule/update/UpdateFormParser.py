@@ -36,6 +36,7 @@ class UpdateFormParser(object):
         self.__reqObj=reqObj
         self.__siteId  = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
         #
+        self.__codeHandler = UniCodeHandler()
         self.__errorContent = ''
         self.__updateList = []
         self.__checkIdMap = {}
@@ -55,50 +56,10 @@ class UpdateFormParser(object):
             self.__errorContent = 'No entry selected'
             return
         #
-        citation = {}
-        codeHandler = UniCodeHandler()
-        items = [ 'citation_id', 'title', 'journal_abbrev', 'journal_volume', 'year', 'page_first',
-                  'page_last', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI' ]
-        for item in items:
-            angstromFlag = False
-            if item == 'title':
-                angstromFlag = True
-            val = codeHandler.process(self.__reqObj.getRawValue(item), angstromFlag)
-            if not val:
-                continue
-            #
-            if item == 'citation_id':
-                citation['id'] = val
-            else:
-                citation[item] = val
-            #
+        keepCitationList = self.__reqObj.getValueList('keep_citation')
+        citation = self.__parseManualInputCitation(keepCitationList)
         #
-        val = str(self.__reqObj.getValue('max_author_num'))
-        if val:
-            max_author_num = int(val)
-            t_list = []
-            author_list = []
-            for i in xrange (0, max_author_num):
-                name = str(self.__reqObj.getValue('name_' + str(i + 1)))
-                if not name:
-                    continue
-                #
-                t_list.append(name)
-                #
-                orcid = str(self.__reqObj.getValue('orcid_' + str(i + 1)))
-                a_dir = {}
-                a_dir['id'] = citation['id']
-                a_dir['name'] = name
-                a_dir['orcid'] = orcid
-                author_list.append(a_dir)
-            #
-            if t_list:
-                citation['author'] = '|'.join(t_list)
-                if len(t_list) == 1:
-                    citation['single_author'] = 'Y'
-                #
-                citation['author_list'] = author_list
-            #
+        keepCitationMap = self.__getKeepCitationMap(keepCitationList)
         #
         itemMapping = {}
         itemMapping['pdbid'] = 'pdb_id'
@@ -243,12 +204,18 @@ class UpdateFormParser(object):
                     else:
                         p_dir['id'] = t_list[1]
                     #
+                    if (entry in keepCitationMap) and (t_list[1] in keepCitationMap[entry]):
+                        p_dir['insert_flag'] = 'Y'
+                    else:
+                        p_dir['insert_flag'] = 'N'
+                    #
                     author_list_number_val = str(self.__reqObj.getValue('citation_author_list_number_' + entry + '_' + pubmed_id))
                     if author_list_number_val:
                         author_list = []
                         author_list_number = int(author_list_number_val)
                         for i in xrange (0, author_list_number):
-                            name = str(self.__reqObj.getValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)))
+                            #name = str(self.__reqObj.getValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)))
+                            name = self.__codeHandler.process(self.__reqObj.getRawValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)), False)
                             if not name:
                                 continue
                             #
@@ -371,3 +338,79 @@ class UpdateFormParser(object):
         if self.__errorContent:
             self.__updateList = []
         #
+
+    def __parseManualInputCitation(self, keepCitationList):
+        """ Parse manually input citation information
+        """
+        citation = {}
+        items = [ 'citation_id', 'title', 'journal_abbrev', 'journal_volume', 'year', 'page_first',
+                  'page_last', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI' ]
+        for item in items:
+            angstromFlag = False
+            if item == 'title':
+                angstromFlag = True
+            #
+            val = self.__codeHandler.process(self.__reqObj.getRawValue(item), angstromFlag)
+            if not val:
+                continue
+            #
+            if item == 'citation_id':
+                citation['id'] = val
+            else:
+                citation[item] = val
+            #
+        #
+        val = str(self.__reqObj.getValue('max_author_num'))
+        if val:
+            max_author_num = int(val)
+            t_list = []
+            author_list = []
+            for i in xrange (0, max_author_num):
+                #name = str(self.__reqObj.getValue('name_' + str(i + 1)))
+                name = self.__codeHandler.process(self.__reqObj.getRawValue('name_' + str(i + 1)), False)
+                if not name:
+                    continue
+                #
+                t_list.append(name)
+                #
+                orcid = str(self.__reqObj.getValue('orcid_' + str(i + 1)))
+                a_dir = {}
+                a_dir['id'] = citation['id']
+                a_dir['name'] = name
+                a_dir['orcid'] = orcid
+                author_list.append(a_dir)
+            #
+            if t_list:
+                citation['author'] = '|'.join(t_list)
+                if len(t_list) == 1:
+                    citation['single_author'] = 'Y'
+                #
+                citation['author_list'] = author_list
+            #
+        #
+        if ('citation_id' in citation) and citation['citation_id'] and (len(keepCitationList) == 1) and (keepCitationList[0] == citation['citation_id']):
+            citation['insert_flag'] = 'Y'
+        else:
+            citation['insert_flag'] = 'N'
+        #
+        return citation
+
+    def __getKeepCitationMap(self, keepCitationList):
+        """
+        """
+        keepCitationMap = {}
+        if not keepCitationList:
+            return keepCitationMap
+        #
+        for keepCitation in keepCitationList:
+            t_list = keepCitation.split(':')
+            if len(t_list) != 2:
+                continue
+            #
+            if t_list[0] in keepCitationMap:
+                keepCitationMap[t_list[0]].append(t_list[1])
+            else:
+                keepCitationMap[t_list[0]] = [ t_list[1] ]
+            #
+        #
+        return keepCitationMap

@@ -108,7 +108,7 @@ class DepictBase(ModuleBaseClass):
             color_status_code = dataDict['status_code_em']
         #
         if (color_status_code == 'PROC' or color_status_code == 'WAIT' or color_status_code == 'AUCO' or \
-            color_status_code == 'REPL' or color_status_code == 'POLC') and requestFlag:
+            color_status_code == 'REPL' or color_status_code == 'POLC' or color_status_code == 'WDRN') and requestFlag:
             self._skipReleaseOptionFlag = True
             myD['status_color'] = '#FF0000'
         #

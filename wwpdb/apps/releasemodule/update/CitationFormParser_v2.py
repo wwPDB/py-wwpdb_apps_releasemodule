@@ -39,7 +39,7 @@ class CitationFormParser(InputFormParser):
         self.__citation_id = str(self._reqObj.getValue('citation_id'))
         #
         self.__pubmedList  = []
-        self.__updateList  = []
+        self.__selected_citation_id_list = []
         #
         self.__getSession()
         self.__getPubmedList()
@@ -116,6 +116,8 @@ class CitationFormParser(InputFormParser):
                 list.append(allow_citation_ids[list[1]])
             else:
                 list.append(int(list[1]) + 11)
+            #
+            self.__selected_citation_id_list.append(list[1])
             lists.append(list)
         #
         if self._errorContent:
@@ -164,7 +166,13 @@ class CitationFormParser(InputFormParser):
         for entry in self._entryList:
             clist = self._dbUtil.getFunctionCall(False, 'getCitationInfo', [entry['structure_id']])
             if not clist:
-                continue
+                #continue
+                # insert empty primary citation so that it wouldn't crash the UI
+                #
+                myD = {}
+                myD['jrnl_serial_no'] = 1
+                clist = []
+                clist.append(myD)
             #
             reformat = True
             if self.__manualFlag == 'yes':
@@ -228,10 +236,13 @@ class CitationFormParser(InputFormParser):
         list = []
         c_map = {}
         for dir in clist:
-            if dir['jrnl_serial_no'] == 1:
+            if int(dir['jrnl_serial_no']) == 1:
                 citation_id = 'primary'
             else:
-                citation_id = str(dir['jrnl_serial_no'] - 1)
+                citation_id = str(int(dir['jrnl_serial_no']) - 1)
+            #
+            if citation_id not in self.__selected_citation_id_list:
+                continue
             #
             if citation_id in  map:
                 dir['author'] = map[citation_id]

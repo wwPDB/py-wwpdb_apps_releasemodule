@@ -40,8 +40,8 @@ class UpdateUtil(EntryUpdateBase):
     def __init__(self, reqObj=None, entryDir=None, verbose=False, log=sys.stderr):
         super(UpdateUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
         #
-        self.__citation_items = [ 'id', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI', 'title', 'journal_abbrev', \
-                                  'journal_volume', 'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author', 'single_author' ]
+        self.__citation_items = [ 'id', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI', 'title', 'journal_abbrev', 'journal_volume', \
+                                  'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author', 'single_author', 'insert_flag' ]
         #
         self.__pubmedInfo = {}
 
@@ -110,7 +110,7 @@ class UpdateUtil(EntryUpdateBase):
             else:
                 item1 = item
             #
-            if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate' and self._entryDir[item1] != 'EMHEADERUpdate':
+            if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate': # and self._entryDir[item1] != 'EMHEADERUpdate':
                 curCat.setValue(self._entryDir[item1], item, 0)
                 if item1 in checking_items:
                     hasValueFlag = True
