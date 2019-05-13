@@ -190,7 +190,7 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         if ('emdb_id' in self._entryDir) and self._entryDir['emdb_id'] and ('emdb_release' in self._entryDir) and \
            self._entryDir['emdb_release'] and (not self.__EmEntryFlag) and ('status_code' in self._entryDir) and \
-           (self._entryDir['status_code'] == 'REREL' or self._entryDir['status_code'] == 'RELOAD' or self._entryDir['status_code'] == 'EMHEADERUpdate'):
+           (self._entryDir['status_code'] == 'REREL' or self._entryDir['status_code'] == 'OBS' or self._entryDir['status_code'] == 'EMHEADERUpdate'):
             self.__EmEntryFlag = True
             self.__EmXmlHeaderOnlyFlag = True
             self._pickleData['emdb_id'] = self._entryDir['emdb_id']

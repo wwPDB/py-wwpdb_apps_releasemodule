@@ -90,7 +90,17 @@ class CombineDbApi(object):
     
     def getExpiredEntryInfo(self, annotator):
         self.__connectAllDB()
-        return self.getEntryInfo(self.__ContentDB.getExpiredEntryList(annotator))
+        entryList = []
+        return_list = self.getEntryInfo(self.__ContentDB.getExpiredEntryList(annotator))
+        for entry in return_list:
+            if ('locking' in entry) and entry['locking']:
+                locking = entry['locking'].upper()
+                if locking.find('DEP') != -1:
+                    entryList.append(entry)
+                #
+            #
+        #
+        return entryList
 
     def getEntriesWithStatusList(self, annotator, status_list):
         self.__connectAllDB()
