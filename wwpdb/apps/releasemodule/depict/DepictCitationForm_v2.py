@@ -112,6 +112,10 @@ class DepictCitationForm(DepictBase):
             myD[item] = val
         #
         myD['max_author_num'] = str(max_author_num)
+        myD['previous_doi_value'] = ''
+        if ('pdbx_database_id_DOI' in dataDict) and dataDict['pdbx_database_id_DOI']:
+            myD['previous_doi_value'] = dataDict['pdbx_database_id_DOI']
+        #
         text = self._processTemplate('citation_request/citation_form_tmplt.html', myD)
         #
         text += self.__depictCitationAuthor(authorlist, max_author_num)
