@@ -60,4 +60,4 @@ class SearchResultParser(object):
 if __name__ == "__main__":
     parser = SearchResultParser(sys.argv[1])
     list = parser.getIdList()
-    print list
+    print(list)

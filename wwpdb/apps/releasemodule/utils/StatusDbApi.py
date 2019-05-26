@@ -264,6 +264,6 @@ if __name__ == '__main__':
     entry_ids = sys.argv[1]
     entry_ids = entry_ids.upper().replace(',', ' ')
     message,id_list,id_map = db.getEntryListFromIDs(entry_ids=entry_ids)
-    print message
-    print id_list
-    print id_map
+    print(message)
+    print(id_list)
+    print(id_map)
