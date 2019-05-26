@@ -145,7 +145,7 @@ class DepictCitation(DepictBase):
     def __getKeepCitationValue(self, pubmed_Citation, curr_Citation):
         if ("pdbx_database_id_DOI" in pubmed_Citation) and pubmed_Citation["pdbx_database_id_DOI"] and \
            ("pdbx_database_id_DOI" in curr_Citation) and curr_Citation["pdbx_database_id_DOI"] and \
-           (pubmed_Citation["pdbx_database_id_DOI"] != curr_Citation["pdbx_database_id_DOI"]):
+           (pubmed_Citation["pdbx_database_id_DOI"].upper() != curr_Citation["pdbx_database_id_DOI"].upper()):
             return  'checked'
         #
         return ''

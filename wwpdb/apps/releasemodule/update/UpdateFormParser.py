@@ -388,7 +388,7 @@ class UpdateFormParser(object):
                 citation['author_list'] = author_list
             #
         #
-        if ('citation_id' in citation) and citation['citation_id'] and (len(keepCitationList) == 1) and (keepCitationList[0] == citation['citation_id']):
+        if ('id' in citation) and citation['id'] and (len(keepCitationList) == 1) and (keepCitationList[0] == citation['id']):
             citation['insert_flag'] = 'Y'
         else:
             citation['insert_flag'] = 'N'
