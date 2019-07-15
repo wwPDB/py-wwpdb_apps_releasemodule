@@ -36,6 +36,8 @@ class ContentDbApi(object):
       "SELECT_EM_ONLY_ENTRY_BY_STATUS" : "select r.structure_id from rcsb_status r, em_admin e where r.structure_id = e.structure_id and " +
                                            "( r.rcsb_annotator = '%s' or r.rcsb_annotator = 'UNASSIGN' or r.rcsb_annotator is null) and " +
                                            "e.current_status in ( '%s' )",
+      "SELECT_ALL_EM_ONLY_ENTRY_BY_STATUS" : "select r.structure_id from rcsb_status r, em_admin e where r.structure_id = e.structure_id and " +
+                                           "e.current_status in ( '%s' )",
       "SELECT_ENTRY_BY_AUDIT_AUTHOR" : "select r.structure_id from rcsb_status r, audit_author a where r.structure_id = a.structure_id " +
                                        "and (r.rcsb_annotator = '%s' or r.rcsb_annotator = 'UNASSIGN' or r.rcsb_annotator is null) and " +
                                        "%s order by structure_id",
@@ -52,7 +54,7 @@ class ContentDbApi(object):
                                   "structure_id = '%s' and jrnl_serial_no = 1",
       "SELECT_ALL_CITATION_AUTHOR" : "select citation_id, name, identifier_ORCID orcid, ordinal from citation_author where structure_id = '%s' order by ordinal",
       "SELECT_PRIMARY_CITATION_AUTHOR" : "select name, ordinal from citation_author where structure_id = '%s' and citation_id = 'primary' order by ordinal",
-      "SELECT_PUBMED_SEARCH_LIST" : "select r.structure_id, r.rcsb_annotator, r.status_code, r.pdb_id, r.title, c.title c_title, " +
+      "SELECT_PUBMED_SEARCH_LIST" : "select r.structure_id, r.rcsb_annotator, r.status_code, r.post_rel_recvd_coord, r.pdb_id, r.title, c.title c_title, " +
                                     "c.publication journal_abbrev, c.volume_no journal_volume, c.first_page page_first, c.last_page page_last, " +
                                     "c.year, c.pdbx_database_id_PubMed, c.pdbx_database_id_DOI, r.author_approval_type from rcsb_status r, " +
                                     "citation c where c.structure_id = r.structure_id and r.exp_method != 'theoretical model' and " +
@@ -60,7 +62,7 @@ class ContentDbApi(object):
                                     "r.status_code in ('HOLD','HPUB','AUTH','POLC','REPL','REL','PROC','WAIT') and (c.publication = " +
                                     "'TO BE PUBLISHED' or c.publication = '' or c.publication is null or c.first_page = '' or c.first_page " +
                                     "is null or c.volume_no = '' or c.volume_no is null) order by r.structure_id",
-      "SELECT_ENTRY_INFO" : "select structure_id,pdb_id,author_release_status_code,status_code,rcsb_annotator,date_hold_coordinates," +
+      "SELECT_ENTRY_INFO" : "select structure_id,pdb_id,author_release_status_code,status_code,post_rel_recvd_coord,rcsb_annotator,date_hold_coordinates," +
                             "date_hold_struct_fact,date_hold_nmr_constraints,title,recvd_coordinates,recvd_struct_fact,recvd_nmr_constraints," +
                             "recvd_chemical_shifts,date_hold_chemical_shifts,status_code_sf,status_code_mr,status_code_cs,author_approval_type," +
                             "initial_deposition_date,exp_method,author_list,date_of_RCSB_release,date_of_sf_release,date_of_mr_release," +
@@ -183,19 +185,25 @@ class ContentDbApi(object):
         return self.__dbApi.selectData(key='SELECT_ALL_CITATION_AUTHOR', parameter=(entry_id))
 
     def getPubmedSearchList(self):
+        em_map_only_entries = self.__getSelectedIDList('SELECT_ALL_EM_ONLY_ENTRY_BY_STATUS', ('OBS'))
         rows = self.__dbApi.selectData(key='SELECT_PUBMED_SEARCH_LIST', parameter=())
+        retList = []
         if rows:
             for row in rows:
                 if ('structure_id' in row) and row['structure_id']:
+                    if (('pdb_id' not in row) or (not row['pdb_id'])) and (row['structure_id'] in em_map_only_entries):
+                        continue
+                    #
                     list1,list2 = self.__getCitationAuthor(row['structure_id'])
                     if list1:
                         row['citation_author'] = list1
                         row['pubmed_author'] = list2
                     #
                 #
+                retList.append(row)
             #
         #
-        return rows
+        return retList
 
     def getEntryInfo(self, id_string):
         rows = self.__dbApi.selectData(key='SELECT_ENTRY_INFO', parameter=(id_string))

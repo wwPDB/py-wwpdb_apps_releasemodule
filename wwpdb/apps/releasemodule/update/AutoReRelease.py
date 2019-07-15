@@ -163,6 +163,9 @@ class AutoReRelease(object):
                 if (not EntryInfo) or (not "status_code" in EntryInfo[0]) or ( EntryInfo[0]["status_code"] != "REL"):
                     continue
                 #
+                if ("post_rel_recvd_coord" in EntryInfo[0]) and (EntryInfo[0]["post_rel_recvd_coord"].upper() == "Y"):
+                    continue
+                #
                 isDEPLocked = False
                 if ("locking" in EntryInfo[0]) and EntryInfo[0]["locking"]:
                     locking = EntryInfo[0]["locking"].upper()

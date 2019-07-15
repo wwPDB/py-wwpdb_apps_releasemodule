@@ -112,6 +112,9 @@ class DepictBase(ModuleBaseClass):
             self._skipReleaseOptionFlag = True
             myD['status_color'] = '#FF0000'
         #
+        if ('post_rel_recvd_coord' in dataDict) and (dataDict['post_rel_recvd_coord'].upper() == "Y"):
+            myD['status_color'] = '#FF0000'
+        #
         hasPickleFlag,selectedData = self.__processEntryPickleFile(dataDict['structure_id'])
         for item in items:
             if item == 'annotator':
@@ -306,6 +309,12 @@ class DepictBase(ModuleBaseClass):
             #
             warning += "EM status code in da_internal database \\\'" + str(dataDict['status_code_em']) \
                      + "\\\' != EM status code WF database \\\'" + str(dataDict['wf_status_code_em']) + "\\\'"
+        #
+        if ('post_rel_recvd_coord' in dataDict) and (dataDict['post_rel_recvd_coord'].upper() == 'Y'):
+            if warning:
+                warning += '\\n'
+            #
+            warning += "Post release coordinate replacement"
         #
         if not warning:
             return warning
