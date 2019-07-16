@@ -240,6 +240,9 @@ class EntryUpdateBase(UpdateBase):
             status = self._entryDir['status_code']
             if status == 'REREL':
                 status_map['status_code'] = 'REL'
+                status_map['post_rel_status'] = 'NULL'
+                status_map['post_rel_recvd_coord'] = 'NULL'
+                status_map['post_rel_recvd_coord_date'] = 'NULL'
             elif status != '' and status != 'RELOAD' and status != 'CITATIONUpdate' and status != 'EMHEADERUpdate':
                 status_map['status_code'] = status
             #

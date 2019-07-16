@@ -194,7 +194,7 @@ class DbApiUtil(object):
             #
             sql += ")"
         #
-        return self.runUpdateSQL(sql)
+        return self.runUpdateSQL(sql.replace("'NULL'", "NULL").replace("'null'", "null"))
 
     def runUpdateSQLwithKey(self, key=None, parameter=()):
         """
