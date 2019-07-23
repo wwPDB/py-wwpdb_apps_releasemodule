@@ -244,7 +244,11 @@ class EntryUpdateBase(UpdateBase):
                 status_map['post_rel_recvd_coord'] = 'NULL'
                 status_map['post_rel_recvd_coord_date'] = 'NULL'
             elif status != '' and status != 'RELOAD' and status != 'CITATIONUpdate' and status != 'EMHEADERUpdate':
-                status_map['status_code'] = status
+                for item in ( 'status_code', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date' ):
+                    if (item in self._entryDir) and self._entryDir[item]:
+                        status_map[item] = self._entryDir[item]
+                    #
+                #
             #
         #
         if (not self._blockEmErrorFlag) and ('status_code_em' in self._entryDir) and self._entryDir['status_code_em']:

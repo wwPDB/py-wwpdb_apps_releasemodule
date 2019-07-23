@@ -54,7 +54,7 @@ class ContentDbApi(object):
                                   "structure_id = '%s' and jrnl_serial_no = 1",
       "SELECT_ALL_CITATION_AUTHOR" : "select citation_id, name, identifier_ORCID orcid, ordinal from citation_author where structure_id = '%s' order by ordinal",
       "SELECT_PRIMARY_CITATION_AUTHOR" : "select name, ordinal from citation_author where structure_id = '%s' and citation_id = 'primary' order by ordinal",
-      "SELECT_PUBMED_SEARCH_LIST" : "select r.structure_id, r.rcsb_annotator, r.status_code, r.post_rel_recvd_coord, r.pdb_id, r.title, c.title c_title, " +
+      "SELECT_PUBMED_SEARCH_LIST" : "select r.structure_id, r.rcsb_annotator, r.status_code, r.post_rel_status, r.post_rel_recvd_coord, r.post_rel_recvd_coord_date, r.pdb_id, r.title, c.title c_title, " +
                                     "c.publication journal_abbrev, c.volume_no journal_volume, c.first_page page_first, c.last_page page_last, " +
                                     "c.year, c.pdbx_database_id_PubMed, c.pdbx_database_id_DOI, r.author_approval_type from rcsb_status r, " +
                                     "citation c where c.structure_id = r.structure_id and r.exp_method != 'theoretical model' and " +
@@ -62,7 +62,7 @@ class ContentDbApi(object):
                                     "r.status_code in ('HOLD','HPUB','AUTH','POLC','REPL','REL','PROC','WAIT') and (c.publication = " +
                                     "'TO BE PUBLISHED' or c.publication = '' or c.publication is null or c.first_page = '' or c.first_page " +
                                     "is null or c.volume_no = '' or c.volume_no is null) order by r.structure_id",
-      "SELECT_ENTRY_INFO" : "select structure_id,pdb_id,author_release_status_code,status_code,post_rel_recvd_coord,rcsb_annotator,date_hold_coordinates," +
+      "SELECT_ENTRY_INFO" : "select structure_id,pdb_id,author_release_status_code,status_code,post_rel_status,post_rel_recvd_coord,post_rel_recvd_coord_date,rcsb_annotator,date_hold_coordinates," +
                             "date_hold_struct_fact,date_hold_nmr_constraints,title,recvd_coordinates,recvd_struct_fact,recvd_nmr_constraints," +
                             "recvd_chemical_shifts,date_hold_chemical_shifts,status_code_sf,status_code_mr,status_code_cs,author_approval_type," +
                             "initial_deposition_date,exp_method,author_list,date_of_RCSB_release,date_of_sf_release,date_of_mr_release," +

@@ -304,8 +304,18 @@ class MultiUpdateProcess(UpdateBase):
         emStatusMap = self.__getEmStatusMap(contentDB.getEMInfo("', '".join(entryIdList)))
         for entryData in self.__updateList:
             if (entryData['entry'] in statusMap) and statusMap[entryData['entry']]:
-                entryData['status_code'] = statusMap[entryData['entry']]
-                self.__updateStatusHistory(entryData['entry'], entryData['status_code'], entryData['annotator'])
+                has_status_code = False
+                for item in ( 'status_code', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date' ):
+                    if (item in statusMap[entryData['entry']]) and statusMap[entryData['entry']][item]:
+                        if item == 'status_code':
+                            has_status_code = True
+                        #
+                        entryData[item] = statusMap[entryData['entry']][item]
+                    #
+                #
+                if has_status_code:
+                    self.__updateStatusHistory(entryData['entry'], entryData['status_code'], entryData['annotator'])
+                #
             #
             if (entryData['entry'] in emStatusMap) and emStatusMap[entryData['entry']]:
                 entryData['status_code_em'] = emStatusMap[entryData['entry']]
@@ -319,8 +329,16 @@ class MultiUpdateProcess(UpdateBase):
         #
         for dataDict in InfoList:
             pdb_id = getCleanValue(dataDict, 'pdb_id')
-            if pdb_id and ('status_code' in dataDict) and dataDict['status_code']:
-                status_map[dataDict['structure_id']] = dataDict['status_code']
+            if pdb_id:
+                myD = {}
+                for item in ( 'status_code', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date' ):
+                    if (item in dataDict) and dataDict[item]:
+                        myD[item] = str(dataDict[item])
+                    #
+                #
+                if myD:
+                    status_map[dataDict['structure_id']] = myD
+                #
             #
         #
         return status_map

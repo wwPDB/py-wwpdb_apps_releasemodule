@@ -90,7 +90,7 @@ class UpdateFormParser(object):
             # merge emdb_id, bmrb_id and comb_ids
             #
             if (entry in ret_map) and ret_map[entry]:
-                for item in ( 'bmrb_id', 'comb_ids', 'emdb_id', 'exp_method', 'emdb_release' ):
+                for item in ( 'bmrb_id', 'comb_ids', 'emdb_id', 'exp_method', 'emdb_release', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date' ):
                     if (item in ret_map[entry]) and ret_map[entry][item]:
                         dataDict[item] = ret_map[entry][item]
                     #
