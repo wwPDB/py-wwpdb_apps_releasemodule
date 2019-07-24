@@ -242,7 +242,7 @@ class ReleaseUtil(EntryUpdateBase):
         self._removeFile(os.path.join(self._sessionPath, outputFile))
         self._removeFile(os.path.join(self._sessionPath, mappingFile))
         self._GetAndRunCmd('pdb', '${BINPATH}', 'GetPdbBundle', self._pickleData['model']['session_file'], outputFile, logFile, clogFile, \
-                           ' -output_mapping ' + mappingFile)
+                           ' -output_mapping ' + mappingFile, messageType='warning')
         #
         if (not os.access(os.path.join(self._sessionPath, outputFile), os.F_OK)) or \
            (not os.access(os.path.join(self._sessionPath, mappingFile), os.F_OK)):

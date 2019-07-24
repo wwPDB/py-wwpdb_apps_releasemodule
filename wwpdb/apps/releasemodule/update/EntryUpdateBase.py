@@ -68,15 +68,15 @@ class EntryUpdateBase(UpdateBase):
             #
         #
 
-    def _GetAndRunCmd(self, errType, programPath, programName, inputFile, outputFile, logFile, clogFile, extraOptions):
+    def _GetAndRunCmd(self, errType, programPath, programName, inputFile, outputFile, logFile, clogFile, extraOptions, messageType='error'):
         cmd = self._getCmd(programPath + '/' + programName, inputFile, outputFile, logFile, clogFile, extraOptions)
         self._insertAction(cmd)
         self._runCmd(cmd)
         if logFile:
-            self._processLogError(errType, '', os.path.join(self._sessionPath, logFile))
+            self._processLogError(errType, '', os.path.join(self._sessionPath, logFile), messageType=messageType)
         #
         if clogFile:
-            self._processLogError(errType, programName, os.path.join(self._sessionPath, clogFile))
+            self._processLogError(errType, programName, os.path.join(self._sessionPath, clogFile), messageType=messageType)
         # 
 
     def _insertAction(self, action):
@@ -414,14 +414,14 @@ class EntryUpdateBase(UpdateBase):
         #
         return status,msg
 
-    def _processLogError(self, errType, program, logfile):
+    def _processLogError(self, errType, program, logfile, messageType='error'):
         status,error = self._getLogMessage(program, logfile)
         if error:
             if errType:
-                self._insertEntryMessage(errType=errType, errMessage=error)
+                self._insertEntryMessage(errType=errType, errMessage=error, messageType=messageType)
             #
             if program:
-                self._insertEntryMessage(errType='sys', errMessage=error, uniqueFlag=True)
+                self._insertEntryMessage(errType='sys', errMessage=error, messageType=messageType, uniqueFlag=True)
             #
         #
 
