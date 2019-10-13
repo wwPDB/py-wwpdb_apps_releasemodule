@@ -21,7 +21,7 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys, time, urllib
+import os, sys, time
 
 from wwpdb.apps.releasemodule.utils.ModuleBaseClass import ModuleBaseClass
 

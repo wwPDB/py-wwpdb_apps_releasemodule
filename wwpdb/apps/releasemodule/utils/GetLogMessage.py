@@ -20,7 +20,7 @@ def GetLogMessage(logfile):
     if statinfo.st_size == 0:
         return ''
     #
-    f = file(logfile, 'r')
+    f = open(logfile, 'r')
     data = f.read()
     f.close()
     #

@@ -313,7 +313,7 @@ class CitationFinder(object):
 
     def _runCitationMatch(self):
         script = os.path.join(self.__sessionPath, 'runCitationMatch.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT   ' + self.__cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')

@@ -66,7 +66,7 @@ class MultiUpdateProcess(UpdateBase):
         if self.__errorContent:
             return
         #
-        numProc = multiprocessing.cpu_count() / 2
+        numProc = int(multiprocessing.cpu_count() / 2)
         mpu = MultiProcUtil(verbose = True)
         mpu.set(workerObj = self, workerMethod = 'runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)
@@ -93,7 +93,7 @@ class MultiUpdateProcess(UpdateBase):
                 self._dumpPickle(entryPickleFile, { 'id' : idMap })
             #
         #
-        numProc = multiprocessing.cpu_count() / 2
+        numProc = int(multiprocessing.cpu_count() / 2)
         mpu = MultiProcUtil(verbose = True)
         mpu.set(workerObj = self, workerMethod = 'runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)

@@ -21,7 +21,11 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import cPickle, operator, os, sys, string, traceback
+import operator, os, sys, string, traceback
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
 
@@ -43,7 +47,7 @@ class CheckResult(object):
     def _deserialize(self):
         filename = os.path.join(self.__sessionPath, self.__picklefile)
         fb = open(filename, 'rb')
-        self.__annotEntryMap = cPickle.load(fb)
+        self.__annotEntryMap = pickle.load(fb)
         fb.close()
 
     def Check(self):
@@ -52,16 +56,16 @@ class CheckResult(object):
         for k,list in map.items():
             elist = []
             for dir in list:
-                print dir['structure_id'] + ': ' + dir['c_title']
+                print(dir['structure_id'] + ': ' + dir['c_title'])
                 plist = []
                 for pdir in dir['pubmed']:
                     sim = calStringSimilarity(dir['c_title'], pdir['title'])
                     if sim < 0.5:
                         continue
                     #
-                    print pdir['pdbx_database_id_PubMed'] + ': ' + \
+                    print(pdir['pdbx_database_id_PubMed'] + ': ' + \
                           pdir['similarity_score'] + ' <--> ' + \
-                          '%.3f' % sim + ' ' + pdir['title']
+                          '%.3f' % sim + ' ' + pdir['title'])
                     plist.append(pdir)
                 #
                 if not plist:
@@ -74,7 +78,7 @@ class CheckResult(object):
                 self.__annotEntryMap[k] = elist
         #
         fb = open('new_citation_finder.db', 'wb')
-        cPickle.dump(self.__annotEntryMap, fb)
+        pickle.dump(self.__annotEntryMap, fb)
         fb.close()
 
 if __name__ == '__main__':

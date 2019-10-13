@@ -136,7 +136,7 @@ class DepictCitationForm(DepictBase):
                 text += self._processTemplate('citation_request/author_form_tmplt.html', myD)
             #
         #
-        for i in xrange (0, diff_num):
+        for i in range(0, diff_num):
             count += 1
             myD = {}
             myD['count'] = str(count)
@@ -147,6 +147,6 @@ class DepictCitationForm(DepictBase):
         return text
 
     def __getTextArea(self, name, value):
-        irow = len(value) / 120 + 1
+        irow = int(len(value) / 120) + 1
         text = '<textarea name="' + name + '" id="' + name + '" cols="120" rows="' + str(irow) + '" wrap>' + value + '</textarea>'
         return text

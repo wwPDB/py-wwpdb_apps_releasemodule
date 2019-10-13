@@ -18,4 +18,4 @@ db = DBUtil(verbose=False,log=sys.stderr)
 list = db.getAuthEntryInfo(annotator)
 dp = Depict(reqObj=reqObj, resultList=list, itemList=items, verbose=False, log=sys.stderr)
 content = dp.DoRender()
-print content
+print(content)

@@ -35,7 +35,7 @@ def calLevenshteinDistance(first, second):
        distance_matrix[i][0] = i
     for j in range(second_length):
        distance_matrix[0][j]=j
-    for i in xrange(1, first_length):
+    for i in range(1, first_length):
         for j in range(1, second_length):
             deletion = distance_matrix[i-1][j] + 1
             insertion = distance_matrix[i][j-1] + 1
@@ -47,10 +47,10 @@ def calLevenshteinDistance(first, second):
 
 def levenshtein(seq1, seq2):
     oneago = None
-    thisrow = range(1, len(seq2) + 1) + [0]
-    for x in xrange(len(seq1)):
+    thisrow = list(range(1, len(seq2) + 1)) + [0]
+    for x in range(len(seq1)):
         twoago, oneago, thisrow = oneago, thisrow, [0] * len(seq2) + [x + 1]
-        for y in xrange(len(seq2)):
+        for y in range(len(seq2)):
             delcost = oneago[y] + 1
             addcost = thisrow[y - 1] + 1
             subcost = oneago[y - 1] + (seq1[x] != seq2[y])

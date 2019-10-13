@@ -130,11 +130,11 @@ def ReleaseOption(dir, flag, newRelease):
                      [ 'OBS_obsolete',   'Obsolete CS'   ] ] ] ]
     #
     author_approval_type = ''
-    if dir.has_key('author_approval_type') and dir['author_approval_type']:
+    if 'author_approval_type' in dir and dir['author_approval_type']:
         author_approval_type = dir['author_approval_type']
     #
     text = ''
-    if dir.has_key('pdb_id') and dir['pdb_id']:
+    if 'pdb_id' in dir and dir['pdb_id']:
         label = 'Re-release Coord.'
         if newRelease:
             label = 'Release Coord.'
@@ -148,7 +148,7 @@ def ReleaseOption(dir, flag, newRelease):
     text += processAuthorApprovalType(author_approval_type, dir['structure_id'])
     #
     for list in exp_list:
-        if not dir.has_key(list[0]):
+        if list[0] not in dir:
             continue
         #
         if dir[list[0]] != 'Y' and dir[list[0]] != 'y':
@@ -159,16 +159,16 @@ def ReleaseOption(dir, flag, newRelease):
         if newRelease:
             label = list[3][0][1]
             display_list = list[3][0:1]
-        elif (not dir.has_key('pdb_id')) or (not dir['pdb_id']):
+        elif ('pdb_id' not in dir) or (not dir['pdb_id']):
             label = list[3][1][1]
         #
         text += list[2] + ': &nbsp; ' + getReleaseManu(list[1] + dir['structure_id'], label, display_list, '')
     #
-    if dir.has_key('pdb_id') and dir['pdb_id']:
+    if 'pdb_id' in dir and dir['pdb_id']:
         text += getSupersedeIDBox(dir['structure_id'])
         text += getObsoleteIDBox(dir['structure_id'])
     #
-    if dir.has_key('obspr'):
+    if 'obspr' in dir:
         text += getObsSprInfo(str(dir['pdb_id']).upper(), dir['obspr'])
     #
     return text

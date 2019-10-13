@@ -76,7 +76,7 @@ class ReadCitationFinderResult(object):
             return
         #
         if annotator == 'ALL':
-            for ann,dataList in self.__annotEntryMap.items():
+            for ann,dataList in list(self.__annotEntryMap.items()):
                 for dataDict in dataList:
                     self.__entryIdList.append(dataDict['structure_id'])
                     self.__foundEntryList.append(dataDict)

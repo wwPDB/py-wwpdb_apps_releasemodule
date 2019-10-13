@@ -62,8 +62,8 @@ class Depict(object):
         text = ''
         count = 0
         for dir in self.__resultList:
-            if (not dir.has_key('pdb_id')) or (not dir['pdb_id']):
-                if dir.has_key('status_code'):
+            if ('pdb_id' not in dir) or (not dir['pdb_id']):
+                if 'status_code' in dir:
                     del dir['status_code']
                 #
             #
@@ -71,17 +71,17 @@ class Depict(object):
             if self.__option == 'status_update':
                 dir['new_status_code'] = dir['author_release_status_code']
             elif self.__option == 'pull_release':
-                if dir.has_key('p_status'):
+                if 'p_status' in dir:
                     dir['new_status_code'] = dir['p_status']
-                elif dir.has_key('author_release_status_code') and dir['author_release_status_code'] == 'HPUB':
+                elif 'author_release_status_code' in dir and dir['author_release_status_code'] == 'HPUB':
                     dir['new_status_code'] = dir['author_release_status_code']
                 else:
                     dir['new_status_code'] = 'HOLD'
             #
             release_date = ''
-            if dir.has_key('date_of_RCSB_release') and dir['date_of_RCSB_release']:
+            if 'date_of_RCSB_release' in dir and dir['date_of_RCSB_release']:
                 release_date = str(dir['date_of_RCSB_release']).replace('00:00:00', '').strip()
-            elif dir.has_key('date_of_EM_release') and dir['date_of_EM_release']:
+            elif 'date_of_EM_release' in dir and dir['date_of_EM_release']:
                 release_date = str(dir['date_of_EM_release']).replace('00:00:00', '').strip()
             #
             myD = {}
@@ -94,9 +94,9 @@ class Depict(object):
                dir['status_code'] == 'AUCO' or dir['status_code'] == 'REPL' or dir['status_code'] == 'POLC'):
             """
             color_status_code = ''
-            if dir.has_key('status_code') and dir['status_code']:
+            if 'status_code' in dir and dir['status_code']:
                 color_status_code = dir['status_code']
-            elif dir.has_key('status_code_em') and dir['status_code_em']:
+            elif 'status_code_em' in dir and dir['status_code_em']:
                 color_status_code = dir['status_code_em']
             #
             if color_status_code == 'PROC' or color_status_code == 'WAIT' or color_status_code == 'AUCO' or \
@@ -108,7 +108,7 @@ class Depict(object):
             #
             for item in self.__items:
                 val = ''
-                if dir.has_key(item):
+                if item in dir:
                     val = dir[item]
                 #
                 if item == 'exp_data': 
@@ -126,7 +126,7 @@ class Depict(object):
             text += self.__processAuthorTitle(dir, count)
             if self.__option == 'pull_release':
                 text += self.__getReleaseInfo(dir, count)
-            elif not newRelease and dir.has_key('pdb_id') and dir['pdb_id']:
+            elif not newRelease and 'pdb_id' in dir and dir['pdb_id']:
                 text += self.__getRevisionInfo(dir['structure_id'], count)
             #
             # Add empty line
@@ -140,12 +140,12 @@ class Depict(object):
 
     def __getNewReleaseFlag(self, dir):
         newRelease = True
-        if dir.has_key('status_code') and dir['status_code'] == 'REL':
-            if dir.has_key('date_of_RCSB_release') and str(dir['date_of_RCSB_release']) < self.__rel_date:
+        if 'status_code' in dir and dir['status_code'] == 'REL':
+            if 'date_of_RCSB_release' in dir and str(dir['date_of_RCSB_release']) < self.__rel_date:
                 newRelease = False
             #
-        elif dir.has_key('status_code_em') and dir['status_code_em'] == 'REL':
-            if dir.has_key('date_of_EM_release') and str(dir['date_of_EM_release']).replace('00:00:00', '').strip() < self.__rel_date:
+        elif 'status_code_em' in dir and dir['status_code_em'] == 'REL':
+            if 'date_of_EM_release' in dir and str(dir['date_of_EM_release']).replace('00:00:00', '').strip() < self.__rel_date:
                 newRelease = False
             #
         #
@@ -159,7 +159,7 @@ class Depict(object):
         #
         text = ''
         for list in exp_list:
-            if not dir.has_key(list[0]):
+            if list[0] not in dir:
                 continue
             #
             if dir[list[0]] != 'Y' and dir[list[0]] != 'y':
@@ -169,7 +169,7 @@ class Depict(object):
                 text += ' <br /> '
             #
             status = ''
-            if dir.has_key(list[1]):
+            if list[1] in dir:
                 status = dir[list[1]]
             #
             text += list[2] + ': ' + status
@@ -192,7 +192,7 @@ class Depict(object):
         myD['cols'] = self.__cols
         for item in ( 'author_list', 'title'):
             val = ''
-            if dir.has_key(item):
+            if item in dir:
                 val = dir[item]
             #
             if val:
@@ -228,7 +228,7 @@ class Depict(object):
 
     def __getSummaryInfo(self, FileInfo):
         summary = ''
-        if FileInfo.has_key('summary'):
+        if 'summary' in FileInfo:
             f = open(FileInfo['summary'], 'r')
             data = f.read()
             f.close()
@@ -239,24 +239,24 @@ class Depict(object):
 
     def __getReleasedFilesLink(self, FileInfo):
         rows = ''
-        if not FileInfo.has_key('releasedFiles'):
+        if 'releasedFiles' not in FileInfo:
             return rows
         #
         num = len(FileInfo['releasedFiles'])
         num_per_line = 5
-        l = num / num_per_line
+        l = int(num / num_per_line)
         x = num % num_per_line
         m = l
         if x == 0:
             m = l - 1
         #
-        for i in xrange(m + 1):
+        for i in range(m + 1):
             n = num_per_line
             if i == l:
                 n = x
             #
             rows += '<tr>\n'
-            for j in xrange(n):
+            for j in range(n):
                 filepath = FileInfo['releasedFiles'][i * num_per_line + j]
                 (path,filename) = os.path.split(filepath)
                 rows += '<td style="text-align:left;border-style:none">' \

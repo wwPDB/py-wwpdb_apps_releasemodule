@@ -21,7 +21,11 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import copy, cPickle, operator, os, sys, string, time, traceback
+import copy, operator, os, sys, string, time, traceback
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from mmcif.api.PdbxContainers                  import *
 from mmcif.io.PdbxWriter                      import PdbxWriter
@@ -54,9 +58,9 @@ class Analysis(object):
 
     def _deserialize(self):
         fb = open(self.__picklefile, 'rb')
-        self.__candidateList = cPickle.load(fb)
-        self.__termMap = cPickle.load(fb)
-        self.__pubmedInfo = cPickle.load(fb)
+        self.__candidateList = pickle.load(fb)
+        self.__termMap = pickle.load(fb)
+        self.__pubmedInfo = pickle.load(fb)
         fb.close()
 
     def _runMatchMP(self):
@@ -69,14 +73,14 @@ class Analysis(object):
         """ Find entries with potential pubmed match
         """
         for cdt in self.__candidateList:
-            if not cdt.has_key('structure_id'):
+            if 'structure_id' not in cdt:
                 continue
             #
             entry_id = cdt['structure_id']
             #
             mList = []
             if self.__matchResultMap:
-                if self.__matchResultMap.has_key(entry_id):
+                if entry_id in self.__matchResultMap:
                     mList = self.__matchResultMap[entry_id]
                 #
             #else:
@@ -90,7 +94,7 @@ class Analysis(object):
             #
             plist = []
             for list in mList:
-                if not self.__pubmedInfo.has_key(list[0]):
+                if list[0] not in self.__pubmedInfo:
                     continue
                 #
                 pdir =  copy.deepcopy(self.__pubmedInfo[list[0]])
@@ -103,7 +107,7 @@ class Analysis(object):
             cdt['pubmed'] = plist
             #
             annot = cdt['rcsb_annotator']
-            if self.__annotEntryMap.has_key(annot):
+            if annot in self.__annotEntryMap:
                 self.__annotEntryMap[annot].append(cdt)
             else:
                 clist = []
@@ -179,9 +183,9 @@ class Analysis(object):
         #
         row = 0
         for cdt in self.__candidateList:
-            if not cdt.has_key('structure_id') or \
-               not cdt.has_key('c_title') or \
-               not cdt.has_key('pubmed_author'):
+            if 'structure_id' not in cdt or \
+               'c_title' not in cdt or \
+               'pubmed_author' not in cdt:
                 continue
             #
             cat.setValue(str(cdt['structure_id']), 'structure_id', row)
@@ -225,7 +229,7 @@ class Analysis(object):
 
     def _runCitationMatch(self):
         script = os.path.join(self.__sessionPath, 'runCitationMatch.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT   ' + self.__cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')
@@ -248,15 +252,15 @@ class Analysis(object):
             return
         #
         for dir in rlist:
-            if not dir.has_key('structure_id') or \
-               not dir.has_key('pubmed_id') or \
-               not dir.has_key('similarity_score'):
+            if 'structure_id' not in dir or \
+               'pubmed_id' not in dir or \
+               'similarity_score' not in dir:
                 continue
             #
             structure_id = dir['structure_id']
             pubmed_id = dir['pubmed_id']
             similarity_score = dir['similarity_score']
-            if self.__matchResultMap.has_key(structure_id):
+            if structure_id in self.__matchResultMap:
                 self.__matchResultMap[structure_id].append([dir['pubmed_id'], dir['similarity_score']])
             else:
                 self.__matchResultMap[structure_id] = [[dir['pubmed_id'], dir['similarity_score']]]
@@ -295,8 +299,8 @@ if __name__ == '__main__':
     dir = cf.getResult()
     endTime=time.time()
     diffTime = endTime - startTime
-    print diffTime
-    for k,list in dir.items():
-        print 'annot='+k+': Total='+str(len(list))
+    print(diffTime)
+    for k,list in list(dir.items()):
+        print('annot='+k+': Total='+str(len(list)))
         for d in list:
-            print d['structure_id'] + '=' + str(len(d['pubmed']))
+            print(d['structure_id'] + '=' + str(len(d['pubmed'])))

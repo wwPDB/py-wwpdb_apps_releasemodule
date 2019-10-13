@@ -60,7 +60,7 @@ class GzipUtil(object):
             logfile    = getFileName(self.__sessionPath, 'gzip', 'log')
         #
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         #
@@ -94,7 +94,7 @@ class GzipUtil(object):
         map['status_code_cs'] = 'date_of_cs_release'
         #
         for dir in list:
-            if not dir.has_key('pdb_id'):
+            if 'pdb_id' not in dir:
                 continue
             #
             # Change 'REL' status to 'NEWREL' for this week's release
@@ -106,7 +106,7 @@ class GzipUtil(object):
                 if dir[k] != 'REL':
                     continue
                 #
-                if not dir.has_key(v):
+                if v not in dir:
                     dir[k] = 'NEWREL'
                 elif not dir[v]:
                     dir[k] = 'NEWREL'
@@ -139,9 +139,9 @@ class GzipUtil(object):
             return ''
         #
         subdirectory = ''
-        if dir.has_key(dir_key):
+        if dir_key in dir:
             subdirectory = dir[dir_key]
-            if dir.has_key('big_entry') and subdirectory == 'reloaded':
+            if 'big_entry' in dir and subdirectory == 'reloaded':
                 subdirectory = 'modified'
             #
         #

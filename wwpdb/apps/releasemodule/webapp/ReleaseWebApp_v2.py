@@ -69,7 +69,7 @@ class ReleaseWebApp(object):
         self.__topPath=self.__cI.get('SITE_WEB_APPS_TOP_PATH')
         #
 
-        if type( parameterDict ) == types.DictType:
+        if isinstance(parameterDict, dict):
             self.__myParameterDict=parameterDict
         else:
             self.__myParameterDict={}

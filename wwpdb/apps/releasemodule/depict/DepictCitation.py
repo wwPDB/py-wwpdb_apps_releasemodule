@@ -21,7 +21,7 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import cPickle, os, sys, string, traceback
+import pickle, os, sys, string, traceback
 
 from wwpdb.apps.releasemodule.citation.StringUtil  import calStringSimilarity
 from wwpdb.apps.releasemodule.depict.ReleaseOption import ReleaseOption
@@ -78,12 +78,12 @@ class DepictCitation(object):
     def __getFinderPubmedInfoMap(self):
         map = {}
         for dir in self.__resultList:
-            if not dir.has_key('pubmed'):
+            if 'pubmed' not in dir:
                 continue
             #
             for pdir in dir['pubmed']:
                 id = pdir['pdbx_database_id_PubMed']
-                if map.has_key(id):
+                if id in map:
                     continue
                 #
                 map[id] = pdir
@@ -94,12 +94,12 @@ class DepictCitation(object):
     def __getRequestPubmedInfoMap(self):
         map = {}
         for entry in self.__resultList:
-            if not entry.has_key('pubmed'):
+            if 'pubmed' not in entry:
                 continue
             #
-            for k,dir in entry['pubmed'].items():
+            for k,dir in list(entry['pubmed'].items()):
                 id = dir['pdbx_database_id_PubMed']
-                if map.has_key(id):
+                if id in map:
                     continue
                 #
                 map[id] = dir
@@ -110,7 +110,7 @@ class DepictCitation(object):
 
     def __writePubmedInfo(self, map, picklefile):
         fb = open(os.path.join(self.__sessionPath, picklefile), 'wb')
-        cPickle.dump(map, fb)
+        pickle.dump(map, fb)
         fb.close()
 
     def __getFinderSummary(self):
@@ -130,14 +130,14 @@ class DepictCitation(object):
         count = 0
         flag = True
         for dir in self.__resultList:
-            if not dir.has_key('pubmed'):
+            if 'pubmed' not in dir:
                 continue
             #
             newRelease = self.__getNewReleaseFlag(dir)
             p_dir = dir['pubmed'][0]
             myD = {}
             myD['status_color'] = '#000000'
-            if dir.has_key('status_code') and (dir['status_code'] == 'PROC' or dir['status_code'] == 'WAIT' or \
+            if 'status_code' in dir and (dir['status_code'] == 'PROC' or dir['status_code'] == 'WAIT' or \
                dir['status_code'] == 'AUCO' or dir['status_code'] == 'REPL' or dir['status_code'] == 'POLC'):
                 myD['status_color'] = '#FF0000' 
             #
@@ -154,7 +154,7 @@ class DepictCitation(object):
                     else:
                         self.__lower_count += 1
                     #
-                elif dir.has_key(item):
+                elif item in dir:
                     val = dir[item]
                 #
                 myD[item] = val
@@ -170,7 +170,7 @@ class DepictCitation(object):
                 myD['bgclass'] = 'odd'
                 flag = True
             #
-            if dir.has_key('citation_author'):
+            if 'citation_author' in dir:
                 dir['author'] = ','.join(dir['citation_author'])
             #
             myD['auth_citation_info'] = self.__depictCitationInfo(dir, c_items, dir['structure_id'], \
@@ -195,11 +195,11 @@ class DepictCitation(object):
         count = 0
         flag = True
         for dir in self.__resultList:
-            if not dir.has_key('pubmed') or not dir.has_key('citation_id'):
+            if 'pubmed' not in dir or 'citation_id' not in dir:
                 continue
             #
-            if (not dir.has_key('pdb_id')) or (not dir['pdb_id']):
-                if dir.has_key('status_code'):
+            if ('pdb_id' not in dir) or (not dir['pdb_id']):
+                if 'status_code' in dir:
                     del dir['status_code']
                 #
             #
@@ -212,9 +212,9 @@ class DepictCitation(object):
                dir['status_code'] == 'AUCO' or dir['status_code'] == 'REPL' or dir['status_code'] == 'POLC'):
             """
             color_status_code = ''
-            if dir.has_key('status_code') and dir['status_code']:
+            if 'status_code' in dir and dir['status_code']:
                 color_status_code = dir['status_code']
-            elif dir.has_key('status_code_em') and dir['status_code_em']:
+            elif 'status_code_em' in dir and dir['status_code_em']:
                 color_status_code = dir['status_code_em']
             #
             if color_status_code == 'PROC' or color_status_code == 'WAIT' or color_status_code == 'AUCO' or \
@@ -223,7 +223,7 @@ class DepictCitation(object):
             #
             for item in items:
                 val = 'None'
-                if dir.has_key(item):
+                if item in dir:
                     val = dir[item]
                 #
                 if item == 'status_code':
@@ -241,7 +241,7 @@ class DepictCitation(object):
             #
             myD['release_option'] = ReleaseOption(dir, True, newRelease)
             #
-            if not newRelease and dir.has_key('pdb_id') and dir['pdb_id']:
+            if not newRelease and 'pdb_id' in dir and dir['pdb_id']:
                 myD['revision'] = self.__getRevisionInfo(dir['structure_id'], count)
             else:
                 myD['revision'] = ''
@@ -256,12 +256,12 @@ class DepictCitation(object):
 
     def __getNewReleaseFlag(self, dir):
         newRelease = True
-        if dir.has_key('status_code') and dir['status_code'] == 'REL':
-            if dir.has_key('date_of_RCSB_release') and str(dir['date_of_RCSB_release']) < self.__rel_date:
+        if 'status_code' in dir and dir['status_code'] == 'REL':
+            if 'date_of_RCSB_release' in dir and str(dir['date_of_RCSB_release']) < self.__rel_date:
                 newRelease = False
             #
-        elif dir.has_key('status_code_em') and dir['status_code_em'] == 'REL':
-            if dir.has_key('date_of_EM_release') and str(dir['date_of_EM_release']).replace('00:00:00', '').strip() < self.__rel_date:
+        elif 'status_code_em' in dir and dir['status_code_em'] == 'REL':
+            if 'date_of_EM_release' in dir and str(dir['date_of_EM_release']).replace('00:00:00', '').strip() < self.__rel_date:
                 newRelease = False
             #
         #
@@ -278,7 +278,7 @@ class DepictCitation(object):
             myD['count'] = str(count)
             c_title = ''
             authFlag = False 
-            if entry.has_key('auth_citation') and entry['auth_citation'].has_key(citation_id):
+            if 'auth_citation' in entry and citation_id in entry['auth_citation']:
                 c_title = entry['auth_citation'][citation_id]['title']
                 authFlag = True
                 myD['auth_citation'] = '&nbsp;'
@@ -290,7 +290,7 @@ class DepictCitation(object):
             #
             p_title = ''
             pubFlag = False
-            if entry.has_key('pubmed') and entry['pubmed'].has_key(citation_id):
+            if 'pubmed' in entry and citation_id in entry['pubmed']:
                 p_title = entry['pubmed'][citation_id]['title']
                 pubFlag = True
                 myD['checkbox'] = '<input type="checkbox" name="pubmed_' + entry['structure_id'] \
@@ -345,7 +345,7 @@ class DepictCitation(object):
         #
         pubmed_id_list = []
         fb = open(pickle_file, 'rb')
-        pubmed_id_list = cPickle.load(fb)
+        pubmed_id_list = pickle.load(fb)
         fb.close()
         if pubmed_id in pubmed_id_list:
             return '<span style="color:red">WARNING: ' + pubmed_id + ' marked as unwanted</span>'
@@ -366,7 +366,7 @@ class DepictCitation(object):
             val = 'None'
             if item == 'page':
                 val = self.__getPubmedPage(dir)
-            elif dir.has_key(item):
+            elif item in dir:
                 val = dir[item]
             #
             if item == 'author':
@@ -427,7 +427,7 @@ class DepictCitation(object):
             if item == 'similarity_score':
                 val = dir[item]
                 myD['color'] = self.__getColorCode(val)
-            elif dir.has_key(item):
+            elif item in dir:
                 val = dir[item]
             #
             myD[item] = val
@@ -472,10 +472,10 @@ class DepictCitation(object):
 
     def __getPubmedPage(self, dir):
         first_page = ''
-        if dir.has_key('page_first'):
+        if 'page_first' in dir:
             first_page = dir['page_first']
         last_page = ''
-        if dir.has_key('page_last'):
+        if 'page_last' in dir:
             last_page = dir['page_last']
         if first_page and last_page:
             if first_page == last_page:

@@ -67,7 +67,7 @@ class GenerateUtil(object):
             pdbid = dir['pdb_id'].lower()
             entryId = dir['entry']
             for list in file_items:
-                if not dir.has_key(list[0]) or not dir.has_key(list[1]):
+                if list[0] not in dir or list[1] not in dir:
                     continue
                 #
                 if dir[list[1]] != 'REL' and dir[list[1]] != 'REREL' and dir[list[1]] != 'OBS' and dir[list[1]] != 'RELOAD':
@@ -83,7 +83,7 @@ class GenerateUtil(object):
                         skipFlag = True
                     #
                     bigEntryFlag = False
-                    if dir.has_key('big_entry'):
+                    if 'big_entry' in dir:
                         bigEntryFlag = True
                         skipFlag = False
                     #
@@ -147,7 +147,7 @@ class GenerateUtil(object):
 #       #
 #       filename = os.path.join(self.__sessionPath, pdbid + '.bigentry')
 #       if os.access(filename, os.F_OK):
-#           f = file(filename, 'r')
+#           f = open(filename, 'r')
 #           data = f.read()
 #           f.close()
 #           #
@@ -274,8 +274,8 @@ class GenerateUtil(object):
         self._insertEntryErrorContent(pdbid, type, err)
 
     def _insertEntryErrorContent(self, pdbid, type, err):
-        if self.__entryErrorContent.has_key(pdbid):
-            if self.__entryErrorContent[pdbid].has_key(type):
+        if pdbid in self.__entryErrorContent:
+            if type in self.__entryErrorContent[pdbid]:
                 self.__entryErrorContent[pdbid][type] += '\n' + err
             else:
                 self.__entryErrorContent[pdbid][type] = err
@@ -320,7 +320,7 @@ class GenerateUtil(object):
 
     def __openScriptFile(self, scriptfile):
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT ' + self.__rcsbRoot + '\n')

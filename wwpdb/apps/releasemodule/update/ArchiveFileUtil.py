@@ -122,7 +122,7 @@ class ArchiveFileUtil(object):
     def __findBeforeReleaseFile(self, baseExt, vList):
         """
         """
-        for i in xrange(len(vList) - 1, 0, -1):
+        for i in range(len(vList) - 1, 0, -1):
             if baseExt == '_model_P1.cif':
                  if (self.__findReleaseDateCIF(vList[i])) and (not self.__findReleaseDateCIF(vList[i-1])):
                      return vList[i-1]
@@ -148,14 +148,14 @@ class ArchiveFileUtil(object):
         rlist = cifObj.GetValue('database_PDB_rev')
         found = False
         for dir in rlist:
-            if dir.has_key('date') and dir['date'] == self.__releaseDate:
+            if 'date' in dir and dir['date'] == self.__releaseDate:
                 found = True
             #
         #
         if not found:
             rlist = cifObj.GetValue('pdbx_version')
             for dir in rlist:
-                if dir.has_key('revision_date') and dir['revision_date'] == self.__releaseDate:
+                if 'revision_date' in dir and dir['revision_date'] == self.__releaseDate:
                     found = True
                 #
             #
@@ -169,7 +169,7 @@ class ArchiveFileUtil(object):
         rlist = cifObj.GetValue('audit')
         found = False
         for dir in rlist:
-            if dir.has_key('creation_date') and dir['creation_date'] == self.__releaseDate: # and \
+            if 'creation_date' in dir and dir['creation_date'] == self.__releaseDate: # and \
                 #dir.has_key('update_record') and dir['update_record'].lower() == 'initial release':
                 found = True
             #
@@ -179,7 +179,7 @@ class ArchiveFileUtil(object):
     def __findReleaseDateMR(self, filename):
         """
         """
-        f = file(filename, 'r')
+        f = open(filename, 'r')
         data = f.read()
         f.close()
         #
@@ -203,7 +203,7 @@ class ArchiveFileUtil(object):
         rlist = cifObj.GetValue('Audit')
         found = False
         for dir in rlist:
-            if dir.has_key('Creation_date') and dir['Creation_date'] == self.__releaseDate: # and \
+            if 'Creation_date' in dir and dir['Creation_date'] == self.__releaseDate: # and \
                 #dir.has_key('Update_record') and dir['Update_record'].lower() == 'initial release':
                 found = True
             #

@@ -45,7 +45,7 @@ class UpdateBase(MessageBaseClass):
         """
         """
         script = os.path.join(self._sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT ' + self._cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')

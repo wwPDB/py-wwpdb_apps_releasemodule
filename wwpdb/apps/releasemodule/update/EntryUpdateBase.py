@@ -261,7 +261,7 @@ class EntryUpdateBase(UpdateBase):
         msgType = 'info'
         message = ''
         if status_map and self.__statusDB:
-            message = "Update workflow DB status to " + ",".join([ "'%s' = '%s'" % (k, v) for k, v in status_map.iteritems()])
+            message = "Update workflow DB status to " + ",".join([ "'%s' = '%s'" % (k, v) for k, v in status_map.items()])
             returnVal = self.__statusDB.runUpdate(table='deposition', where={ 'dep_set_id' : self._entryId }, data=status_map)
             if returnVal:
                 message += " successful."
@@ -383,7 +383,7 @@ class EntryUpdateBase(UpdateBase):
         if statinfo.st_size == 0:
             return 'empty',''
         #
-        f = file(logfile, 'r')
+        f = open(logfile, 'r')
         data = f.read()
         f.close()
         #

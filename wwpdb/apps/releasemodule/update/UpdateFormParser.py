@@ -213,7 +213,7 @@ class UpdateFormParser(object):
                     if author_list_number_val:
                         author_list = []
                         author_list_number = int(author_list_number_val)
-                        for i in xrange (0, author_list_number):
+                        for i in range (0, author_list_number):
                             #name = str(self.__reqObj.getValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)))
                             name = self.__codeHandler.process(self.__reqObj.getRawValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)), False)
                             if not name:
@@ -365,7 +365,7 @@ class UpdateFormParser(object):
             max_author_num = int(val)
             t_list = []
             author_list = []
-            for i in xrange (0, max_author_num):
+            for i in range (0, max_author_num):
                 #name = str(self.__reqObj.getValue('name_' + str(i + 1)))
                 name = self.__codeHandler.process(self.__reqObj.getRawValue('name_' + str(i + 1)), False)
                 if not name:

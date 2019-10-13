@@ -22,7 +22,7 @@ __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle as pickle
 
@@ -164,7 +164,7 @@ class DepictCitation(DepictBase):
             if not 'pubmed' in dataDict:
                 continue
             #
-            for k,pdir in dataDict['pubmed'].items():
+            for k,pdir in list(dataDict['pubmed'].items()):
                 pid = pdir['pdbx_database_id_PubMed']
                 if pid in pubmedInfoMap:
                     continue

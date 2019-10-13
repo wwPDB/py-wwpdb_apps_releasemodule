@@ -78,13 +78,13 @@ class MatchMP(object):
     def run(self):
         numProc = multiprocessing.cpu_count() * 2
         #
-        subLists = [self.__entryList[i::numProc] for i in xrange(numProc)]
+        subLists = [self.__entryList[i::numProc] for i in range(numProc)]
         #
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
         #
         workers = [ MatchWorker(termMap=self.__termMap, pubmedInfo=self.__pubmedInfo, taskQueue=taskQueue, \
-                    resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) for i in xrange(numProc) ]
+                    resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) for i in range(numProc) ]
         #
         for w in workers:
             w.start()
@@ -92,10 +92,10 @@ class MatchMP(object):
         for subList in subLists:
             taskQueue.put(subList)
         #
-        for i in xrange(numProc):
+        for i in range(numProc):
             taskQueue.put(None)
         #
-        for i in xrange(len(subLists)):
+        for i in range(len(subLists)):
             lists = resultQueue.get()
             if not lists:
                 continue

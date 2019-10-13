@@ -21,7 +21,11 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys, urllib
+import os, sys
+try:
+    from urllib.parse import quote as u_quote
+except ImportError:
+    from urllib import quote as u_quote
 
 from wwpdb.apps.releasemodule.depict.ReleaseOption_v2 import ReleaseOption
 from wwpdb.apps.releasemodule.utils.ModuleBaseClass   import ModuleBaseClass
@@ -261,7 +265,7 @@ class DepictBase(ModuleBaseClass):
 
     def __getUrlMethod(self, dataDict):
         if ('exp_method' in dataDict) and dataDict['exp_method']:
-            return urllib.quote(dataDict['exp_method'])
+            return u_quote(dataDict['exp_method'])
         #
         return ''
   

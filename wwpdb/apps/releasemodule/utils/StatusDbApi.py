@@ -79,7 +79,7 @@ class StatusDbApi(object):
         #
         if self.isTableExist(table=table):
             rdir = self.__getDataDir("COUNT", (table), 0)
-            if rdir and rdir.has_key('count(*)') and rdir['count(*)'] > 0:
+            if rdir and 'count(*)' in rdir and rdir['count(*)'] > 0:
                 return True
             #
         #
@@ -125,7 +125,7 @@ class StatusDbApi(object):
                 group_ids.append(id.upper())
             else:
                 all_id_list.append(id.upper())
-                if id_map.has_key(id_type):
+                if id_type in id_map:
                     id_map[id_type].append(id.upper())
                 else:
                     id_map[id_type] = [ id.upper() ]
@@ -145,7 +145,7 @@ class StatusDbApi(object):
                 message += err_message
             #
             if dep_id_list:
-                if id_map.has_key('dep_set_id'):
+                if 'dep_set_id' in id_map:
                     id_map['dep_set_id'].extend(dep_id_list)
                 else:
                     id_map['dep_set_id'] = dep_id_list
@@ -173,14 +173,14 @@ class StatusDbApi(object):
         #
         da_group_id = '5'
         rdir = self.__getDataDir('GET_DA_GROUP_ID', ('ANN', siteId), 0)
-        if rdir and rdir.has_key('da_group_id'):
+        if rdir and 'da_group_id' in rdir:
             da_group_id = str(rdir['da_group_id'])
         #
         ann_list = []
         return_list = self.__dbApi.selectData(key='GET_ANNO_INITIALS', parameter=(da_group_id))
         if return_list:
             for rD in return_list:
-                if rD.has_key('initials') and rD['initials']:
+                if 'initials' in rD and rD['initials']:
                     ann_list.append(rD['initials'].upper())
                 #
             #
@@ -200,10 +200,10 @@ class StatusDbApi(object):
         group_id_map = {}
         if return_list:
             for myD in return_list:
-                if myD.has_key('dep_set_id') and myD['dep_set_id']:
+                if 'dep_set_id' in myD and myD['dep_set_id']:
                     return_id_list.append(myD['dep_set_id'])
                 #
-                if myD.has_key('group_id') and myD['group_id']:
+                if 'group_id' in myD and myD['group_id']:
                     group_id_map[myD['group_id'].upper()] = 'yes'
                 #
             #
@@ -213,7 +213,7 @@ class StatusDbApi(object):
     def __getEntryList(self, message, id_map, all_id_list):
         parameter = ''
         for id_type in ( 'dep_set_id', 'pdb_id', 'bmrb_id', 'emdb_id' ):
-            if not id_map.has_key(id_type):
+            if id_type not in id_map:
                 continue
             #
             id_map[id_type] = sorted(set(id_map[id_type]))
@@ -228,7 +228,7 @@ class StatusDbApi(object):
         all_id_map = {}
         if return_list:
             for myD in return_list:
-                if (not myD.has_key('dep_set_id')) or (not myD['dep_set_id']):
+                if ('dep_set_id' not in myD) or (not myD['dep_set_id']):
                     continue
                 #
                 if myD['dep_set_id'] in return_id_list:
@@ -237,7 +237,7 @@ class StatusDbApi(object):
                 return_id_list.append(myD['dep_set_id'])
                 return_id_map[myD['dep_set_id']] = myD
                 for id_type in ( 'dep_set_id', 'pdb_id', 'bmrb_id', 'emdb_id' ):
-                    if myD.has_key(id_type) and myD[id_type]: 
+                    if id_type in myD and myD[id_type]: 
                         all_id_map[myD[id_type].upper()] = 'yes'
                     #
                 #
@@ -252,7 +252,7 @@ class StatusDbApi(object):
     def __getNotValidIDMessage(self, id_list, id_map):
         message = ''
         for id in id_list:
-            if id_map.has_key(id):
+            if id in id_map:
                 continue
             #
             message += "'" + id + "' is not a valid ID.\n"

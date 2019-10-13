@@ -109,4 +109,4 @@ class TimeUtil(object):
 
 if __name__ == '__main__':
     t =TimeUtil()
-    print(t.NextWednesday())
+    print((t.NextWednesday()))

@@ -161,7 +161,7 @@ class UpdateUtil(EntryUpdateBase):
         if not hasValueFlag:
             return
         #
-        f = file(self.__inputFilePath, 'w')
+        f = open(self.__inputFilePath, 'w')
         pdbxW = PdbxWriter(f)
         pdbxW.write(myDataList)
         f.close()

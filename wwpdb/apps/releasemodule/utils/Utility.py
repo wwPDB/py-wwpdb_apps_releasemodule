@@ -260,7 +260,7 @@ def GetUniqueLogMessage(program, logfile):
     if statinfo.st_size == 0:
         return ''
     #
-    f = file(logfile, 'r')
+    f = open(logfile, 'r')
     data = f.read()
     f.close()
     #
@@ -365,5 +365,5 @@ def FindReleaseFiles(siteId, entry_dir):
 
 if __name__ == "__main__":
     list = FindFiles(sys.argv[1])
-    print(len(list))
+    print((len(list)))
     print(list)

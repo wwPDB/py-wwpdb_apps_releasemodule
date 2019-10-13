@@ -54,7 +54,7 @@ class UpdateCifUtil(object):
             scriptfile,logfile,clogfile = self.__getAuxiliaryFileNames('update_model_cif')
             #
             script = os.path.join(self.__sessionPath, scriptfile)
-            f = file(script, 'w')
+            f = open(script, 'w')
             f.write('#!/bin/tcsh -f\n')
             f.write('#\n')
             f.write('setenv RCSBROOT ' + self.__rcsbRoot + '\n')
@@ -140,13 +140,13 @@ class UpdateCifMP(object):
         #
         numProc = multiprocessing.cpu_count() * 2
         #
-        subLists = [self.__updateList[i::numProc] for i in xrange(numProc)]
+        subLists = [self.__updateList[i::numProc] for i in range(numProc)]
         #
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
         #
         workers = [ UpdateCifWorker(path=self.__sessionPath, siteId=self.__siteId, processLabel=str(i+1), taskQueue=taskQueue, \
-                    resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) for i in xrange(numProc) ]
+                    resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) for i in range(numProc) ]
         #
         for w in workers:
             w.start()
@@ -154,10 +154,10 @@ class UpdateCifMP(object):
         for subList in subLists:
             taskQueue.put(subList)
         #
-        for i in xrange(numProc):
+        for i in range(numProc):
             taskQueue.put(None)
         #
-        for i in xrange(len(subLists)):
+        for i in range(len(subLists)):
             list = resultQueue.get()
             if list[0]:
                 for k,v in list[0].items():

@@ -84,7 +84,7 @@ class FetchMP(object):
         self.__pubmedInfoMap = fetch.getPubmedInfoMap()
 
     def runMultiProcessing(self):
-        numBlock = len(self.__pubmedIdList) / 200 + 1
+        numBlock = int(len(self.__pubmedIdList) / 200 + 1)
         numProc = multiprocessing.cpu_count() * 2
         # Leave room for other processes
         if self.__apikey:
@@ -101,7 +101,7 @@ class FetchMP(object):
             numProc = numBlock
         #
         mpl = MultiProcLimit(rate)
-        subLists = [self.__pubmedIdList[i::numProc] for i in xrange(numProc)]
+        subLists = [self.__pubmedIdList[i::numProc] for i in range(numProc)]
         #
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
@@ -109,7 +109,7 @@ class FetchMP(object):
         workers = [ FetchWorker(path=self.__sessionPath, processLabel=str(i+1), taskQueue=taskQueue, \
                        resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose, \
                        siteId = self.__siteId, mpl = mpl) \
-                       for i in xrange(numProc) ]
+                       for i in range(numProc) ]
         #
         for w in workers:
             w.start()
@@ -117,10 +117,10 @@ class FetchMP(object):
         for subList in subLists:
             taskQueue.put(subList)
         #
-        for i in xrange(numProc):
+        for i in range(numProc):
             taskQueue.put(None)
         #
-        for i in xrange(len(subLists)):
+        for i in range(len(subLists)):
             list = resultQueue.get()
             for info in list:
                 self.__pubmedInfoMap[info['pdbx_database_id_PubMed']] = info
@@ -153,7 +153,7 @@ class FetchMP(object):
         return self.__pubmedInfoMap
 
 if __name__ == '__main__':
-    f = file(sys.argv[1], 'r')
+    f = open(sys.argv[1], 'r')
     data = f.read()
     f.close()
     #

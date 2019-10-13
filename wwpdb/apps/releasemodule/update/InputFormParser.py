@@ -104,10 +104,10 @@ class InputFormParser(object):
         return getCombinationInfo(self._contentDB.getEntryInfo(locked_id_list), id_map)
 
     def __isDEPLocked(self, depid, id_map):
-        if not id_map.has_key(depid):
+        if depid not in id_map:
             return False
         #
-        if id_map[depid].has_key('locking') and id_map[depid]['locking']:
+        if 'locking' in id_map[depid] and id_map[depid]['locking']:
             locking = id_map[depid]['locking'].upper()
             if locking.find('DEP') != -1:
                 return True

@@ -98,13 +98,13 @@ class CitationFormParser(InputFormParser):
             if not list[0].isdigit():
                 self._errorContent += 'Invalid pubmed ID: ' + list[0] + '.\n'
             #
-            if not allow_citation_ids.has_key(list[1]) and not list[1].isdigit():
+            if list[1] not in allow_citation_ids and not list[1].isdigit():
                 self._errorContent += 'Invalid citation ID: ' + list[1] + '.\n'
             #
-            if input_pubmed_ids.has_key(list[0]):
+            if list[0] in input_pubmed_ids:
                 self._errorContent += 'Repeat pubmed ID: ' + list[0] + '.\n'
             #
-            if input_citation_ids.has_key(list[1]):
+            if list[1] in input_citation_ids:
                 self._errorContent += 'Repeat citation ID: ' + list[1] + '.\n'
             #
             input_pubmed_ids[list[0]] = 'y'
@@ -112,7 +112,7 @@ class CitationFormParser(InputFormParser):
             if self._errorContent:
                 continue
             #
-            if allow_citation_ids.has_key(list[1]):
+            if list[1] in allow_citation_ids:
                 list.append(allow_citation_ids[list[1]])
             else:
                 list.append(int(list[1]) + 11)
@@ -149,7 +149,7 @@ class CitationFormParser(InputFormParser):
         pubmedInfoMap = fetch.getPubmedInfoMap()
         #
         for id_list in pubmed_info_list:
-            if not pubmedInfoMap or not pubmedInfoMap.has_key(id_list[0]):
+            if not pubmedInfoMap or id_list[0] not in pubmedInfoMap:
                 self._errorContent += 'No pubmed information for ID: ' + id_list[0] + '.\n'
                 continue
             #
@@ -209,7 +209,7 @@ class CitationFormParser(InputFormParser):
     def __mergeCitationInfo(self, clist, alist):
         map = {}
         for dir in alist:
-            if map.has_key(dir['citation_id']):
+            if dir['citation_id'] in map:
                 map[dir['citation_id']] += ',' + dir['name']
             else:
                 map[dir['citation_id']] = dir['name']
@@ -222,7 +222,7 @@ class CitationFormParser(InputFormParser):
                 citation_id = 'primary'
             else:
                 citation_id = str(dir['jrnl_serial_no'] - 1)
-            if map.has_key(citation_id):
+            if citation_id in map:
                 dir['author'] = map[citation_id]
             #
             list.append(citation_id)
@@ -240,7 +240,7 @@ class CitationFormParser(InputFormParser):
             list,cid_map = self.__getSortCitationID(entry['citation_id'], allow_citation_ids)
             p_map = {}
             for dir in self.__pubmedList:
-                if cid_map.has_key(dir['citation_id']):
+                if dir['citation_id'] in cid_map:
                     p_map[dir['citation_id']] = dir
                 elif dir['ordinal'] < 11:
                     p_map[dir['citation_id']] = dir
@@ -272,7 +272,7 @@ class CitationFormParser(InputFormParser):
             return sort_cid_list,cid_map
         #
         for id in list:
-            if allow_citation_ids.has_key(id):
+            if id in allow_citation_ids:
                 order = allow_citation_ids[id]
             else:
                 order = int(id) + 10

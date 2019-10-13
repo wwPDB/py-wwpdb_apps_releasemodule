@@ -101,7 +101,7 @@ class FetchUtil(object):
             logfile    = getFileName(self.__sessionPath, 'fetch_command', 'log')
         #
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('/usr/bin/curl -g "' + query + '" > ' + xmlfile + '\n')

@@ -775,7 +775,10 @@ class UniCodeHandler(object):
         else:
              data = self.__processUniCode(data, self.__unicodeLetterAMapping)
         #
-        data = str(unicodedata.normalize('NFKD', data).encode('ascii','xmlcharrefreplace'))
+        data = unicodedata.normalize('NFKD', data).encode('ascii','xmlcharrefreplace')
+        if sys.version_info[0] > 2:
+            data = data.decode('ascii')
+        data = str(data)
         data = data.replace('  ', ' ')
         data = data.replace(' .', '.')
         data = data.strip()
@@ -1069,7 +1072,7 @@ if __name__ == "__main__":
     list = parser.getPubmedInfoList()
     for dir in list:
         for k,v in dir.items():
-            if (type(v) == types.TupleType) or (type(v) == types.ListType) or (type(v) == types.DictType):
+            if (type(v) == tuple) or (type(v) == list) or (type(v) == dict):
                 print(k + '=')
                 print(v)
             else:

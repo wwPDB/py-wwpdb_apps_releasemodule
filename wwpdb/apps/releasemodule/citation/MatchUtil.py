@@ -38,10 +38,10 @@ class MatchUtil(object):
         self.__pubmedMatchList = []
 
     def run(self):
-        if not self.__entry.has_key('rcsb_annotator') or \
-           not self.__entry.has_key('c_title') or \
-           not self.__entry.has_key('pubmed_author') or \
-           not self.__entry.has_key('structure_id'):
+        if 'rcsb_annotator' not in self.__entry or \
+           'c_title' not in self.__entry or \
+           'pubmed_author' not in self.__entry or \
+           'structure_id' not in self.__entry:
             return
         #
         idlist = self._getUniquePubmedIdList()
@@ -57,11 +57,11 @@ class MatchUtil(object):
         idlist = []
         map = {}
         for term in self.__entry['pubmed_author']:
-            if not self.__termMap.has_key(term):
+            if term not in self.__termMap:
                 continue
             #
             for id in self.__termMap[term]:
-                if map.has_key(id):
+                if id in map:
                     continue
                 #
                 map[id] = 'y'
@@ -71,7 +71,7 @@ class MatchUtil(object):
 
     def _findMatchList(self, idlist):
         for id in idlist:
-            if not self.__pubmedInfo.has_key(id):
+            if id not in self.__pubmedInfo:
                 continue
             sim = calStringSimilarity(self.__entry['c_title'], \
                                self.__pubmedInfo[id]['title'])

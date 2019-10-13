@@ -40,7 +40,7 @@ class DepictReleaseInfo(MessageBaseClass):
         entryList = []
         select = str(self._reqObj.getValue('select'))
         if select == 'all':
-            entryList = self.__annPickleData['entryDir'].keys()
+            entryList = list(self.__annPickleData['entryDir'].keys())
         elif select == 'last':
             if ('eventList' in self.__annPickleData) and self.__annPickleData['eventList'] and \
                ('entry_ids' in self.__annPickleData['eventList'][-1]) and self.__annPickleData['eventList'][-1]['entry_ids']:

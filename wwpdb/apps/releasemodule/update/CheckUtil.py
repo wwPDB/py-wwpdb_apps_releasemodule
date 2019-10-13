@@ -71,12 +71,12 @@ class CheckUtil(object):
         for dir in self.__updateList:
             pdbid = dir['pdb_id'].lower()
             for list in file_items:
-                if not dir.has_key(list[0]):
+                if list[0] not in dir:
                     continue
                 #
                 if list[1] == 'coor':
                     re_release_flag = ''
-                    if dir.has_key('directory') and dir['directory'] == 'modified':
+                    if 'directory' in dir and dir['directory'] == 'modified':
                         re_release_flag = ' -re_release '
                     #
                     self.__checkPDBFile(dir[list[0]], pdbid, re_release_flag)
@@ -310,7 +310,7 @@ class CheckUtil(object):
 
     def __openScriptFile(self, scriptfile):
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT ' + self.__rcsbRoot + '\n')
@@ -365,8 +365,8 @@ class CheckUtil(object):
         self.__addCheckResult(type, pdbid, msg)
 
     def __addCheckResult(self, type, pdbid, msg):
-        if self.__checkResult.has_key(pdbid):
-            if self.__checkResult[pdbid].has_key(type):
+        if pdbid in self.__checkResult:
+            if type in self.__checkResult[pdbid]:
                 self.__checkResult[pdbid][type] += '\n' + msg
             else: 
                 self.__checkResult[pdbid][type] = msg

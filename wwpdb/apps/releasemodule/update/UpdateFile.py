@@ -21,7 +21,11 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import cPickle, logging, os, shutil, sys, string, traceback
+import logging, os, shutil, sys, string, traceback
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from mmcif_utils.trans.InstanceMapper                import InstanceMapper
 from wwpdb.utils.config.ConfigInfo                   import ConfigInfo
@@ -130,12 +134,12 @@ class UpdateFile(object):
         #
         for dir in self.__updateFileList:
             entryId = dir['entry']
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 self.__returnContent += 'Entry ' + entryId + '(' + dir['pdb_id'] + ') is pulled off from release.'
             else:
                 self.__returnContent += 'Entry ' + entryId + ' is pulled off from release.'
             #
-            if self.__wfDBUpdateStatus.has_key(entryId):
+            if entryId in self.__wfDBUpdateStatus:
                 self.__returnContent += ' ' + self.__wfDBUpdateStatus[entryId]
             self.__returnContent += '\n'
         #
@@ -152,7 +156,7 @@ class UpdateFile(object):
             return
         #
         fb = open(os.path.join(self.__sessionPath, pubmed_file), 'rb')
-        self.__pubmedInfo = cPickle.load(fb)
+        self.__pubmedInfo = pickle.load(fb)
         fb.close() 
 
     def __findSourceFile(self):
@@ -164,7 +168,7 @@ class UpdateFile(object):
         anno_indexfile = os.path.join(self.__topReleaseDir, 'index', self.__annotator + '.index')
         if os.access(anno_indexfile, os.F_OK):
             fbr = open(anno_indexfile, 'rb')
-            entry_index = cPickle.load(fbr)
+            entry_index = pickle.load(fbr)
             fbr.close()
         #
         errMsg = ''
@@ -175,7 +179,7 @@ class UpdateFile(object):
             entryId = dir['entry']
             key_id = entryId
             pdbid = ''
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 pdbid = dir['pdb_id'].lower()
                 key_id = pdbid
             #
@@ -187,7 +191,7 @@ class UpdateFile(object):
             indexfile = os.path.join(self.__topReleaseDir, 'index', index_id + '.index')
             if os.access(indexfile, os.F_OK):
                 fbr = open(indexfile, 'rb')
-                index = cPickle.load(fbr)
+                index = pickle.load(fbr)
                 fbr.close() 
             #
             copyModelFile = False
@@ -197,7 +201,7 @@ class UpdateFile(object):
             foundReloadFlag = False
             foundCitationUpdateFlag = False
             for list in self.__fileTypeList:
-                if not dir.has_key('status_code' + list[1]):
+                if 'status_code' + list[1] not in dir:
                     continue
                 #
                 if dir['status_code' + list[1]] == 'RELOAD':
@@ -217,7 +221,7 @@ class UpdateFile(object):
                 if list[3] == 'model':
                     copyModelFile = True
                 #
-                if index.has_key(list[5]):
+                if list[5] in index:
                     if not sourcePath in index[list[5]]:
                         index[list[5]].append(sourcePath)
                     #
@@ -247,8 +251,8 @@ class UpdateFile(object):
                 if foundRelFlag or foundReloadFlag:
                     self.__releaseList.append(dir)
                     release_dir['pdb'] = pdbid
-                    if dir.has_key('status_code') and dir['status_code'] == 'REL' and \
-                       dir.has_key('directory') and dir['directory'] == 'added':
+                    if 'status_code' in dir and dir['status_code'] == 'REL' and \
+                       'directory' in dir and dir['directory'] == 'added':
                         checkFile = os.path.join(self.__topReleaseDir, dir['directory'], pdbid, pdbid + '.cif.gz')
                         if not os.access(checkFile, os.F_OK):
                             self.__messageListMap[entryId] = { 'pdb' : checkFile }
@@ -260,7 +264,7 @@ class UpdateFile(object):
                     if not copyModelFile:
                         sourcePath,err = self.__copyArchiveFile(entryId, key_id, self.__fileTypeList[0])
                         if sourcePath:
-                            if index.has_key(self.__fileTypeList[0][5]):
+                            if self.__fileTypeList[0][5] in index:
                                 if not sourcePath in index[self.__fileTypeList[0][5]]:
                                     index[self.__fileTypeList[0][5]].append(sourcePath)
                                 #
@@ -276,24 +280,24 @@ class UpdateFile(object):
                         #
                     #
                     if os.access(fn, os.F_OK):
-                        if not dir.has_key('input_file' + self.__fileTypeList[0][1]):
+                        if 'input_file' + self.__fileTypeList[0][1] not in dir:
                             dir['input_file' + self.__fileTypeList[0][1]] = entryId + self.__fileTypeList[0][0]
                             self.__modelCifList.append(entryId + self.__fileTypeList[0][0])
                         #
-                        if not dir.has_key('output_file' + self.__fileTypeList[0][1]):
+                        if 'output_file' + self.__fileTypeList[0][1] not in dir:
                             dir['output_file' + self.__fileTypeList[0][1]] = entryId + self.__fileTypeList[0][0]
                         #
-                        if dir.has_key('emdb_id') and dir['emdb_id']:
+                        if 'emdb_id' in dir and dir['emdb_id']:
                             release_dir['emd'] = dir['emdb_id']
                             index['emdb_id'] = dir['emdb_id']
                             emdb_id = dir['emdb_id']
                             checkFile = os.path.join(self.__topReleaseDir, 'emd', emdb_id, 'map', emdb_id.replace('-', '_').lower() + '.map.gz')
                             is_new_release = False
-                            if dir.has_key('status_code_em') and dir['status_code_em'] == 'REL':
+                            if 'status_code_em' in dir and dir['status_code_em'] == 'REL':
                                 is_new_release = True
                             #
                             if is_new_release and (not os.access(checkFile, os.F_OK)):
-                                if self.__messageListMap.has_key(entryId):
+                                if entryId in self.__messageListMap:
                                     self.__messageListMap[entryId]['emd'] = checkFile
                                 else:
                                     self.__messageListMap[entryId] = { 'emd' : checkFile }
@@ -305,7 +309,7 @@ class UpdateFile(object):
                     self.__releaseEMList.append(dir)
                 elif foundRelFlag or foundCitationUpdateFlag:
                     self.__updateFileList.append(dir)
-                elif foundReloadFlag and dir.has_key('revision'):
+                elif foundReloadFlag and 'revision' in dir:
                     self.__updateFileList.append(dir)
                 #
                 if release_dir:
@@ -313,11 +317,11 @@ class UpdateFile(object):
                 #
             #
             fbw = open(indexfile, 'wb')
-            cPickle.dump(index, fbw)
+            pickle.dump(index, fbw)
             fbw.close()
         #
         fbw = open(anno_indexfile, 'wb')
-        cPickle.dump(entry_index, fbw)
+        pickle.dump(entry_index, fbw)
         fbw.close()
         #
         if not self.__updateList:
@@ -355,7 +359,7 @@ class UpdateFile(object):
         for dir in self.__inputList:
             entryId = dir['entry']
             key_id = entryId
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 key_id = dir['pdb_id'].lower()
                 id_list.append(key_id)
             #
@@ -365,10 +369,10 @@ class UpdateFile(object):
             indexfile = os.path.join(self.__topReleaseDir, 'index', key_id.lower() + '.index')
             if os.access(indexfile, os.F_OK):
                 fbr = open(indexfile, 'rb')
-                index = cPickle.load(fbr)
+                index = pickle.load(fbr)
                 fbr.close() 
                 foundIndex = True
-                if index.has_key('emdb_id') and index['emdb_id']:
+                if 'emdb_id' in index and index['emdb_id']:
                     id_list.append(index['emdb_id'])
                 #
             else:
@@ -380,12 +384,12 @@ class UpdateFile(object):
             #
             for list in self.__fileTypeList:
                 if foundIndex:
-                    if not index.has_key(list[5]):
+                    if list[5] not in index:
                         continue
                     #
                     arObj.GetBeforeReleaseFileWithList(filenameList=index[list[5]], baseExt=list[0])
                 else:
-                    if not file_index.has_key(list[5]):
+                    if list[5] not in file_index:
                         continue
                     #
                     arObj.GetBeforeReleaseFile(baseExt=list[0])
@@ -425,7 +429,7 @@ class UpdateFile(object):
         scriptfile = getFileName(self.__sessionPath, 'remove', 'csh')
         logfile    = getFileName(self.__sessionPath, 'remove', 'log')
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         #
@@ -459,7 +463,7 @@ class UpdateFile(object):
                 #
                 de.export(fn,contentType=list[3], formatType=list[4], version="next")
                 #
-                if dir.has_key('status_code' + list[1]) and (dir['status_code' + list[1]] == 'REL' or \
+                if 'status_code' + list[1] in dir and (dir['status_code' + list[1]] == 'REL' or \
                    dir['status_code'+ list[1]] == 'OBS' or dir['status_code'+ list[1]] == 'REREL' or \
                    dir['status_code' + list[1]] == 'RELOAD'):
                     de.export(fn, contentType=list[3]+'-release', formatType=list[4], version='next')
@@ -479,15 +483,15 @@ class UpdateFile(object):
         emdList = []
         pdbList = []
         for entry,dir in self.__messageListMap.items():
-            if dir.has_key('emd') and dir.has_key('pdb'):
+            if 'emd' in dir and 'pdb' in dir:
                 if os.access(dir['emd'], os.F_OK) and os.access(dir['pdb'], os.F_OK):
                     emdList.append(entry)
                 #
-            elif dir.has_key('emd'):
+            elif 'emd' in dir:
                 if os.access(dir['emd'], os.F_OK):
                     emdList.append(entry)
                 #
-            elif dir.has_key('pdb'):
+            elif 'pdb' in dir:
                 if os.access(dir['pdb'], os.F_OK):
                     pdbList.append(entry)
                 #
@@ -550,13 +554,13 @@ class UpdateFile(object):
             return
         #
         for dir in self.__releaseEMList:
-            if not dir.has_key('emdb_id'):
+            if 'emdb_id' not in dir:
                 continue
             #
             emdb_id = dir['emdb_id']
             entryId = dir['entry']
             key_id = entryId
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 key_id = dir['pdb_id'].lower()
             #
             modelfile = os.path.join(self.__sessionPath, entryId + self.__fileTypeList[0][0])
@@ -594,45 +598,45 @@ class UpdateFile(object):
         #
         for dir in self.__updateList:
             self.__returnContent += '\n\nEntry ' + dir['entry']
-            if dir.has_key('comb_ids'):
+            if 'comb_ids' in dir:
                 self.__returnContent += ' ' + dir['comb_ids']
-            elif dir.has_key('pdb_id'):
+            elif 'pdb_id' in dir:
                 self.__returnContent += ' ' + dir['pdb_id']
             #
             self.__returnContent += ': '
             Content_by_entry = ''
             key_id = dir['entry']
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 key_id = dir['pdb_id'].lower()
             #
-            if self.__wfDBUpdateStatus.has_key(key_id):
+            if key_id in self.__wfDBUpdateStatus:
                 Content_by_entry += '\n\n' + self.__wfDBUpdateStatus[key_id]
             for list in self.__fileTypeList:
                 status_key = 'status_code' + list[1]
                 type_key = list[5]
                 name_key = list[2]
-                if not dir.has_key(status_key) or dir[status_key] == 'CITATIONUpdate':
+                if status_key not in dir or dir[status_key] == 'CITATIONUpdate':
                     continue
                 #
                 if type_key == 'coor':
                     Content_by_entry += '\n\n' + name_key + ':'
                     foundError = False
-                    if self.__entryErrorContent.has_key(key_id):
-                        if self.__entryErrorContent[key_id].has_key(type_key):
+                    if key_id in self.__entryErrorContent:
+                        if type_key in self.__entryErrorContent[key_id]:
                             Content_by_entry += '\n' + self.__entryErrorContent[key_id][type_key]
                             foundError = True
                         #
                     #
                     if not foundError:
-                        if dir.has_key(status_key) and (dir[status_key] == 'REL' or dir[status_key] == 'OBS' \
+                        if status_key in dir and (dir[status_key] == 'REL' or dir[status_key] == 'OBS' \
                            or dir[status_key] == 'RELOAD'):
                             for list1 in type_list:
                                 if list1[1] == 'PDB' and dir[status_key] == 'RELOAD':
                                     continue
                                 #
                                 Content_by_entry += '\n' + list1[1] + ':'
-                                if self.__entryErrorContent.has_key(key_id):
-                                    if self.__entryErrorContent[key_id].has_key(list1[0]):
+                                if key_id in self.__entryErrorContent:
+                                    if list1[0] in self.__entryErrorContent[key_id]:
                                         Content_by_entry += '\n' + self.__entryErrorContent[key_id][list1[0]]
                                     else:
                                         Content_by_entry += ' OK'
@@ -647,8 +651,8 @@ class UpdateFile(object):
                     #
                 else:
                     Content_by_entry += '\n\n' + name_key + ':'
-                    if self.__entryErrorContent.has_key(key_id):
-                        if self.__entryErrorContent[key_id].has_key(type_key):
+                    if key_id in self.__entryErrorContent:
+                        if type_key in self.__entryErrorContent[key_id]:
                             Content_by_entry += '\n' + self.__entryErrorContent[key_id][type_key]
                         else:
                             Content_by_entry += ' OK'
@@ -682,17 +686,17 @@ class UpdateFile(object):
         logfile    = getFileName(self.__sessionPath, 'copy_em', 'log')
         #
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         for dir in self.__releaseEMList:
-            if not dir.has_key('emdb_id'):
+            if 'emdb_id' not in dir:
                 continue
             #
             emdb_id = dir['emdb_id']
             entryId = dir['entry']
             key_id = entryId
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 key_id = dir['pdb_id'].lower()
             #
             modelfile = os.path.join(self.__sessionPath, emdb_id.replace('-', '_').lower() + '_v2.xml')
@@ -741,12 +745,12 @@ class UpdateFile(object):
                 continue
             #
             for list in self.__em_additional_list:
-                if not self.__contentD.has_key(list[0]):
+                if list[0] not in self.__contentD:
                     continue
                 #
                 for fType in self.__contentD[list[0]][0]:
                     contentType = list[0]+ '_' + fType
-                    if not partMap.has_key(contentType):
+                    if contentType not in partMap:
                         continue
                     #
                     formatExt = self.__formatD[fType]
@@ -779,8 +783,8 @@ class UpdateFile(object):
         RunScript(self.__sessionPath, scriptfile, logfile)
 
     def __insertEntryError(self, id, type, err):
-        if self.__entryErrorContent.has_key(id):
-            if self.__entryErrorContent[id].has_key(type):
+        if id in self.__entryErrorContent:
+            if type in self.__entryErrorContent[id]:
                 self.__entryErrorContent[id][type] += '\n' + err
             else:
                 self.__entryErrorContent[id][type] = err
@@ -796,7 +800,7 @@ class UpdateFile(object):
         clogfile   = getFileName(self.__sessionPath, 'check_bigentry_command', 'log')
         #
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT ' + self.__cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')
@@ -812,7 +816,7 @@ class UpdateFile(object):
         #
         filename = os.path.join(self.__sessionPath, pdbid + '.bigentry')
         if os.access(filename, os.F_OK):
-            f = file(filename, 'r')
+            f = open(filename, 'r')
             data = f.read()
             f.close()
             #
@@ -827,11 +831,11 @@ class UpdateFile(object):
             return
         #
         for k,dir in e_error.items():
-            if not self.__entryErrorContent.has_key(k):
+            if k not in self.__entryErrorContent:
                 self.__entryErrorContent[k] = dir
             else:
                 for k1,v in dir.items():
-                    if not self.__entryErrorContent[k].has_key(k1):
+                    if k1 not in self.__entryErrorContent[k]:
                         self.__entryErrorContent[k][k1] = v
                     else:
                         self.__entryErrorContent[k][k1] += '\n' + v
@@ -861,7 +865,7 @@ class UpdateFile(object):
         for dir in self.__updateFileList:
             entryId = dir['entry']
             key_id = entryId
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 key_id = dir['pdb_id'].lower()
             #
             fn = os.path.join(self.__sessionPath, entryId + '_model_P1.cif')
@@ -872,7 +876,7 @@ class UpdateFile(object):
             file_list.append(fn)
             #
             status_map = {}
-            if dir.has_key('status_code') and dir['status_code']:
+            if 'status_code' in dir and dir['status_code']:
                 status  = dir['status_code']
                 if status != '' and status != 'RELOAD' and status != 'CITATIONUpdate':
                     status_map['status_code'] = status
@@ -880,12 +884,12 @@ class UpdateFile(object):
                     #message = "Update workflow DB status to '" + status + "' " + returnCode
                 #
             #
-            if dir.has_key('status_code_em') and dir['status_code_em']:
+            if 'status_code_em' in dir and dir['status_code_em']:
                 status_map['status_code_emdb'] = dir['status_code_em']
             #
             if status_map:
                 returnCode = self.__updateWfDb(entryId, status_map)
-                message = "Update workflow DB status to " + ",".join([ "'%s' = '%s'" % (k, v) for k, v in status_map.iteritems()]) + " " + returnCode
+                message = "Update workflow DB status to " + ",".join([ "'%s' = '%s'" % (k, v) for k, v in status_map.items()]) + " " + returnCode
             #
             code = 'failed.'
             returnStatus = killAllWF(entryId, 'RelMod') 
@@ -918,7 +922,7 @@ class UpdateFile(object):
             dBreturnCode = c.saveObject(rd, 'update', constDict)
             if dBreturnCode and dBreturnCode == 'ok':
             """
-            sql = "update deposition set " + ",".join([ "%s = '%s'" % (k, v) for k, v in statusCodeMap.iteritems()]) \
+            sql = "update deposition set " + ",".join([ "%s = '%s'" % (k, v) for k, v in statusCodeMap.items()]) \
                 + " where dep_set_id = '" + idCode + "'"
             ret = c.runUpdateSQL(sql)
             if ret != None:
@@ -940,7 +944,7 @@ class UpdateFile(object):
         #
         for dir in self.__releaseList:
             entryId = dir['entry']
-            if (not dir.has_key('entry')) or (not dir.has_key('status_code')):
+            if ('entry' not in dir) or ('status_code' not in dir):
                 continue
             #
             try:
@@ -967,7 +971,7 @@ class UpdateFile(object):
         """
         #
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv DEPLOY_DIR ' + self.__cI.get('SITE_DEPLOY_PATH') + '\n')
@@ -1039,12 +1043,12 @@ class UpdateFile(object):
             formatExt = str(fFields[1]).strip()
             nFields = baseName.split('_')
             fileExt = nFields[2] + '_' + formatExt
-            if not self.__fileExtContentTypeD.has_key(fileExt):
+            if fileExt not in self.__fileExtContentTypeD:
                 continue
             #
             ContentType = self.__fileExtContentTypeD[fileExt]
             PartNumber = str(nFields[3]).strip().replace('P', '')
-            if p_map.has_key(ContentType):
+            if ContentType in p_map:
                 if PartNumber not in p_map[ContentType]:
                     p_map[ContentType].append(PartNumber)
                 #

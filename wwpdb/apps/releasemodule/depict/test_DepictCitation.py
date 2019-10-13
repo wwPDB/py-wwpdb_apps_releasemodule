@@ -12,4 +12,4 @@ if list:
     reqObj.setValue("TemplatePath", os.path.join("/net/wwpdb_da/da_top/wwpdb_da_test/webapps","htdocs","releasemodule","templates"))
     dp = DepictCitation(reqObj=reqObj, resultList=list, verbose=False, log=sys.stderr)
     content = dp.DoRender()
-    print content
+    print(content)

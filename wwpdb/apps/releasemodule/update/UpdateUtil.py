@@ -111,20 +111,20 @@ class UpdateUtil(object):
                 else:
                     item1 = item
                 #
-                if dir.has_key(item1) and dir[item1] != 'RELOAD' and dir[item1] != 'CITATIONUpdate':
+                if item1 in dir and dir[item1] != 'RELOAD' and dir[item1] != 'CITATIONUpdate':
                     curCat.setValue(dir[item1], item, 0)
                 #
             #
             curContainer.append(curCat)
             #
-            if dir.has_key('revision'):
+            if 'revision' in dir:
                 revCat = DataCategory('revision')
                 revCat.appendAttribute('revision_type')
                 revCat.appendAttribute('details')
                 row = 0
                 for dir1 in dir['revision']:
                     for item1 in ( 'revision_type', 'details' ):
-                        if dir1.has_key(item1):
+                        if item1 in dir1:
                             revCat.setValue(dir1[item1], item1, row)
                         #
                     #
@@ -132,12 +132,12 @@ class UpdateUtil(object):
                 #
                 curContainer.append(revCat)
             #
-            if dir.has_key('pubmed'):
+            if 'pubmed' in dir:
                 pubCat = self.__genPubmedCategory(dir['pubmed'])
                 if pubCat:
                     curContainer.append(pubCat)
                 #
-            elif dir.has_key('citation'):
+            elif 'citation' in dir:
                 pubCat = self.__genCitationCategory(dir['citation'])
                 if pubCat:
                     curContainer.append(pubCat)
@@ -146,7 +146,7 @@ class UpdateUtil(object):
             myDataList.append(curContainer)
         #
         inputfile = os.path.join(self.__sessionPath, filename)
-        f = file(inputfile, 'w')
+        f = open(inputfile, 'w')
         pdbxW = PdbxWriter(f)
         pdbxW.write(myDataList)
         f.close()
@@ -166,12 +166,12 @@ class UpdateUtil(object):
         for dir in pubmed_list:
             pubmed_id = dir['pdbx_database_id_PubMed']
             for item in items:
-                if dir.has_key(item):
+                if item in dir:
                     cat.setValue(dir[item], item, row)
                     continue
                 #
-                if not self.__pubmedInfo.has_key(pubmed_id) or \
-                   not self.__pubmedInfo[pubmed_id].has_key(item):
+                if pubmed_id not in self.__pubmedInfo or \
+                   item not in self.__pubmedInfo[pubmed_id]:
                     continue
                 #
                 cat.setValue(self.__pubmedInfo[pubmed_id][item], item, row);
@@ -189,7 +189,7 @@ class UpdateUtil(object):
             cat.appendAttribute(item)
         #
         for item in items:
-            if dir.has_key(item):
+            if item in dir:
                 cat.setValue(dir[item], item, 0)
             #
         #
@@ -197,7 +197,7 @@ class UpdateUtil(object):
 
     def __genScriptFile(self, scriptfile, inputfile, outputfile, logfile):
         script = os.path.join(self.__sessionPath, scriptfile)
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT ' + self.__rcsbRoot + '\n')
@@ -226,7 +226,7 @@ class UpdateUtil(object):
         cifObj = mmCIFUtil(filePath=outputfile)
         rlist = cifObj.GetValue('error_message')
         for dir in rlist:
-            if self.__entryErrorContent.has_key(dir['pdbid']):
+            if dir['pdbid'] in self.__entryErrorContent:
                 self.__entryErrorContent[dir['pdbid']][dir['type']] = dir['message']
             else:
                 dir1 = {}
@@ -243,11 +243,11 @@ class UpdateUtil(object):
         #
         for dir in self.__updateList:
             key_id = dir['entry']
-            if dir.has_key('pdb_id'):
+            if 'pdb_id' in dir:
                 key_id = dir['pdb_id'].lower()
             #
             for list in item_list:
-                if not dir.has_key(list[0]):
+                if list[0] not in dir:
                     continue
                 #
                 filename = os.path.join(self.__sessionPath, dir[list[0]])
@@ -255,8 +255,8 @@ class UpdateUtil(object):
                     continue
                 #
                 err = 'Missing updated ' + list[2] + ' file.'
-                if self.__entryErrorContent.has_key(key_id):
-                    if self.__entryErrorContent[key_id].has_key(list[1]):
+                if key_id in self.__entryErrorContent:
+                    if list[1] in self.__entryErrorContent[key_id]:
                         self.__entryErrorContent[key_id][list[1]] += '\n' + err
                     else:
                         self.__entryErrorContent[key_id][list[1]] = err

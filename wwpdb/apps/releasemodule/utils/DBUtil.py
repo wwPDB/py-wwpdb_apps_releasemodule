@@ -64,7 +64,7 @@ class DBUtil(object):
         rows = self.runSelectSQL(query)
         if rows:
             for row in rows:
-                if row.has_key('structure_id'):
+                if 'structure_id' in row:
                     list.append(row['structure_id'])
                 #
             #
@@ -88,7 +88,7 @@ class DBUtil(object):
                     #
                 #
             #
-        except MySQLdb.Error, e:
+        except MySQLdb.Error as e:
             self.__lfh.write("Database error %d: %s\n" % (e.args[0], e.args[1]))
         #
         return list
@@ -128,8 +128,8 @@ class DBUtil(object):
         if rows:
             map = {}
             for row in rows:
-                if row.has_key('structure_id'):
-                    if map.has_key(row['structure_id']):
+                if 'structure_id' in row:
+                    if row['structure_id'] in map:
                         continue
                     #
                     map[row['structure_id']] = 'yes'
@@ -198,7 +198,7 @@ class DBUtil(object):
         rows = self.runSelectSQL(query)
         if rows:
             for row in rows:
-                if row.has_key('structure_id') and (row['rcsb_annotator'] == None or \
+                if 'structure_id' in row and (row['rcsb_annotator'] == None or \
                    str(row['rcsb_annotator']).upper() == annotator.upper() or \
                    str(row['rcsb_annotator']).upper() == 'UNASSIGN'):
                     entry_list.append(row['structure_id'])
@@ -278,7 +278,7 @@ class DBUtil(object):
             curs = self.__dbcon.cursor(MySQLdb.cursors.DictCursor)
             curs.execute(query)
             dir = curs.fetchone()
-        except MySQLdb.Error, e:
+        except MySQLdb.Error as e:
             self.__lfh.write("Database error %d: %s\n" % (e.args[0], e.args[1]))
         return dir
 
@@ -296,7 +296,7 @@ class DBUtil(object):
         rows = self.runSelectSQL(query)
         if rows:
             for row in rows:
-                if not row.has_key('name'):
+                if 'name' not in row:
                     continue
                 #
                 if reformat:
@@ -331,7 +331,7 @@ class DBUtil(object):
         rows = self.runSelectSQL(query)
         if rows:
             for row in rows:
-                if not row.has_key('name'):
+                if 'name' not in row:
                     continue
                 #
                 list = row['name'].split(',')
@@ -393,7 +393,7 @@ class DBUtil(object):
         list = self.runSelectSQL(query)
         if list:
             for row in list:
-                if row.has_key('structure_id'):
+                if 'structure_id' in row:
                     list1,list2 = self.getCitationAuthor(row['structure_id'])
                     if list1:
                         row['citation_author'] = list1
@@ -423,7 +423,7 @@ class DBUtil(object):
         list = self.runSelectSQL(query)
         if list:
             for d in list:
-                if not d.has_key('structure_id') or not d.has_key('status_code'):
+                if 'structure_id' not in d or 'status_code' not in d:
                     continue
                 #
                 dir[d['structure_id']] = d['status_code']
@@ -446,7 +446,7 @@ class DBUtil(object):
         pdbid = ''
         query = "select pdb_id from rcsb_status where structure_id = '" + depid + "'"
         list = self.runSelectSQL(query)
-        if list and list[0].has_key('pdb_id'):
+        if list and 'pdb_id' in list[0]:
             pdbid = list[0]['pdb_id']
         #
         return pdbid
@@ -455,7 +455,7 @@ class DBUtil(object):
         depid = ''
         query = "select structure_id from rcsb_status where pdb_id = '" + pdbid + "'"
         list = self.runSelectSQL(query)
-        if list and list[0].has_key('structure_id'):
+        if list and 'structure_id' in list[0]:
             depid = list[0]['structure_id']
         #
         return depid
@@ -483,7 +483,7 @@ class DBUtil(object):
         list = self.__mergeEntryList(rcsb_list, em_list)
 
         for dir in list:
-            if not obsprMap.has_key(dir['structure_id']):
+            if dir['structure_id'] not in obsprMap:
                 continue
             #
             dir['obspr'] = obsprMap[dir['structure_id']]
@@ -507,7 +507,7 @@ class DBUtil(object):
         ret_list = self.runSelectSQL(query)
         if ret_list:
             for dir in ret_list:
-                if dir.has_key('requested_accession_types') and dir['requested_accession_types'].upper().find('EMDB') != -1:
+                if 'requested_accession_types' in dir and dir['requested_accession_types'].upper().find('EMDB') != -1:
                     dir1 = {}
                     dir1['structure_id'] = dir['structure_id']
                     dir1['recvd_em_map'] = 'Y'
@@ -535,27 +535,27 @@ class DBUtil(object):
         #
         unique_id = sorted(set(all_id_list))
         for id in unique_id:
-            if rcsb_map.has_key(id):
+            if id in rcsb_map:
                 dir = rcsb_map[id]
-                if dir.has_key('author_list'):
+                if 'author_list' in dir:
                     dir['author_list'] = self.__processAuthorList(dir['author_list'])
                 #
-                if (not dir.has_key('pdb_id')) or (not dir['pdb_id']):
-                    if dir.has_key('status_code'):
+                if ('pdb_id' not in dir) or (not dir['pdb_id']):
+                    if 'status_code' in dir:
                         del dir['status_code']
                     #
                 #
-                if em_map.has_key(id):
+                if id in em_map:
                     dir['recvd_em_map'] = em_map[id]['recvd_em_map']
-                    if em_status_code_map.has_key(id):
+                    if id in em_status_code_map:
                         for item in ( 'status_code_em', 'date_of_EM_release' ):
-                            if em_status_code_map[id].has_key(item):
+                            if item in em_status_code_map[id]:
                                 dir[item] = em_status_code_map[id][item]
                             #
                         #
-                        if (not dir.has_key('pdb_id')) or (not dir['pdb_id']):
+                        if ('pdb_id' not in dir) or (not dir['pdb_id']):
                             for item in ( 'title', 'author_list' ):
-                                if em_status_code_map[id].has_key(item) and em_status_code_map[id][item]:
+                                if item in em_status_code_map[id] and em_status_code_map[id][item]:
                                     dir[item] = em_status_code_map[id][item]
                                 #
                             #
@@ -563,10 +563,10 @@ class DBUtil(object):
                     #
                 #
                 list.append(dir)
-            elif em_map.has_key(id):
-                if em_status_code_map.has_key(id):
+            elif id in em_map:
+                if id in em_status_code_map:
                     for item in ( 'status_code_em', 'date_of_EM_release' ):
-                        if em_status_code_map[id].has_key(item):
+                        if item in em_status_code_map[id]:
                             em_map[id][item] = em_status_code_map[id][item]
                         #
                     #
@@ -602,10 +602,10 @@ class DBUtil(object):
         list = self.runSelectSQL(query)
         if list:
             for d in list:
-                if not d.has_key('structure_id') or not d.has_key('status_code_em') or not d['structure_id'] or not d['status_code_em']:
+                if 'structure_id' not in d or 'status_code_em' not in d or not d['structure_id'] or not d['status_code_em']:
                     continue
                 #
-                if d.has_key('author_list'):
+                if 'author_list' in d:
                     d['author_list'] = self.__processAuthorList(d['author_list'])
                 #
                 map[d['structure_id']] = d
@@ -630,7 +630,7 @@ class DBUtil(object):
             return obsprMap2
         #
         for k,list in obsprMap2.items():
-            if obsprMap1.has_key(k):
+            if k in obsprMap1:
                 found = False
                 for dir in obsprMap1[k]:
                     if dir['pdb_id'] == list[0]['pdb_id']:
@@ -665,8 +665,8 @@ class DBUtil(object):
         list = self.runSelectSQL(query)
         if list:
             for dir in list:
-                if (not dir.has_key('pdb_id')) or (not dir.has_key('structure_id')) or \
-                   (not dir.has_key('relace_pdb_id')):
+                if ('pdb_id' not in dir) or ('structure_id' not in dir) or \
+                   ('relace_pdb_id' not in dir):
                     continue
                 #
                 pdb_id = str(dir['pdb_id'])
@@ -679,7 +679,7 @@ class DBUtil(object):
                 dir1 = {}
                 dir1['pdb_id'] = pdb_id
                 dir1['relace_pdb_id'] = relace_pdb_id
-                if map.has_key(dir['structure_id']):
+                if dir['structure_id'] in map:
                     map[dir['structure_id']].append(dir1)
                 else:
                     list1 = []
@@ -698,7 +698,7 @@ class DBUtil(object):
         list = self.runSelectSQL(query)
         if list:
             for dir in list:
-                if (not dir.has_key('structure_id')) or (not dir.has_key('replace_pdb_id')):
+                if ('structure_id' not in dir) or ('replace_pdb_id' not in dir):
                     continue
                 #
                 pdb_id = self.getPDBID(str(dir['structure_id']))
@@ -733,7 +733,7 @@ if __name__ == '__main__':
     #dir = c.getPreviousStatusCode([ 'RCSB057158', 'RCSB079243', 'RCSB079395', 'RCSB079656' ])
     #print dir
     #list = c.getRelEntryInfo('CS')
-    print list
+    print(list)
     #dir = c.getRequestReleaseEntryInfo('JY')
     #print dir
     #print len(dir)

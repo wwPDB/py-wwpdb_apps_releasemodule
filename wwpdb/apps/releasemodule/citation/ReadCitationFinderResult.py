@@ -21,7 +21,7 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import copy, cPickle, operator, os, sys, string, traceback
+import copy, pickle, operator, os, sys, string, traceback
 
 from wwpdb.apps.releasemodule.citation.FetchUtil  import FetchUtil
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
@@ -49,7 +49,7 @@ class ReadCitationFinderResult(object):
 
     def _deserialize(self):
         fb = open(self.__pickleFile, 'rb')
-        self.__annotEntryMap = cPickle.load(fb)
+        self.__annotEntryMap = pickle.load(fb)
         fb.close()
 
     def getEntryList(self, annotator):
@@ -71,7 +71,7 @@ class ReadCitationFinderResult(object):
         #
         #for ann in ('NULL', 'UNASSIGN'): 
         for ann in annList:
-            if not self.__annotEntryMap.has_key(ann):
+            if ann not in self.__annotEntryMap:
                 continue
             #
             for dir in self.__annotEntryMap[ann]:
@@ -89,7 +89,7 @@ class ReadCitationFinderResult(object):
         idlist = []
         for dir in self.__foundEntryList:
             for pdir in dir['pubmed']:
-                if map.has_key(pdir['pdbx_database_id_PubMed']):
+                if pdir['pdbx_database_id_PubMed'] in map:
                     continue
                 #
                 map[pdir['pdbx_database_id_PubMed']] = 'y'
@@ -130,7 +130,7 @@ class ReadCitationFinderResult(object):
             #
             if cinfo:
                 for item in items:
-                    if not cinfo.has_key(item) or not cinfo[item]:
+                    if item not in cinfo or not cinfo[item]:
                         continue
                     #
                     if item == 'title':
@@ -139,7 +139,7 @@ class ReadCitationFinderResult(object):
                         dir[item] = cinfo[item]
                     #
                 #
-                if cinfo.has_key('pdbx_database_id_PubMed') and cinfo['pdbx_database_id_PubMed']:
+                if 'pdbx_database_id_PubMed' in cinfo and cinfo['pdbx_database_id_PubMed']:
                     dir['pdbx_database_id_PubMed'] = cinfo['pdbx_database_id_PubMed']
                 #
             #
@@ -158,9 +158,9 @@ class ReadCitationFinderResult(object):
                 #
                 # Update latest pubmed information
                 #
-                if self.__pubmedInfoMap and self.__pubmedInfoMap.has_key(pubmed_id):
+                if self.__pubmedInfoMap and pubmed_id in self.__pubmedInfoMap:
                     for item in items:
-                        if not self.__pubmedInfoMap[pubmed_id].has_key(item):
+                        if item not in self.__pubmedInfoMap[pubmed_id]:
                             continue
                         #
                         pdir[item] = self.__pubmedInfoMap[pubmed_id][item]
@@ -212,7 +212,7 @@ class ReadCitationFinderResult(object):
                     #
                 #
             #
-            if dir.has_key('rcsb_annotator') and str(dir['rcsb_annotator']) != '' and \
+            if 'rcsb_annotator' in dir and str(dir['rcsb_annotator']) != '' and \
                dir['rcsb_annotator'].upper() != 'NULL' and dir['rcsb_annotator'].upper() != 'UNASSIGN' and \
                dir['rcsb_annotator'] != annotator:
                 continue
@@ -242,14 +242,14 @@ class ReadCitationFinderResult(object):
             return pubmed_id_list
         #
         fb = open(pickle_file, 'rb')
-        pubmed_id_list = cPickle.load(fb)
+        pubmed_id_list = pickle.load(fb)
         fb.close()
         return pubmed_id_list
 
     def __compareCitationInfo(self, cinfo, dir, release_flag):
         code = ' '
-        if not cinfo.has_key('pdbx_database_id_PubMed') or \
-           not dir.has_key('pdbx_database_id_PubMed'):
+        if 'pdbx_database_id_PubMed' not in cinfo or \
+           'pdbx_database_id_PubMed' not in dir:
             return code
         #
         if str(cinfo['pdbx_database_id_PubMed']) != dir['pdbx_database_id_PubMed']:
@@ -262,19 +262,19 @@ class ReadCitationFinderResult(object):
             #
             # Not allowed missing value in citation
             #
-            if ((not cinfo.has_key(item)) or (not cinfo[item])) and dir.has_key(item):
+            if ((item not in cinfo) or (not cinfo[item])) and item in dir:
                 return code
             #
             # Allowed missing value in pubmed
             #
-            if not dir.has_key(item) or not dir[item]:
+            if item not in dir or not dir[item]:
                 continue
             #
-            if cinfo.has_key(item) and cinfo[item] and str(cinfo[item]) != str(dir[item]):
+            if item in cinfo and cinfo[item] and str(cinfo[item]) != str(dir[item]):
                 return code
             #
         #
-        if dir.has_key('similarity_score') and (float(dir['similarity_score']) > 0.98 or \
+        if 'similarity_score' in dir and (float(dir['similarity_score']) > 0.98 or \
            (release_flag and float(dir['similarity_score']) > 0.9)):
             code = 'skip'
         #
@@ -337,4 +337,4 @@ if __name__ == '__main__':
     cReader = ReadCitationFinderResult(pickleFile=sys.argv[1], verbose=False, log=sys.stderr)
     list = cReader.getEntryList(sys.argv[2])
     for id in list:
-        print id
+        print(id)

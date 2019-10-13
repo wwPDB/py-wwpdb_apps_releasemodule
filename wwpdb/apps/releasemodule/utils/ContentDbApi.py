@@ -349,5 +349,5 @@ if __name__ == '__main__':
     print c.getCitationInfo(sys.argv[2])
     print c.getCitationAuthorList(sys.argv[2])
     """
-    print(c.getLastPdbxAuditRevisionHistory(sys.argv[1]))
-    print(c.getLastReleaseDate(sys.argv[1]))
+    print((c.getLastPdbxAuditRevisionHistory(sys.argv[1])))
+    print((c.getLastReleaseDate(sys.argv[1])))

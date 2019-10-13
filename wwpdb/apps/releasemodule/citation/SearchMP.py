@@ -103,7 +103,7 @@ class SearchMP(object):
         numProc = min(numProc, rate + 1)
         mpl = MultiProcLimit(rate)
         #
-        subLists = [self.__termList[i::numProc] for i in xrange(numProc)]
+        subLists = [self.__termList[i::numProc] for i in range(numProc)]
         #
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
@@ -111,7 +111,7 @@ class SearchMP(object):
         workers = [ SearchWorker(path=self.__sessionPath, processLabel=str(i+1), taskQueue=taskQueue, \
                        resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose, \
                        siteId = self.__siteId, mpl = mpl) \
-                       for i in xrange(numProc) ]
+                       for i in range(numProc) ]
         #
         for w in workers:
             w.start()
@@ -119,10 +119,10 @@ class SearchMP(object):
         for subList in subLists:
             taskQueue.put(subList)
         #
-        for i in xrange(numProc):
+        for i in range(numProc):
             taskQueue.put(None)
         #
-        for i in xrange(len(subLists)):
+        for i in range(len(subLists)):
             list = resultQueue.get()
             if not list:
                 continue
@@ -146,7 +146,7 @@ class SearchMP(object):
         return self.__termMap
 
 if __name__ == '__main__':
-    f = file(sys.argv[1], 'r')
+    f = open(sys.argv[1], 'r')
     data = f.read()
     f.close()
     #

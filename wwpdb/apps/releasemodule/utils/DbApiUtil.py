@@ -130,7 +130,8 @@ class DbApiUtil(object):
                 #
             else:
                 for myD in ret:
-                    items = myD.keys()
+                    # We make copy of the keys to avoid "dictionary changed size during iteration"
+                    items = list(myD.keys())
                     for item in items:
                         if not myD[item]:
                             del myD[item]
@@ -169,7 +170,7 @@ class DbApiUtil(object):
         #
         rowExists = False
         if where:
-            sql = "select * from " + str(table) + " where " + ' and '.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in where.iteritems()])
+            sql = "select * from " + str(table) + " where " + ' and '.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in where.items()])
             rows = self.runSelectSQL(sql)
             if rows and len(rows) > 0:
                 rowExists = True
@@ -179,18 +180,18 @@ class DbApiUtil(object):
             return 'OK'
         #
         if rowExists:
-            sql = "update " + str(table) + " set " + ','.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in data.iteritems()])
+            sql = "update " + str(table) + " set " + ','.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in data.items()])
             if where:
-                sql += ' where ' + ' and '.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in where.iteritems()])
+                sql += ' where ' + ' and '.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in where.items()])
             #
         else:
-            sql = "insert into " + str(table) + " (" + ','.join(['%s' % (k) for k, v in where.iteritems()])
+            sql = "insert into " + str(table) + " (" + ','.join(['%s' % (k) for k, v in where.items()])
             if data:
-                sql += "," + ','.join(['%s' % (k) for k, v in data.iteritems()])
+                sql += "," + ','.join(['%s' % (k) for k, v in data.items()])
             #
-            sql += ") values (" + ','.join(["'%s'" % (v.replace("'", "\\'")) for k, v in where.iteritems()])
+            sql += ") values (" + ','.join(["'%s'" % (v.replace("'", "\\'")) for k, v in where.items()])
             if data:
-                sql += "," + ','.join(["'%s'" % (v.replace("'", "\\'")) for k, v in data.iteritems()])
+                sql += "," + ','.join(["'%s'" % (v.replace("'", "\\'")) for k, v in data.items()])
             #
             sql += ")"
         #

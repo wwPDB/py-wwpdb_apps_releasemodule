@@ -135,19 +135,19 @@ class DepictRequest(DepictBase):
         #
         num = len(FileInfo['releasedFiles'])
         num_per_line = 5
-        l = num / num_per_line
+        l = int(num / num_per_line)
         x = num % num_per_line
         m = l
         if x == 0:
             m = l - 1
         #
-        for i in xrange(m + 1):
+        for i in range(m + 1):
             n = num_per_line
             if i == l:
                 n = x
             #
             rows += '<tr>\n'
-            for j in xrange(n):
+            for j in range(n):
                 filepath = FileInfo['releasedFiles'][i * num_per_line + j]
                 (path,filename) = os.path.split(filepath)
                 rows += '<td style="text-align:left;border-style:none">' \

@@ -77,7 +77,7 @@ class FormParser(object):
         if val:
             max_author_num = int(val)
             list = []
-            for i in xrange (0, max_author_num):
+            for i in range(0, max_author_num):
                 val = str(self.__reqObj.getValue('name_' + str(i + 1)))
                 if val:
                     list.append(val)
@@ -135,7 +135,7 @@ class FormParser(object):
             has_ReleaseInfo = False
             check_flag = False
             for ext in ( '', '_sf', '_em', '_mr', '_cs' ):
-                if dir.has_key('status_code' + ext):
+                if 'status_code' + ext in dir:
                     has_SelectedOption = True
                     if dir['status_code' + ext] == 'REL_added' or dir['status_code' + ext] == 'OBS_obsolete':
                         check_flag = True
@@ -151,7 +151,7 @@ class FormParser(object):
                 #
             #
             is_RelEntry = False
-            if dir.has_key('directory') and dir['directory'] == 'modified':
+            if 'directory' in dir and dir['directory'] == 'modified':
                 is_RelEntry = True
             #
             #if citationflag == 'yes' and (not is_RelEntry):
@@ -161,7 +161,7 @@ class FormParser(object):
                 check_flag = False
                 dir['status_code'] = 'CITATIONUpdate'
                 for status in ( 'status_code_sf', 'status_code_em', 'status_code_mr', 'status_code_cs' ):
-                    if dir.has_key(status):
+                    if status in dir:
                         del dir[status]
                     #
                 #
@@ -169,7 +169,7 @@ class FormParser(object):
             if (not has_SelectedOption) and (option != 'pull_release'):
                 self.__errorContent += 'Entry ' + entry + ' has no release option selected\n'
             #
-            if has_ReleaseInfo and (not dir.has_key('approval_type')):
+            if has_ReleaseInfo and ('approval_type' not in dir):
                 self.__errorContent += 'Entry ' + entry + ' has no approval type selected\n'
             #
             if self.__errorContent:
@@ -265,21 +265,21 @@ class FormParser(object):
             map[dir['structure_id']] = dir
         #
         for dir in self.__updateList:
-            if not map.has_key(dir['entry']):
+            if dir['entry'] not in map:
                 continue
             #
             status_map = {}
             value_map = {}
             not_EM_type = False
             for type in ( 'status_code', 'status_code_sf', 'status_code_em', 'status_code_mr', 'status_code_cs'):
-                if not dir.has_key(type):
+                if type not in dir:
                     continue
                 #
                 if type != 'status_code_em':
                     not_EM_type = True
                #
                 status_map[type] = dir[type]
-                if value_map.has_key(dir[type]):
+                if dir[type] in value_map:
                     continue
                 #
                 value_map[dir[type]] = 'yes'
@@ -293,13 +293,13 @@ class FormParser(object):
                                   [ 'recvd_em_map',          'status_code_em', 'EM file' ], \
                                   [ 'recvd_nmr_constraints', 'status_code_mr', 'MR file' ], \
                                   [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ] ):
-                        if not map[dir['entry']].has_key(list[0]):
+                        if list[0] not in map[dir['entry']]:
                             continue
                         #
                         if map[dir['entry']][list[0]] != 'Y' and map[dir['entry']][list[0]] != 'y':
                             continue
                         #
-                        if dir.has_key(list[1]):
+                        if list[1] in dir:
                             continue
                         #
                         if error:
@@ -310,7 +310,7 @@ class FormParser(object):
                     #
                     if error:
                         self.__errorContent += 'Entry ' + dir['entry'] + ': '
-                        if value_map.has_key('OBS'):
+                        if 'OBS' in value_map:
                             self.__errorContent += 'obsolete '
                         else:
                             self.__errorContent += 'release '
@@ -322,7 +322,7 @@ class FormParser(object):
                 self.__errorContent += 'Entry ' + dir['entry'] + ' has inconsist release status:'
                 for list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'EM', 'status_code_em' ], \
                               [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ] ):
-                    if not dir.has_key(list[1]):
+                    if list[1] not in dir:
                         continue
                     #
                     self.__errorContent += ' ' + list[0] + ':' + dir[list[1]]

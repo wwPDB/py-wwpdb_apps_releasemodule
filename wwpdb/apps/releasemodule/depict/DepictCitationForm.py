@@ -21,7 +21,7 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import cPickle, os, sys, string, traceback
+import pickle, os, sys, string, traceback
 
 from wwpdb.apps.releasemodule.citation.StringUtil  import calStringSimilarity
 from wwpdb.apps.releasemodule.depict.ReleaseOption import ReleaseOption
@@ -73,8 +73,8 @@ class DepictCitationForm(object):
         count = 0
         flag = True
         for dir in self.__resultList:
-            if (not dir.has_key('pdb_id')) or (not dir['pdb_id']):
-                if dir.has_key('status_code'):
+            if ('pdb_id' not in dir) or (not dir['pdb_id']):
+                if 'status_code' in dir:
                     del dir['status_code']
                 #
             #
@@ -87,9 +87,9 @@ class DepictCitationForm(object):
                dir['status_code'] == 'AUCO' or dir['status_code'] == 'REPL' or dir['status_code'] == 'POLC'):
             """
             color_status_code = ''
-            if dir.has_key('status_code') and dir['status_code']:
+            if 'status_code' in dir and dir['status_code']:
                 color_status_code = dir['status_code']
-            elif dir.has_key('status_code_em') and dir['status_code_em']:
+            elif 'status_code_em' in dir and dir['status_code_em']:
                 color_status_code = dir['status_code_em']
             #
             if color_status_code == 'PROC' or color_status_code == 'WAIT' or color_status_code == 'AUCO' or \
@@ -98,7 +98,7 @@ class DepictCitationForm(object):
             #
             for item in items:
                 val = 'None'
-                if dir.has_key(item):
+                if item in dir:
                     val = dir[item]
                 #
                 if item == 'status_code':
@@ -116,7 +116,7 @@ class DepictCitationForm(object):
             #
             myD['release_option'] = ReleaseOption(dir, True, newRelease)
             #
-            if not newRelease and dir.has_key('pdb_id') and dir['pdb_id']:
+            if not newRelease and 'pdb_id' in dir and dir['pdb_id']:
                 myD['revision'] = self.__getRevisionInfo(dir['structure_id'], count)
             else:
                 myD['revision'] = ''
@@ -132,12 +132,12 @@ class DepictCitationForm(object):
 
     def __getNewReleaseFlag(self, dir):
         newRelease = True
-        if dir.has_key('status_code') and dir['status_code'] == 'REL':
-            if dir.has_key('date_of_RCSB_release') and str(dir['date_of_RCSB_release']) < self.__rel_date:
+        if 'status_code' in dir and dir['status_code'] == 'REL':
+            if 'date_of_RCSB_release' in dir and str(dir['date_of_RCSB_release']) < self.__rel_date:
                 newRelease = False
             #
-        elif dir.has_key('status_code_em') and dir['status_code_em'] == 'REL':
-            if dir.has_key('date_of_EM_release') and str(dir['date_of_EM_release']).replace('00:00:00', '').strip() < self.__rel_date:
+        elif 'status_code_em' in dir and dir['status_code_em'] == 'REL':
+            if 'date_of_EM_release' in dir and str(dir['date_of_EM_release']).replace('00:00:00', '').strip() < self.__rel_date:
                 newRelease = False
             #
         #
@@ -145,7 +145,7 @@ class DepictCitationForm(object):
 
     def __depictCitationInfo(self, dir):
         authorlist = []
-        if dir.has_key('author'):
+        if 'author' in dir:
             authorlist = dir['author']
         #
         max_author_num = len(authorlist) + 5
@@ -158,7 +158,7 @@ class DepictCitationForm(object):
         myD = {}
         for item in items:
             val = ''
-            if dir.has_key(item) and dir[item]:
+            if item in dir and dir[item]:
                 val = str(dir[item])
             #
             if item != 'citation_id':
@@ -189,7 +189,7 @@ class DepictCitationForm(object):
                 text += self.__processTemplate('citation_request/author_form_tmplt.html', myD)
             #
         #
-        for i in xrange (0, diff_num):
+        for i in range(0, diff_num):
             count += 1
             myD = {}
             myD['count'] = str(count)
@@ -199,7 +199,7 @@ class DepictCitationForm(object):
         return text
 
     def __getTextArea(self, name, value):
-        irow = len(value) / 120 + 1
+        irow = int(len(value) / 120) + 1
         text = '<textarea name="' + name + '" id="' + name + '" cols="120" rows="' + str(irow) + '" wrap>' + value + '</textarea>'
         return text
 

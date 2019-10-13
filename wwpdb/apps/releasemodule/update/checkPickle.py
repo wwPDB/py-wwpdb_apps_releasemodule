@@ -1,9 +1,14 @@
 ##
-import cPickle, sys
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+import sys
 
 def readPickle(filename):
     fb = open(filename, 'rb')
-    map = cPickle.load(fb)
+    map = pickle.load(fb)
     fb.close() 
     print map 
 

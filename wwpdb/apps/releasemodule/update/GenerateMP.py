@@ -79,14 +79,14 @@ class GenerateMP(object):
         #
         numProc = multiprocessing.cpu_count() * 2
         #
-        subLists = [self.__updateList[i::numProc] for i in xrange(numProc)]
+        subLists = [self.__updateList[i::numProc] for i in range(numProc)]
         #
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
         #
         workers = [ GenerateWorker(path=self.__sessionPath, siteId=self.__siteId, processLabel=str(i+1), \
                     taskQueue=taskQueue, resultQueue=resultQueue, log=self.__lfh, \
-                    verbose=self.__verbose) for i in xrange(numProc) ]
+                    verbose=self.__verbose) for i in range(numProc) ]
         #
         for w in workers:
             w.start()
@@ -94,10 +94,10 @@ class GenerateMP(object):
         for subList in subLists:
             taskQueue.put(subList)
         #
-        for i in xrange(numProc):
+        for i in range(numProc):
             taskQueue.put(None)
         #
-        for i in xrange(len(subLists)):
+        for i in range(len(subLists)):
             list = resultQueue.get()
             if list[0]:
                 for k,v in list[0].items():
