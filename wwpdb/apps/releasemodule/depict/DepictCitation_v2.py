@@ -110,8 +110,12 @@ class DepictCitation(DepictBase):
             else:
                 self.__lower_count += 1
             #
-            if myD['check_option'] == 'checked' and myD['status_code'] != 'REL':
-                myD['check_option'] = ''
+            if myD['check_option'] == 'checked':
+                if (myD['pdb_id'] != 'None') and (myD['status_code'] != 'REL'):
+                    myD['check_option'] = ''
+                elif (myD['pdb_id'] == 'None') and (myD['comb_status_code'] != 'REL'):
+                    myD['check_option'] = ''
+                #
             #
             myD['pubmed_citation_info'],count = self.__getPubmedInfo(dataDict['pubmed'], dataDict['structure_id'], p_items, count, False)
             if flag:
