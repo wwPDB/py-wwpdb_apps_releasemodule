@@ -110,8 +110,13 @@ class UpdateUtil(EntryUpdateBase):
             else:
                 item1 = item
             #
-            if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate': # and self._entryDir[item1] != 'EMHEADERUpdate':
-                curCat.setValue(self._entryDir[item1], item, 0)
+            if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate': 
+                                                                 # and self._entryDir[item1] != 'EMHEADERUpdate':
+                if item1.startswith("input_file") and (self._processing_site == "RCSB"):
+                    curCat.setValue(os.path.join(self._sessionPath, self._entryDir[item1]), item, 0)
+                else:
+                    curCat.setValue(self._entryDir[item1], item, 0)
+                #
                 if item1 in checking_items:
                     hasValueFlag = True
                 #
@@ -170,8 +175,22 @@ class UpdateUtil(EntryUpdateBase):
         if not os.access(self.__inputFilePath, os.F_OK):
             return
         #
-        self._GetAndRunCmd('', '${BINPATH}', 'ReleaseUpdate', self.__inputfile, self.__outputfile, self.__logfile, self.__clogfile, \
-                           ' -archivepath ' + os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive') + ' ')
+        if self._processing_site == "RCSB":
+            tarFile = self._entryId + "-release-updated.tar.gz"
+            outputList = []
+            outputList.append( ( tarFile, True ) )
+            outputList.append( ( self.__logfile, True ) )
+            outputList.append( ( self.__clogfile, True ) )
+            self._dpUtilityApi(operator="annot-release-update", inputFileName=self.__inputFilePath, outputFileNameTupList=outputList, \
+                               option="-archivepath " + os.path.join(self._cI.get("SITE_ARCHIVE_STORAGE_PATH"), "archive"), \
+                               id_value=self._entryId, id_name="dep_id")
+            #
+            self._processLogError("", "", os.path.join(self._sessionPath, self.__logfile))
+            self._processLogError("", "ReleaseUpdate", os.path.join(self._sessionPath, self.__clogfile))
+            self._extractTarFile(tarFile)
+        else:
+            self._GetAndRunCmd('', '${BINPATH}', 'ReleaseUpdate', self.__inputfile, self.__outputfile, self.__logfile, self.__clogfile, \
+                               ' -archivepath ' + os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive') + ' ')
 
     def __genPubmedCategory(self, pubmed_list):
         if not pubmed_list or not self.__pubmedInfo:

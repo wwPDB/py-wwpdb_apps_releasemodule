@@ -21,12 +21,13 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import filecmp, ntpath, os, shutil, sys, time
+import filecmp, ntpath, os, shutil, sys, tarfile, time, traceback
 
 from wwpdb.apps.releasemodule.update.UpdateBase    import UpdateBase
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.wf_engine.engine.WFEapplications   import killAllWF
 from wwpdb.io.locator.PathInfo                     import PathInfo
+from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
 
 class EntryUpdateBase(UpdateBase):
     """ Base Class responsible for releasing/pulling back a entry
@@ -46,6 +47,8 @@ class EntryUpdateBase(UpdateBase):
         self._outPutFiles = []
         self.__pI=PathInfo(siteId=self._siteId, sessionPath=self._sessionPath, verbose=False, log=self._lfh)
         self.__checkEMEntry()
+        #
+        self._processing_site = self._cI.get("SITE_NAME").upper()
         #
         # Added for DAOTHER-2996
         # For map only entry, pdb_id is not set, we will create an error message that will never match
@@ -78,6 +81,52 @@ class EntryUpdateBase(UpdateBase):
         if clogFile:
             self._processLogError(errType, programName, os.path.join(self._sessionPath, clogFile), messageType=messageType)
         # 
+
+    def _dpUtilityApi(self, operator="", inputFileName="", outputFileNameTupList=[], option="", id_value="", id_name="pdb_id"):
+        """
+        """
+        if (not operator) or (not inputFileName) or (not outputFileNameTupList):
+            return
+        #
+        self._insertAction("Run RcsbDpUtility.op('" + operator + "') with input file: " + inputFileName + ".")
+        outpuList = []
+        for outputFileNameTup in outputFileNameTupList:
+            outputFilePath = os.path.join(self._sessionPath, outputFileNameTup[0])
+            outpuList.append(outputFilePath)
+            #
+            if not outputFileNameTup[1]:
+                continue
+            #
+            if os.access(outputFilePath, os.F_OK):
+                os.remove(outputFilePath)
+            #
+        #
+        try:
+            dp = RcsbDpUtility(tmpPath=self._sessionPath, siteId=self._siteId, verbose=self._verbose, log=self._lfh)
+            dp.imp(inputFileName)
+            if option:
+                dp.addInput(name="option", value=option)
+            #
+            if id_value:
+                dp.addInput(name=id_name, value=id_value)
+            #
+            dp.op(operator)
+            dp.expList(outpuList)
+            dp.cleanup()
+        except:
+            self._insertEntryMessage(errType="sys", errMessage=traceback.format_exc(), messageType="error", uniqueFlag=True)
+            #
+            traceback.print_exc(file=self._lfh)
+        #
+
+    def _extractTarFile(self, tarFileName):
+        tarFilePath = os.path.join(self._sessionPath, tarFileName)
+        if not os.access(tarFilePath, os.F_OK):
+            return
+        #
+        tf = tarfile.open(tarFilePath)
+        tf.extractall(path=self._sessionPath)
+        os.remove(tarFilePath)
 
     def _insertAction(self, action):
         self._actionList.append( { 'time' : time.time(), 'action' : action } )
@@ -298,7 +347,7 @@ class EntryUpdateBase(UpdateBase):
         #
 
     def _copyUpdatedFilesFromSessionToArchive(self):
-        """ Update data archive based on updated files in session directory. Only four contentType ( 'model', 'structure-factors',
+        """ Update data archive based on updated files in session directory. Only five contentType ( 'model', 'structure-factors',
             'nmr-restraints', 'nmr-chemical-shifts' ) files will be updated during release process
         """
         for contentType in ( 'model', 'structure-factors', 'nmr-restraints', 'nmr-chemical-shifts'):
@@ -322,10 +371,22 @@ class EntryUpdateBase(UpdateBase):
                     #
                     if not isCitationUpdateOnly:
                         head,tail = ntpath.split(nextArchiveFilePath)
-                        vList = tail.split('.V')
+                        vList = tail.split(".V")
                         if len(vList) == 2:
-                            self._GetAndRunCmd('', '${BINPATH}', 'AddVersionInfo', fileName, fileName, self._entryId + '_addversion.log', \
-                                               self._entryId + '_addversion.clog', ' -depid ' + self._entryId + ' -version ' + vList[1])
+                            if self._processing_site == "RCSB":
+                                outputList = []
+                                outputList.append( ( fileName, False ) )
+                                outputList.append( ( self._entryId + "_addversion.log", True ) )
+                                outputList.append( ( self._entryId + "_addversion.clog", True ) )
+                                self._dpUtilityApi(operator="annot-add-version-info", inputFileName=fn, outputFileNameTupList=outputList, \
+                                                   option="-depid " + self._entryId + " -version " + vList[1])
+                                #
+                                self._processLogError("", "", os.path.join(self._sessionPath, self._entryId + "_addversion.log"))
+                                self._processLogError("", "AddVersionInfo", os.path.join(self._sessionPath, self._entryId + "_addversion.clog"))
+                            else:
+                                self._GetAndRunCmd("", "${BINPATH}", "AddVersionInfo", fileName, fileName, self._entryId + "_addversion.log", \
+                                                   self._entryId + "_addversion.clog", " -depid " + self._entryId + " -version " + vList[1])
+                            #
                         #
                     #
                 #

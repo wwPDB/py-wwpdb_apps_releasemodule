@@ -26,6 +26,7 @@ import gzip, os, shutil, sys
 from wwpdb.apps.releasemodule.update.EmReleaseUtil   import EmReleaseUtil
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.apps.releasemodule.update.ReleaseUtil     import ReleaseUtil
+from wwpdb.apps.releasemodule.update.ReleaseDpUtil   import ReleaseDpUtil
 from wwpdb.apps.releasemodule.update.UpdateUtil_v2   import UpdateUtil
 
 class EntryUpdateProcess(EntryUpdateBase):
@@ -76,7 +77,11 @@ class EntryUpdateProcess(EntryUpdateBase):
             updateUtil.run()
         #
         if self.__releaseFlag:
-            releaseUtil = ReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
+            if self._processing_site == "RCSB":
+                releaseUtil = ReleaseDpUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
+            else:
+                releaseUtil = ReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
+            #
             releaseUtil.run()
         #
         if self.__EmEntryFlag:
