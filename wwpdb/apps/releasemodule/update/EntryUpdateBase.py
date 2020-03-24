@@ -373,7 +373,7 @@ class EntryUpdateBase(UpdateBase):
                         head,tail = ntpath.split(nextArchiveFilePath)
                         vList = tail.split(".V")
                         if len(vList) == 2:
-                            if self._processing_site == "RCSB":
+                            if self._processing_site == "PDBE":
                                 outputList = []
                                 outputList.append( ( fileName, False ) )
                                 outputList.append( ( self._entryId + "_addversion.log", True ) )

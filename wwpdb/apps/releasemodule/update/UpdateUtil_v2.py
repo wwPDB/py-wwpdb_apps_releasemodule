@@ -112,7 +112,7 @@ class UpdateUtil(EntryUpdateBase):
             #
             if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate': 
                                                                  # and self._entryDir[item1] != 'EMHEADERUpdate':
-                if item1.startswith("input_file") and (self._processing_site == "RCSB"):
+                if item1.startswith("input_file") and (self._processing_site == "PDBE"):
                     curCat.setValue(os.path.join(self._sessionPath, self._entryDir[item1]), item, 0)
                 else:
                     curCat.setValue(self._entryDir[item1], item, 0)
@@ -175,7 +175,7 @@ class UpdateUtil(EntryUpdateBase):
         if not os.access(self.__inputFilePath, os.F_OK):
             return
         #
-        if self._processing_site == "RCSB":
+        if self._processing_site == "PDBE":
             tarFile = self._entryId + "-release-updated.tar.gz"
             outputList = []
             outputList.append( ( tarFile, True ) )
