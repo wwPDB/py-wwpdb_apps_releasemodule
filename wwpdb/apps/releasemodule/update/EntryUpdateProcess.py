@@ -77,7 +77,7 @@ class EntryUpdateProcess(EntryUpdateBase):
             updateUtil.run()
         #
         if self.__releaseFlag:
-            if self._processing_site == "RCSB":
+            if self._processing_site == "PDBE":
                 releaseUtil = ReleaseDpUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
             else:
                 releaseUtil = ReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
