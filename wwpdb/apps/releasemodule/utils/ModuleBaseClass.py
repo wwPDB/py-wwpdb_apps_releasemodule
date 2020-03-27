@@ -75,8 +75,14 @@ class ModuleBaseClass(object):
         pickle.dump(pickleData, fb)
         fb.close()
 
+    def __getIndexPath(self):
+        index_path = os.path.join(self._topReleaseDir, 'index')
+        if not os.path.exists(index_path):
+            os.makedirs(index_path)
+        return index_path
+
     def _getEntryPickleFileName(self, entryId):
-        return os.path.join(self._topReleaseDir, 'index', entryId.lower() + '.index')
+        return os.path.join(self.__getIndexPath(), entryId.lower() + '.index')
 
     def _loadEntryPickle(self, entryId):
         if not entryId:
@@ -114,7 +120,7 @@ class ModuleBaseClass(object):
         return selected_annotator
 
     def __getAnnotatorPickleFileName(self, ann):
-        return os.path.join(self._topReleaseDir, 'index', ann + '.index')
+        return os.path.join(self.__getIndexPath(), ann + '.index')
 
     def _loadAnnotatorPickle(self, ann):
         pickleFile = self.__getAnnotatorPickleFileName(ann)
