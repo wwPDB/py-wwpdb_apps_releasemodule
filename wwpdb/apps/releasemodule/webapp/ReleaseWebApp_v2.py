@@ -1014,7 +1014,6 @@ class ReleaseWebAppWorker(object):
                 continue
             #
             for entry_id,idMap in annoPickle['entryDir'].items():
-                self.__lfh.write("entry_id=%s-\n" % entry_id)
                 found = False
                 for id_type in ( 'pdb_id', 'emdb_id' ):
                     if (not id_type in idMap) or (not idMap[id_type]):

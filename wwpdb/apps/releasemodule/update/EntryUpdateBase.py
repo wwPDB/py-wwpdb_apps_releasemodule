@@ -348,9 +348,9 @@ class EntryUpdateBase(UpdateBase):
 
     def _copyUpdatedFilesFromSessionToArchive(self):
         """ Update data archive based on updated files in session directory. Only five contentType ( 'model', 'structure-factors',
-            'nmr-restraints', 'nmr-chemical-shifts' ) files will be updated during release process
+            'nmr-restraints', 'nmr-chemical-shifts', 'nmr-data-str' ) files will be updated during release process
         """
-        for contentType in ( 'model', 'structure-factors', 'nmr-restraints', 'nmr-chemical-shifts'):
+        for contentType in ( 'model', 'structure-factors', 'nmr-restraints', 'nmr-chemical-shifts', 'nmr-data-str' ):
             if (not contentType in self._pickleData) or (not self._pickleData[contentType]) or \
                (not 'updated_archival_files' in self._pickleData[contentType]) or (not self._pickleData[contentType]['updated_archival_files']):
                 continue
@@ -399,18 +399,39 @@ class EntryUpdateBase(UpdateBase):
                                                nextArchiveFilePath, self._entryId)
                 #
                 if ('release' in self._pickleData[contentType]) and self._pickleData[contentType]['release']:
-                    latestMilestoneFilePath = self._findArchiveFileName(contentType+'-release', formatType, 'latest', '1')
-                    if latestMilestoneFilePath and os.access(latestMilestoneFilePath, os.F_OK) and filecmp.cmp(fn, latestMilestoneFilePath):
-                        continue
-                    #
-                    nextMilestoneFilePath = self._findArchiveFileName(contentType+'-release', formatType, 'next', '1')
-                    rtn_message = self._copyFileUtil(fn, nextMilestoneFilePath)
-                    if rtn_message == 'ok':
-                        self._insertAction('Copied ' + fn + ' to ' + nextMilestoneFilePath + '.')
-                        self._outPutFiles.append([ self._fileTypeMap[contentType][0] + ' milestone', nextMilestoneFilePath])
+                    if contentType != 'nmr-data-str':
+                        latestMilestoneFilePath = self._findArchiveFileName(contentType+'-release', formatType, 'latest', '1')
+                        if latestMilestoneFilePath and os.access(latestMilestoneFilePath, os.F_OK) and filecmp.cmp(fn, latestMilestoneFilePath):
+                            continue
+                        #
+                        nextMilestoneFilePath = self._findArchiveFileName(contentType+'-release', formatType, 'next', '1')
+                        rtn_message = self._copyFileUtil(fn, nextMilestoneFilePath)
+                        if rtn_message == 'ok':
+                            self._insertAction('Copied ' + fn + ' to ' + nextMilestoneFilePath + '.')
+                            self._outPutFiles.append([ self._fileTypeMap[contentType][0] + ' milestone', nextMilestoneFilePath])
+                        else:
+                            self._processCopyFileError(self._fileTypeMap[contentType][1], rtn_message, 'milestone ' + self._fileTypeMap[contentType][0], \
+                                                       fn, nextMilestoneFilePath, self._entryId)
+                        #
                     else:
-                        self._processCopyFileError(self._fileTypeMap[contentType][1], rtn_message, 'milestone ' + self._fileTypeMap[contentType][0], \
-                                                   fn, nextMilestoneFilePath, self._entryId)
+                        for nmrDataMilestoneType in ( ( '_nmr-data-str_P1.str', 'nmr-data-str', 'nmr-star' ), ( '_nmr-data-nef_P1.str', 'nmr-data-nef', 'nmr-star' ) ):
+                            fn = os.path.join(self._sessionPath, self._entryId + nmrDataMilestoneType[0])
+                            if not os.access(fn, os.F_OK):
+                                continue
+                            #
+                            latestMilestoneFilePath = self._findArchiveFileName(nmrDataMilestoneType[1]+'-release', nmrDataMilestoneType[2], 'latest', '1')
+                            if latestMilestoneFilePath and os.access(latestMilestoneFilePath, os.F_OK) and filecmp.cmp(fn, latestMilestoneFilePath):
+                                continue
+                            #
+                            nextMilestoneFilePath = self._findArchiveFileName(nmrDataMilestoneType[1]+'-release', nmrDataMilestoneType[2], 'next', '1')
+                            rtn_message = self._copyFileUtil(fn, nextMilestoneFilePath)
+                            if rtn_message == 'ok':
+                                self._insertAction('Copied ' + fn + ' to ' + nextMilestoneFilePath + '.')
+                                self._outPutFiles.append([ 'NMR DATA milestone', nextMilestoneFilePath])
+                            else:
+                                self._processCopyFileError('nmr_data', rtn_message, 'milestone NMR DATA', fn, nextMilestoneFilePath, self._entryId)
+                            #
+                        #
                     #
                 #
             #

@@ -68,6 +68,7 @@ class UpdateFormParser(object):
         itemMapping['status_em'] = 'status_code_em'
         itemMapping['status_mr'] = 'status_code_mr'
         itemMapping['status_cs'] = 'status_code_cs'
+        itemMapping['status_nmr_data'] = 'status_code_nmr_data'
         itemMapping['approval_type'] = 'approval_type'
         itemMapping['obsolete'] = 'obsolete_ids'
         itemMapping['supersede'] = 'supersede_ids'
@@ -118,7 +119,7 @@ class UpdateFormParser(object):
             has_SelectedOption = False
             has_ReleaseInfo = False
             check_flag = False
-            for ext in ( '', '_sf', '_em', '_mr', '_cs' ):
+            for ext in ( '', '_sf', '_em', '_mr', '_cs', '_nmr_data' ):
                 if ('status_code' + ext) in dataDict:
                     has_SelectedOption = True
                     if dataDict['status_code' + ext] == 'REL_added' or dataDict['status_code' + ext] == 'OBS_obsolete':
@@ -139,8 +140,8 @@ class UpdateFormParser(object):
                 dataDict['status_code'] = 'CITATIONUpdate'
             #
             if ('status_code' in dataDict) and (dataDict['status_code'] == 'CITATIONUpdate' or dataDict['status_code'] == 'EMHEADERUpdate'):
-                removeList = [ 'status_code_sf', 'status_code_mr', 'status_code_cs', 'directory', 'directory_sf', \
-                               'directory_mr', 'directory_cs', 'obsolete_ids', 'supersede_ids' ]
+                removeList = [ 'status_code_sf', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data', 'directory', 'directory_sf', \
+                               'directory_mr', 'directory_cs', 'directory_nmr_data', 'obsolete_ids', 'supersede_ids' ]
                 #
                 if dataDict['status_code'] == 'CITATIONUpdate':
                     removeList.append('status_code_em')
@@ -260,8 +261,8 @@ class UpdateFormParser(object):
             status_map = {}
             value_map = {}
             not_EM_type = False
-            #for status_type in ( 'status_code', 'status_code_sf', 'status_code_em', 'status_code_mr', 'status_code_cs'):
-            for status_type in ( 'status_code', 'status_code_sf', 'status_code_mr', 'status_code_cs'):
+            #for status_type in ( 'status_code', 'status_code_sf', 'status_code_em', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data' ):
+            for status_type in ( 'status_code', 'status_code_sf', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data' ):
                 if not status_type in dataDict:
                     continue
                 #
@@ -290,12 +291,14 @@ class UpdateFormParser(object):
 #                                   [ 'recvd_struct_fact',     'status_code_sf', 'SF file' ], \
 #                                   [ 'recvd_em_map',          'status_code_em', 'EM file' ], \
 #                                   [ 'recvd_nmr_constraints', 'status_code_mr', 'MR file' ], \
-#                                   [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ] ):
+#                                   [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ], \
+#                                   [ 'recvd_nmr_data',       'status_code_nmr_data', 'NMR DATA file' ] ):
 #                   removed checking EM consistency because of rare release/obsolete policy
                     for t_list in ( [ 'recvd_coordinates',     'status_code', 'Coord. file'], \
                                     [ 'recvd_struct_fact',     'status_code_sf', 'SF file' ], \
                                     [ 'recvd_nmr_constraints', 'status_code_mr', 'MR file' ], \
-                                    [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ] ):
+                                    [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ], \
+                                    [ 'recvd_nmr_data',       'status_code_nmr_data', 'NMR DATA file' ] ):
                         if not t_list[0] in self.__checkIdMap[dataDict['entry']]:
                             continue
                         #
@@ -324,9 +327,10 @@ class UpdateFormParser(object):
             else:
                 self.__errorContent += 'Entry ' + dataDict['entry'] + ' has inconsist release status:'
 #               for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'EM', 'status_code_em' ], \
-#                               [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ] ):
+#                               [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
 #               removed checking EM consistency because of rare release/obsolete policy
-                for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ] ):
+                for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'MR', 'status_code_mr' ], \
+                                [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
                     if not t_list[1] in dataDict:
                         continue
                     #

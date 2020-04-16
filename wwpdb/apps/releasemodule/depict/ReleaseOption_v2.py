@@ -172,7 +172,11 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
                  [ 'recvd_chemical_shifts', 'status_cs_', 'CS', 'status_code_cs',
                    [ [ 'REL_added',         'Release CS'    ],
                      [ 'REREL_modified',    'Re-release CS' ],
-                     [ 'OBS_obsolete',      'Obsolete CS'   ] ] ] ]
+                     [ 'OBS_obsolete',      'Obsolete CS'   ] ] ],
+                 [ 'recvd_nmr_data', 'status_nmr_data_', 'NMR DATA', 'status_code_nmr_data',
+                   [ [ 'REL_added',      'Release NMR DATA'    ],
+                     [ 'REREL_modified', 'Re-release NMR DATA' ],
+                     [ 'OBS_obsolete',   'Obsolete NMR DATA'   ] ] ] ]
     #
     text = ''
     pre_select_flag = False

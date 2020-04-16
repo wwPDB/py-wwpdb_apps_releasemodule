@@ -82,15 +82,14 @@ class UpdateUtil(EntryUpdateBase):
         fb.close()
 
     def __generateInputFile(self):
-        items = [ 'entry', 'pdbid', 'annotator', 'option', 'input_file', 'output_file', 'status_code', \
-                  'input_file_sf', 'output_file_sf', 'status_code_sf', 'input_file_mr', 'output_file_mr', \
-                  'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', 'status_code_em', \
-                  'approval_type', 'revdat_tokens', 'obsolete_ids',  'supersede_ids', 'da_status_code', \
-                  'da_status_code_em', 'wf_status_code', 'wf_status_code_em' ]
+        items = [ 'entry', 'pdbid', 'annotator', 'option', 'input_file', 'output_file', 'status_code', 'input_file_sf', 'output_file_sf', \
+                  'status_code_sf', 'input_file_mr', 'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', \
+                  'input_file_nmr_data', 'output_file_nmr_data', 'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids', \
+                  'supersede_ids', 'da_status_code', 'da_status_code_em', 'wf_status_code', 'wf_status_code_em' ]
         #
-        checking_items = [ 'status_code', 'input_file_sf', 'output_file_sf', 'status_code_sf', 'input_file_mr', \
-                           'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', \
-                           'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',  'supersede_ids' ]
+        checking_items = [ 'status_code', 'input_file_sf', 'output_file_sf', 'status_code_sf', 'input_file_mr', 'output_file_mr', \
+                           'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', 'input_file_nmr_data', 'output_file_nmr_data', \
+                           'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',  'supersede_ids' ]
         #
         self._removeFile(self.__inputFilePath)
         #

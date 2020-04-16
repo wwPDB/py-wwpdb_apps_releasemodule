@@ -54,9 +54,9 @@ class EntryUpdateProcess(EntryUpdateBase):
         self.__version_file_name_conversions = \
                ( ( '',  '.cif.gz',  'xyz',  '.cif.gz', 'no', 'model' ), ( '', '.xml.gz', 'xyz', '.xml.gz', 'no', 'model' ), \
                  ( '',  '-noatom.xml.gz', 'xyz-no-atom', '.xml.gz', 'no', 'model' ), ( '',  '-extatom.xml.gz', 'xyz-ext-atom', '.xml.gz', 'no', 'model' ), \
-                 ( 'pdb', '.ent', 'xyz', '.pdb.gz', 'yes', 'model' ), \
-                 ( '', '_cs.str', 'cs', '.str.gz', 'yes', 'nmr-chemical-shifts' ), ( '', '.mr', 'mr', '.mr.gz', 'yes', 'nmr-restraints' ), \
-                 ( '', '-sf.cif', 'sf', '.cif.gz', 'yes', 'structure-factors' ) )
+                 ( 'pdb', '.ent', 'xyz', '.pdb.gz', 'yes', 'model' ), ( '', '_cs.str', 'cs', '.str.gz', 'yes', 'nmr-chemical-shifts' ), \
+                 ( '', '.mr', 'mr', '.mr.gz', 'yes', 'nmr-restraints' ), ( '', '_nmr-data.str.gz', 'nmr-data', '.str.gz', 'no', 'nmr-data-str' ), \
+                 ( '', '_nmr-data.nef.gz', 'nmr-data', '.nef.gz', 'no', 'nmr-data-nef' ), ( '', '-sf.cif', 'sf', '.cif.gz', 'yes', 'structure-factors' ) )
         #
 
     def run(self):
@@ -191,6 +191,9 @@ class EntryUpdateProcess(EntryUpdateBase):
                 self.__releaseFlag = True
             #
             self._pickleData[typeList[3]] = dataDict
+            if typeList[3] == 'nmr-data-str':
+                self._pickleData['nmr-data-nef'] = dataDict
+            #
             self._insertFileStatus(typeList[5], True)
         #
         if ('emdb_id' in self._entryDir) and self._entryDir['emdb_id'] and ('emdb_release' in self._entryDir) and \

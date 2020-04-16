@@ -35,7 +35,7 @@ from wwpdb.io.file.mmCIFUtil                     import mmCIFUtil
 from wwpdb.apps.releasemodule.citation.FetchMP   import FetchMP
 from wwpdb.apps.releasemodule.citation.SearchMP  import SearchMP
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
-from wwpdb.apps.releasemodule.utils.StatusDbApi  import StatusDbApi
+from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.releasemodule.utils.Utility      import *
 
 class CitationFinder(object):

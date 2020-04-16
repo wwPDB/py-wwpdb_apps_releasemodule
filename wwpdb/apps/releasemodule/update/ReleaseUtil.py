@@ -24,6 +24,7 @@ __version__   = "V0.07"
 import os, sys, tarfile
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
+from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
 
 class ReleaseUtil(EntryUpdateBase):
     """ Class responsible for generating and checking release files
@@ -32,7 +33,8 @@ class ReleaseUtil(EntryUpdateBase):
         super(ReleaseUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
         #
         self.__pdbId = self._entryDir['pdb_id'].lower()
-        self.__dictRoot = self._cI.get('SITE_PDBX_DICT_PATH')
+        self.__dictRoot = os.path.abspath(self._cI.get('SITE_PDBX_DICT_PATH'))
+        self.__dictBase = self._cI.get('SITE_PDBX_DICTIONARY_NAME_DICT')['ARCHIVE_CURRENT']
         # 0        1              2                            3                         4                         5           6           7
         # version, cif_extension, current_internal_dictionary, target_public_dictionary, xml_convertor_dictionary, xml_prefix, xml_schema, xml_extension
         self.__CifXmlInfo = self.__readDictionaryInfo()
@@ -62,6 +64,7 @@ class ReleaseUtil(EntryUpdateBase):
         self.__releasingSfFile()
         self.__releasingMrFile()
         self.__releasingCsFile()
+        self.__releasingNefFile()
         if self._blockErrorFlag:
             if ('status_code_em' in self._pickleData) and self._pickleData['status_code_em']:
                 self._insertFileStatus('em', False)
@@ -136,13 +139,18 @@ class ReleaseUtil(EntryUpdateBase):
         if not self.__checkReleaseFlag('model'):
             return
         #
-        for cifxmlInfo in self.__CifXmlInfo:
+#       for cifxmlInfo in self.__CifXmlInfo:
 #           if (cifxmlInfo[0] == 'v5') and (not self._EMEntryFlag):
 #               continue
 #           # 
-            self.__releasingCIFFile(cifxmlInfo)
-            self.__releasingXMLFiles(cifxmlInfo)
+#           self.__releasingCIFFile(cifxmlInfo)
+#           self.__releasingXMLFiles(cifxmlInfo)
+#       #
+        cifxmlInfo = ( 'v5', '.cif', self.__dictBase + '.sdb', self.__dictBase + '.sdb', self.__dictBase + '.odb', 'pdbx-v50', 'pdbx-v50.xsd', \
+                     ( ( '.cif.xml', '.xml' ), ( '.cif.xml-noatom', '-noatom.xml' ), ( '.cif.xml-extatom', '-extatom.xml' ) ) )
         #
+        self.__releasingCIFFile(cifxmlInfo)
+        self.__releasingXMLFiles(cifxmlInfo)
         self.__runMiscChecking()
         #
         if self._entryDir['status_code'] == 'RELOAD':
@@ -294,7 +302,7 @@ class ReleaseUtil(EntryUpdateBase):
         self.__checkingExperimentalDataFile('CheckSFFile', 'sf', self._pickleData['structure-factors']['session_file'])
         if self._entryDir['status_code_sf'] == 'REL':
             dList = self._pickleData['structure-factors']['session_file'].split('/')
-            self.__checkCIFFile('sf', dList[-1], self._cI.get('SITE_PDBX_V4_DICT_NAME') + '.sdb', '', True)
+            self.__checkCIFFile('sf', dList[-1], self.__dictBase + '.sdb', '', True)
         #
 
     def __releasingMrFile(self):
@@ -318,6 +326,33 @@ class ReleaseUtil(EntryUpdateBase):
         #
         self._insertReleseFile('nmr-chemical-shifts', os.path.join(self._sessionPath, strFile), strFile, '', False)
         self.__checkingExperimentalDataFile('CheckCSFile', 'cs', self._pickleData['nmr-chemical-shifts']['session_file'])
+
+    def __releasingNefFile(self):
+        if not self.__checkReleaseFlag('nmr-data-str'):
+            return
+        #
+        internalStrFile = self._entryId + '_nmr-data-str_P1.str'
+        internalNefFile = self._entryId + '_nmr-data-nef_P1.str'
+        externalStrFile = self.__pdbId + '_nmr-data.str'
+        externalNefFile = self.__pdbId + '_nmr-data.nef'
+        for fileName in ( internalStrFile, internalNefFile, externalStrFile, externalNefFile ):
+            self._removeFile(os.path.join(self._sessionPath, fileName))
+        #
+        generator = NmrDataGenerator(siteId=self._siteId, workingDirPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
+        generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile), \
+                                  os.path.join(self._sessionPath, internalNefFile))
+        #
+        if not self.__verifyGeneratingFile('nmr_data', internalStrFile):
+            return
+        #
+        self._copyFileUtil(os.path.join(self._sessionPath, internalStrFile), os.path.join(self._sessionPath, externalStrFile))
+        self._insertReleseFile('nmr-data-str', os.path.join(self._sessionPath, externalStrFile), externalStrFile, '', True)
+        #
+        if not self.__verifyGeneratingFile('nmr_data', internalNefFile):
+            return
+        #
+        self._copyFileUtil(os.path.join(self._sessionPath, internalNefFile), os.path.join(self._sessionPath, externalNefFile))
+        self._insertReleseFile('nmr-data-nef', os.path.join(self._sessionPath, externalNefFile), externalNefFile, '', True)
 
     def __checkReleaseFlag(self, contentType):
         if (not contentType in self._pickleData) or (not self._pickleData[contentType]) or \

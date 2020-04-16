@@ -66,6 +66,7 @@ class ContentDbApi(object):
                             "date_hold_struct_fact,date_hold_nmr_constraints,title,recvd_coordinates,recvd_struct_fact,recvd_nmr_constraints," +
                             "recvd_chemical_shifts,date_hold_chemical_shifts,status_code_sf,status_code_mr,status_code_cs,author_approval_type," +
                             "initial_deposition_date,exp_method,author_list,date_of_RCSB_release,date_of_sf_release,date_of_mr_release," +
+                            "status_code_nmr_data,recvd_nmr_data,date_nmr_data,date_hold_nmr_data,dep_release_code_nmr_data,date_of_nmr_data_release," +
                             "date_of_cs_release from rcsb_status where structure_id in ( '%s' ) order by structure_id",
       "SELECT_EM_INFO" : "select structure_id, current_status status_code_em, map_release_date date_of_EM_release, last_update last_EM_release_date, " +
                          "title title_emdb, author_list author_list_emdb from em_admin where structure_id in ( '%s' ) order by structure_id",

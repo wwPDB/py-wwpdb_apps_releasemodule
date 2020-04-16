@@ -332,7 +332,8 @@ class DepictBase(ModuleBaseClass):
         exp_list = [ [ 'recvd_struct_fact',     'status_code_sf', 'SF' ],
                      [ 'recvd_em_map',          'status_code_em', 'EM' ],
                      [ 'recvd_nmr_constraints', 'status_code_mr', 'MR' ],
-                     [ 'recvd_chemical_shifts', 'status_code_cs', 'CS' ] ]
+                     [ 'recvd_chemical_shifts', 'status_code_cs', 'CS' ],
+                     [ 'recvd_nmr_data',  'status_code_nmr_data', 'NMR DATA' ] ]
         #
         text = ''
         for t_list in exp_list:

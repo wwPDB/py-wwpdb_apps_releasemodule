@@ -24,7 +24,7 @@ __version__   = "V0.07"
 import os, sys
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
-#from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
+from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
 
 class ReleaseDpUtil(EntryUpdateBase):
     """ Class responsible for generating and checking release files
@@ -307,37 +307,32 @@ class ReleaseDpUtil(EntryUpdateBase):
         self._insertReleseFile("nmr-chemical-shifts", os.path.join(self._sessionPath, strFile), strFile, "", False)
         self.__checkingExperimentalDataFile("CheckCSFile", "cs", self._pickleData["nmr-chemical-shifts"]["session_file"])
 
-#   def __releasingNefFile(self):
-#       if not self.__checkReleaseFlag('nmr-data-str'):
-#           return
-#       #
-#       internalStrFile = self._entryId + '_nmr-data-str_P1.str'
-#       self._removeFile(os.path.join(self._sessionPath, internalStrFile))
-#       #
-#       internalNefFile = self._entryId + '_nmr-data-nef_P1.str'
-#       self._removeFile(os.path.join(self._sessionPath, internalNefFile))
-#       #
-#       externalStrFile = self.__pdbId + '_nmr-data.str'
-#       self._removeFile(os.path.join(self._sessionPath, externalStrFile))
-#       #
-#       externalNefFile = self.__pdbId + '_nmr-data.nef'
-#       self._removeFile(os.path.join(self._sessionPath, externalNefFile))
-#       #
-#       generator = NmrDataGenerator(siteId=self._siteId, workingDirPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
-#       generator.getNmrDataFiles(self._pickleData['nmr-data-str']['session_file'], self.__pdbId, os.path.join(self._sessionPath, internalStrFile), \
-#                                 os.path.join(self._sessionPath, internalNefFile))
-#       #
-#       if not self.__verifyGeneratingFile('nmr_data', internalStrFile):
-#           return
-#       #
-#       self._copyFileUtil(os.path.join(self._sessionPath, internalStrFile), os.path.join(self._sessionPath, externalStrFile))
-#       self._insertReleseFile('nmr-data-str', os.path.join(self._sessionPath, externalStrFile), externalStrFile, '', True)
-#       #
-#       if not self.__verifyGeneratingFile('nmr_data', internalNefFile):
-#           return
-#       #
-#       self._copyFileUtil(os.path.join(self._sessionPath, internalNefFile), os.path.join(self._sessionPath, externalNefFile))
-#       self._insertReleseFile('nmr-data-nef', os.path.join(self._sessionPath, externalNefFile), externalNefFile, '', True)
+    def __releasingNefFile(self):
+        if not self.__checkReleaseFlag('nmr-data-str'):
+            return
+        #
+        internalStrFile = self._entryId + '_nmr-data-str_P1.str'
+        internalNefFile = self._entryId + '_nmr-data-nef_P1.str'
+        externalStrFile = self.__pdbId + '_nmr-data.str'
+        externalNefFile = self.__pdbId + '_nmr-data.nef'
+        for fileName in ( internalStrFile, internalNefFile, externalStrFile, externalNefFile ):
+            self._removeFile(os.path.join(self._sessionPath, fileName))
+        #
+        generator = NmrDataGenerator(siteId=self._siteId, workingDirPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
+        generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile), \
+                                  os.path.join(self._sessionPath, internalNefFile))
+        #
+        if not self.__verifyGeneratingFile('nmr_data', internalStrFile):
+            return
+        #
+        self._copyFileUtil(os.path.join(self._sessionPath, internalStrFile), os.path.join(self._sessionPath, externalStrFile))
+        self._insertReleseFile('nmr-data-str', os.path.join(self._sessionPath, externalStrFile), externalStrFile, '', True)
+        #
+        if not self.__verifyGeneratingFile('nmr_data', internalNefFile):
+            return
+        #
+        self._copyFileUtil(os.path.join(self._sessionPath, internalNefFile), os.path.join(self._sessionPath, externalNefFile))
+        self._insertReleseFile('nmr-data-nef', os.path.join(self._sessionPath, externalNefFile), externalNefFile, '', True)
 
     def __checkReleaseFlag(self, contentType):
         if (not contentType in self._pickleData) or (not self._pickleData[contentType]) or \

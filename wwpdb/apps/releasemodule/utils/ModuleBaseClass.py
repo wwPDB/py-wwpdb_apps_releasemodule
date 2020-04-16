@@ -51,7 +51,8 @@ class ModuleBaseClass(object):
                                [ '_sf_P1.cif',        '_sf', 'Structural Factor', 'structure-factors',   'pdbx',     'sf'   ],
                                [ '_em-volume_P1.map', '_em', 'EM Header/Map',     'em-volume',           'map',      'em'   ],
                                [ '_mr_P1.mr',         '_mr', 'NMR restraints',    'nmr-restraints',      'pdb-mr',   'mr'   ],
-                               [ '_cs_P1.cif',        '_cs', 'Chemical Shifts',   'nmr-chemical-shifts', 'pdbx',     'cs'   ] ]
+                               [ '_cs_P1.cif',        '_cs', 'Chemical Shifts',   'nmr-chemical-shifts', 'pdbx',     'cs'   ],
+                               [ '_nmr-data-str_P1.cif', '_nmr_data', 'NMR DATA', 'nmr-data-str',        'pdbx', 'nmr_data' ] ]
         #
         t = TimeUtil()
         self._rel_date = t.NextWednesday()
@@ -199,7 +200,10 @@ class ModuleBaseClass(object):
                        [ '_mr', 'OBS_obsolete',    'Obsolete MR'                 ],
                        [ '_cs', 'REL_added',       'Release CS'                  ],
                        [ '_cs', 'REREL_modified',  'Re-release CS'               ],
-                       [ '_cs', 'OBS_obsolete',    'Obsolete CS'                 ] ]
+                       [ '_cs', 'OBS_obsolete',    'Obsolete CS'                 ],
+                       [ '_nmr_data', 'REL_added',      'Release NMR DATA'       ],
+                       [ '_nmr_data', 'REREL_modified', 'Re-release NMR DATA'    ],
+                       [ '_nmr_data', 'OBS_obsolete',   'Obsolete NMR DATA'      ] ]
         #
         for olist in optionList:
             self.__selectOptionMap[olist[1] + olist[0]] = olist[2]
