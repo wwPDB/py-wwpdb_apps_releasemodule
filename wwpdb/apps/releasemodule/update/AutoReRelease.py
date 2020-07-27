@@ -26,12 +26,14 @@ except ImportError:
     import pickle as pickle
 
 import operator, os, shutil, string, sys
+import logging
 
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.apps.releasemodule.update.MultiUpdateProcess import MultiUpdateProcess
 from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
 from wwpdb.io.locator.PathInfo import PathInfo
 from wwpdb.utils.session.WebRequest import InputRequest
+
 
 class AutoReRelease(object):
     def __init__(self, siteId=None, verbose=False, log=sys.stderr):
@@ -289,5 +291,13 @@ class AutoReRelease(object):
         #
 
 if __name__ == '__main__':
+    # Create logger
+    logger = logging.getLogger()
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter('[%(levelname)s] [%(module)s.%(funcName)s] %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    logger.setLevel(logging.INFO)
+
     releaseUtil = AutoReRelease(siteId=os.environ["WWPDB_SITE_ID"], verbose = True, log = sys.stderr)
     releaseUtil.ReleaseProcess(sys.argv[1])
