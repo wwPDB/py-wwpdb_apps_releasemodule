@@ -262,7 +262,7 @@ class EmReleaseUtil(EntryUpdateBase):
                 #
                 for part in self.__partD[contentType]:
                     partExt = ''
-                    if len(self.__partD[contentType]) > 1 or typeList[2] == 'masks':
+                    if len(self.__partD[contentType]) > 1 or typeList[2] in ['masks', 'other', 'fsc', 'images']:
                         partExt = '_' + part
                     #
                     sourcePath = self._findArchiveFileName(typeList[0], fType, 'latest', part)
