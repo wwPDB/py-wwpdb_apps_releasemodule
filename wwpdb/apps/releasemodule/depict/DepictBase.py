@@ -166,7 +166,7 @@ class DepictBase(ModuleBaseClass):
 
     def _getReleaseOption(self, dataDict, selectedData, citationFlag):
         return ReleaseOption(dataDict, selectedData, citationFlag, self._newReleaseFlag, self.__reObsoleteFlag, \
-                             self.__newReleaseEmFlag, self.__reObsoleteEmFlag)
+                             self.__newReleaseEmFlag, self.__reObsoleteEmFlag, self._rel_date)
 
     def _getRevisionInfo(self, structure_id, count, selectedData, cols, begin_comment, end_comment, style, display):
         return ''

@@ -252,9 +252,9 @@ class ReleaseDpUtil(EntryUpdateBase):
             self._dpUtilityApi(operator="annot-get-biol-pdb-file", inputFileName=self._pickleData["model"]["session_file"], \
                                 outputFileNameTupList=outputList, id_value=self.__pdbId)
         #
+        self._extractTarFile(tarFile)
         self._processLogError(fileType, "", os.path.join(self._sessionPath, logFile))
         self._processLogError(fileType, program, os.path.join(self._sessionPath, clogFile))
-        self._extractTarFile(tarFile)
         #
         if not os.access(os.path.join(self._sessionPath, indexFile), os.F_OK):
             self._insertEntryMessage(errType=fileType, errMessage="Generating bio-assembly file(s) failed.", uniqueFlag=True) 
@@ -401,9 +401,9 @@ class ReleaseDpUtil(EntryUpdateBase):
         self._dpUtilityApi(operator="annot-check-pdb-file", inputFileName=os.path.join(self._sessionPath, pdbFile), \
                             outputFileNameTupList=outputList, option=options, id_value=self.__pdbId)
         #
+        self._extractTarFile(tarFile)
         self._processLogError("pdb", "", os.path.join(self._sessionPath, logFile))
         self._processLogError("pdb", "CheckPDBFile", os.path.join(self._sessionPath, clogFile))
-        self._extractTarFile(tarFile)
         #
         self.__processCheckReoprt("pdb", reportFile, True, False)
 

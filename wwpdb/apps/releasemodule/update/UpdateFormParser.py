@@ -72,6 +72,7 @@ class UpdateFormParser(object):
         itemMapping['approval_type'] = 'approval_type'
         itemMapping['obsolete'] = 'obsolete_ids'
         itemMapping['supersede'] = 'supersede_ids'
+        itemMapping['obspr_details'] = 'obspr_details'
         #
         statusMapping = {}
         statusMapping['status_code'] = 'da_status_code'
@@ -141,7 +142,7 @@ class UpdateFormParser(object):
             #
             if ('status_code' in dataDict) and (dataDict['status_code'] == 'CITATIONUpdate' or dataDict['status_code'] == 'EMHEADERUpdate'):
                 removeList = [ 'status_code_sf', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data', 'directory', 'directory_sf', \
-                               'directory_mr', 'directory_cs', 'directory_nmr_data', 'obsolete_ids', 'supersede_ids' ]
+                               'directory_mr', 'directory_cs', 'directory_nmr_data', 'obsolete_ids', 'supersede_ids', 'obspr_details' ]
                 #
                 if dataDict['status_code'] == 'CITATIONUpdate':
                     removeList.append('status_code_em')

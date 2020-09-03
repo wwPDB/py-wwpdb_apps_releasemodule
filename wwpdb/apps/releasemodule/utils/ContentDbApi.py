@@ -72,7 +72,7 @@ class ContentDbApi(object):
                          "title title_emdb, author_list author_list_emdb from em_admin where structure_id in ( '%s' ) order by structure_id",
       "SELECT_REQUESTED_ACCESSION_TYPES" : "select structure_id, requested_accession_types from pdbx_depui_entry_details " +
                          "where structure_id in ( '%s' ) order by structure_id",
-      "SELECT_PDBX_OBS_SPR_INFO" : "select structure_id,id,pdb_id,date,relace_pdb_id replace_pdb_id from pdbx_database_PDB_obs_spr where structure_id " +
+      "SELECT_PDBX_OBS_SPR_INFO" : "select structure_id,id,pdb_id,date,details,relace_pdb_id replace_pdb_id from pdbx_database_PDB_obs_spr where structure_id " +
                                    "in ( '%s' ) order by structure_id",
       "SELECT_DEPUI_OBS_SPR_INFO" : "select structure_id,replace_pdb_id from pdbx_depui_entry_details " +
                                     "where structure_id in ( '%s' ) order by structure_id",

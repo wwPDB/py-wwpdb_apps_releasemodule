@@ -116,7 +116,7 @@ class CombineDbApi(object):
         rows = self.__ContentDB.getCitationAuthorList(entry_id)
         if rows:
             for row in rows:
-                if not 'name' in row:
+                if 'name' not in row:
                     continue
                 #
                 if reformat:
@@ -293,7 +293,7 @@ class CombineDbApi(object):
         return_id_list = []
         return_map = {}
         for myD in dep_info_list:
-            if (not 'dep_set_id' in myD) or (not myD['dep_set_id']):
+            if ('dep_set_id' not in myD) or (not myD['dep_set_id']):
                 continue
             #
             if myD['dep_set_id'] in return_id_list:
@@ -364,7 +364,7 @@ class CombineDbApi(object):
                             myD[item] = em_info_map[myD['structure_id']][item]
                         #
                     #
-                    if (not 'pdb_id' in myD) or (not myD['pdb_id']):
+                    if ('pdb_id' not in myD) or (not myD['pdb_id']):
                         for item in ( 'title_emdb', 'author_list_emdb' ):
                             if (item in em_info_map[myD['structure_id']]) and em_info_map[myD['structure_id']][item]:
                                 myD[item] = em_info_map[myD['structure_id']][item]
@@ -398,7 +398,7 @@ class CombineDbApi(object):
         requestedInfoList = self.__ContentDB.getRequestedInfo(id_string)
         if emInfoList:
             for myD in emInfoList:
-                if (not 'structure_id' in myD) or (not myD['structure_id']):
+                if ('structure_id' not in myD) or (not myD['structure_id']):
                     continue
                 #
                 em_info_map[myD['structure_id']] = myD
@@ -406,7 +406,7 @@ class CombineDbApi(object):
         #
         if requestedInfoList:
             for myD in requestedInfoList:
-                if (not 'structure_id' in myD) or (not myD['structure_id']) or (not 'requested_accession_types' in myD) or \
+                if ('structure_id' not in myD) or (not myD['structure_id']) or ('requested_accession_types' not in myD) or \
                    (myD['requested_accession_types'].upper().find("EMDB") == -1):
                     continue
                 #
@@ -474,31 +474,50 @@ class CombineDbApi(object):
         #
         retMap = {}
         for obsD in obsprList:
-            if (not 'pdb_id' in obsD) or (not obsD['pdb_id']) or (not 'structure_id' in obsD) or (not obsD['structure_id']) or \
-               (not 'replace_pdb_id' in obsD) or (not obsD['replace_pdb_id']):
+#           if ('pdb_id' not in obsD) or (not obsD['pdb_id']) or ('structure_id' not in obsD) or (not obsD['structure_id']) or \
+#              ('replace_pdb_id' not in obsD) or (not obsD['replace_pdb_id']):
+#               continue
+#           #
+            if ('structure_id' not in obsD) or (not obsD['structure_id']) or (obsD['structure_id'] not in pdbIdMap):
                 continue
             #
-            if not obsD['structure_id'] in pdbIdMap:
-                continue
+            pdb_id = ''
+            if ('pdb_id' in obsD) and obsD['pdb_id']:
+                pdb_id = str(obsD['pdb_id']).strip().upper()
+                if pdb_id.upper() == 'NONE':
+                    pdb_id = ''
+                #
             #
-            pdb_id = str(obsD['pdb_id']).strip().upper()
-            if pdb_id.upper() == 'NONE':
-                pdb_id = ''
-            replace_pdb_id = str(obsD['replace_pdb_id']).strip().upper()
-            if (not pdb_id) or (not replace_pdb_id):
+            replace_pdb_id = ''
+            if ('replace_pdb_id' in obsD) and obsD['replace_pdb_id']:
+                replace_pdb_id = str(obsD['replace_pdb_id']).strip().upper()
+            #
+            details = ''
+            if ('details' in obsD) and obsD['details']:
+                details = str(obsD['details']).strip()
+            #
+            if ((not pdb_id) or (not replace_pdb_id)) and (not details):
                 continue
             #
             if pdb_id != pdbIdMap[obsD['structure_id']] and replace_pdb_id != pdbIdMap[obsD['structure_id']]:
                 continue
             #
             myD = {}
-            myD['pdb_id'] = pdb_id
-            myD['replace_pdb_id'] = replace_pdb_id
-            for item in ( 'id', 'date' ):
-                if (not item in obsD) or (not obsD[item]):
+            if pdb_id:
+                myD['pdb_id'] = pdb_id
+            #
+            if replace_pdb_id:
+                myD['replace_pdb_id'] = replace_pdb_id
+            #
+            for item in ( 'id', 'date', 'details' ):
+                if (item not in obsD) or (not obsD[item]):
                     continue
                 #
-                myD[item] = str(obsD[item]).replace('00:00:00', '').strip().upper()
+                if item == 'details':
+                    myD[item] = str(obsD[item]).strip()
+                else:
+                    myD[item] = str(obsD[item]).replace('00:00:00', '').strip().upper()
+                #
             #
             if obsD['structure_id'] in retMap:
                 retMap[obsD['structure_id']].append(myD)
@@ -515,10 +534,10 @@ class CombineDbApi(object):
         #
         retMap = {}
         for obsD in obsprList:
-            if (not 'structure_id' in obsD) or (not obsD['structure_id']) or (not 'replace_pdb_id' in obsD) or (not obsD['replace_pdb_id']):
+            if ('structure_id' not in obsD) or (not obsD['structure_id']) or ('replace_pdb_id' not in obsD) or (not obsD['replace_pdb_id']):
                 continue
             #
-            if not obsD['structure_id'] in pdbIdMap:
+            if obsD['structure_id'] not in pdbIdMap:
                 continue
             #
             pdb_id = pdbIdMap[obsD['structure_id']]
