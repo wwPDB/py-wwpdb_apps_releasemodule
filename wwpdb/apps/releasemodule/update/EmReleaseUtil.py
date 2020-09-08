@@ -262,7 +262,13 @@ class EmReleaseUtil(EntryUpdateBase):
                 #
                 for part in self.__partD[contentType]:
                     partExt = ''
-                    if len(self.__partD[contentType]) > 1 or typeList[2] in ['masks', 'other', 'fsc', 'images']:
+                    if typeList[2] in ['fsc', 'images']:
+                        # These files can be present with multiple but the first is considered the primary of it's type
+                        # The first is of the format name.format
+                        # All subsequent are of the format name_partnumber.format
+                        if part > 1:
+                            partExt = '_' + part
+                    elif len(self.__partD[contentType]) > 1 or typeList[2] in ['masks', 'other']:
                         partExt = '_' + part
                     #
                     sourcePath = self._findArchiveFileName(typeList[0], fType, 'latest', part)
