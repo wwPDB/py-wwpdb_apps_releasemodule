@@ -43,7 +43,7 @@ class EntryUpdateProcess(EntryUpdateBase):
         self.__EmEntryFlag = False
         self.__GenEmXmlHeaderFlag = False
         self.__EmXmlHeaderOnlyFlag = False
-        self.__releaseDirectory = []
+        self.__releaseDirectory = {}
         # tuple[0]: old prefix
         # tuple[1]: old suffix
         # tuple[2]: new file type
@@ -72,9 +72,10 @@ class EntryUpdateProcess(EntryUpdateBase):
             emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
             emUtil.validateXml()
         #
+        emMapTypeList = []
         if self.__updateFlag:
             updateUtil = UpdateUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
-            updateUtil.run()
+            emMapTypeList = updateUtil.run()
         #
         if self.__releaseFlag:
             if self._processing_site == "PDBE":
@@ -86,7 +87,7 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         if self.__EmEntryFlag:
             emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
-            emUtil.run(self.__GenEmXmlHeaderFlag, self.__EmXmlHeaderOnlyFlag)
+            emUtil.run(emMapTypeList, self.__GenEmXmlHeaderFlag, self.__EmXmlHeaderOnlyFlag)
         #
         self._loadLocalPickle()
         #
@@ -236,7 +237,7 @@ class EntryUpdateProcess(EntryUpdateBase):
             if typeList[3] == 'em-volume':
                 for_release_dir = 'emd'
                 if emdbId:
-                    entry_dir = emdbId + '.new'
+                    entry_dir = emdbId
                 else:
                     self._insertEntryMessage(errType=typeList[5], errMessage='No EMDB ID found for EM entry ' + self._entryId + '.', uniqueFlag=True)
                 #
@@ -249,7 +250,7 @@ class EntryUpdateProcess(EntryUpdateBase):
                     #
                 #
                 if pdbId:
-                    entry_dir = pdbId + '.new'
+                    entry_dir = pdbId
                 else:
                     self._insertEntryMessage(errType=typeList[5], errMessage='No PDB ID found for entry ' + self._entryId + '.', uniqueFlag=True)
                 #
@@ -258,13 +259,14 @@ class EntryUpdateProcess(EntryUpdateBase):
                 continue
             #
             for fileList in self._pickleData[typeList[3]]['release_file']:
-                targetPath = os.path.join(self._topReleaseDir, for_release_dir, entry_dir)
+                releasePath = os.path.join(self._topReleaseDir, for_release_dir, entry_dir)
+                targetPath = os.path.join(self._sessionPath, entry_dir + ".tmp_dir")
                 topTargetPath = targetPath
-                if not targetPath in self.__releaseDirectory:
-                    self.__releaseDirectory.append(targetPath)
+                if releasePath not in self.__releaseDirectory:
+                    self.__releaseDirectory[releasePath] = targetPath
                 #
                 if fileList[2]:
-                    targetPath = os.path.join(self._topReleaseDir, for_release_dir, entry_dir, fileList[2])
+                    targetPath = os.path.join(self._sessionPath, entry_dir + ".tmp_dir", fileList[2])
                 #
                 self.__make_directory(targetPath)
                 if not os.access(os.path.join(topTargetPath, self._entryId + '.summary'), os.F_OK):
@@ -298,20 +300,22 @@ class EntryUpdateProcess(EntryUpdateBase):
             #
         #
         if self._blockErrorFlag:
+            self._removeExistingForReleaseDirectories()
             for filePath in self._outPutFiles:
                 self._insertAction('remove ' + filePath)
                 self._removeFile(filePath)
-            for dirPath in self.__releaseDirectory:
+            #
+            for relPath,dirPath in self.__releaseDirectory.items():
                 self._removeDirectory(dirPath)
             #
         else:
             self._removeExistingForReleaseDirectories()
-            for dirPath in self.__releaseDirectory:
+            for relPath,dirPath in self.__releaseDirectory.items():
                 if pdbId and os.access(os.path.join(dirPath, pdbId + '.cif.gz'),  os.F_OK):
                     #
                     # Copying for_release_beta directory
                     #
-                    betaDirPath = dirPath.replace(self._topReleaseDir, self._topReleaseBetaDir).replace('.new', '') 
+                    betaDirPath = relPath.replace(self._topReleaseDir, self._topReleaseBetaDir)
                     self._insertAction('Copied ' + dirPath + ' to ' + betaDirPath)
                     shutil.copytree(dirPath, betaDirPath)
                     #
@@ -392,8 +396,9 @@ class EntryUpdateProcess(EntryUpdateBase):
                         #
                     #
                 #
-                self._insertAction('Renamed ' + dirPath + ' to ' + dirPath.replace('.new', ''))
-                os.rename(dirPath, dirPath.replace('.new', ''))
+                self._insertAction('Copied ' + dirPath + ' to ' + relPath)
+                shutil.copytree(dirPath, relPath)
+                self._removeDirectory(dirPath)
             #
         #
 

@@ -46,15 +46,16 @@ class UpdateUtil(EntryUpdateBase):
         self.__pubmedInfo = {}
 
     def run(self):
+        emMapTypeList = []
         self._loadLocalPickle()
         if self._blockErrorFlag:
-            return
+            return emMapTypeList
         #
         self.__initializeFileName()
         self.__readPubmedInfo()
         self.__generateInputFile()
         self.__runContentUpdate()
-        self.__readOutputFile()
+        emMapTypeList = self.__readOutputFile()
         if self._blockErrorFlag:
             for typeList in self._fileTypeList:
                 if (not ('status_code' + typeList[1]) in self._pickleData) or (not self._pickleData['status_code' + typeList[1]]):
@@ -64,6 +65,8 @@ class UpdateUtil(EntryUpdateBase):
             #
         #
         self._dumpLocalPickle()
+        #
+        return emMapTypeList
 
     def __initializeFileName(self):
         self.__inputfile = 'inputfile_' + self._entryId + '.cif'
@@ -85,11 +88,11 @@ class UpdateUtil(EntryUpdateBase):
         items = [ 'entry', 'pdbid', 'annotator', 'option', 'input_file', 'output_file', 'status_code', 'input_file_sf', 'output_file_sf', \
                   'status_code_sf', 'input_file_mr', 'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', \
                   'input_file_nmr_data', 'output_file_nmr_data', 'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids', \
-                  'supersede_ids', 'da_status_code', 'da_status_code_em', 'wf_status_code', 'wf_status_code_em' ]
+                  'supersede_ids', 'obspr_details', 'da_status_code', 'da_status_code_em', 'wf_status_code', 'wf_status_code_em' ]
         #
         checking_items = [ 'status_code', 'input_file_sf', 'output_file_sf', 'status_code_sf', 'input_file_mr', 'output_file_mr', \
                            'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', 'input_file_nmr_data', 'output_file_nmr_data', \
-                           'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',  'supersede_ids' ]
+                           'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',  'supersede_ids', 'obspr_details' ]
         #
         self._removeFile(self.__inputFilePath)
         #
@@ -184,9 +187,9 @@ class UpdateUtil(EntryUpdateBase):
                                option="-archivepath " + os.path.join(self._cI.get("SITE_ARCHIVE_STORAGE_PATH"), "archive"), \
                                id_value=self._entryId, id_name="dep_id")
             #
+            self._extractTarFile(tarFile)
             self._processLogError("", "", os.path.join(self._sessionPath, self.__logfile))
             self._processLogError("", "ReleaseUpdate", os.path.join(self._sessionPath, self.__clogfile))
-            self._extractTarFile(tarFile)
         else:
             self._GetAndRunCmd('', '${BINPATH}', 'ReleaseUpdate', self.__inputfile, self.__outputfile, self.__logfile, self.__clogfile, \
                                ' -archivepath ' + os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive') + ' ')
@@ -269,9 +272,10 @@ class UpdateUtil(EntryUpdateBase):
         return cat
 
     def __readOutputFile(self):
+        emMapTypeList = []
         outputfile = os.path.join(self._sessionPath, self.__outputfile)
         if not os.access(outputfile, os.F_OK):
-            return
+            return emMapTypeList
         #
         cifObj = mmCIFUtil(filePath=outputfile)
         for typeList in ( ( 'error', 'error_message' ), ( 'warning', 'warning_message' ) ):
@@ -307,3 +311,12 @@ class UpdateUtil(EntryUpdateBase):
                 #
             #
         #
+        emMapFileTypeList = cifObj.GetValue('em_map_file_type')
+        if emMapFileTypeList:
+            for typeDict in emMapFileTypeList:
+                if ('type' in typeDict) and typeDict['type']:
+                    emMapTypeList.append(typeDict['type'])
+                #
+            #
+        #
+        return emMapTypeList

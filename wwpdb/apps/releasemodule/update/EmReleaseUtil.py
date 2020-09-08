@@ -39,13 +39,13 @@ class EmReleaseUtil(EntryUpdateBase):
     def __init__(self, reqObj=None, entryDir=None, verbose=False, log=sys.stderr):
         super(EmReleaseUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
         #
-        self.__additionalTypeList = [ [ 'em-mask-volume',       '_msk',        'masks',            False ],
-                                      [ 'em-additional-volume', '_additional', 'other',            True  ],
-                                      [ 'em-half-volume',       '_half_map',   'other',            True  ],
-                                      [ 'fsc',                  '_fsc',        'fsc',              False ],
-                                      [ 'img-emdb',             '',            'images',           False ],
-                                      [ 'layer-lines',          '_ll',         'layerLines',       True  ],
-                                      [ 'structure-factors',    '_sf',         'structureFactors', True  ] ]
+        self.__additionalTypeList = [ [ 'em-mask-volume',       '_msk',        'masks',            False, True,  True  ],
+                                      [ 'em-additional-volume', '_additional', 'other',            True,  True,  True  ],
+                                      [ 'em-half-volume',       '_half_map',   'other',            True,  True,  True  ],
+                                      [ 'fsc',                  '_fsc',        'fsc',              False, False, True  ],
+                                      [ 'img-emdb',             '',            'images',           False, False, True  ],
+                                      [ 'layer-lines',          '_ll',         'layerLines',       True,  False, False ],
+                                      [ 'structure-factors',    '_sf',         'structureFactors', True,  False, False ] ]
         #
         self.__embdId = self._entryDir['emdb_id'].replace('-', '_').lower()
         self.__contentD = {}
@@ -53,7 +53,7 @@ class EmReleaseUtil(EntryUpdateBase):
         self.__fileExtContentTypeD = {}
         self.__partD = {}
 
-    def run(self, GenEmXmlHeaderFlag, EmXmlHeaderOnly):
+    def run(self, emMapTypeList, GenEmXmlHeaderFlag, EmXmlHeaderOnly):
         self._loadLocalPickle()
         if self._blockErrorFlag or self._blockEmErrorFlag:
             return
@@ -62,7 +62,7 @@ class EmReleaseUtil(EntryUpdateBase):
             self.__generateEMapHeader()
         #
         if (not EmXmlHeaderOnly) and (not self._blockEmErrorFlag):
-            self.__getFileContentDictionary()
+            self.__getFileContentDictionary(emMapTypeList)
             mapFile = self._findArchiveFileName('em-volume', 'map', 'latest', '1')
             if os.access(mapFile, os.F_OK):   
                 self._insertReleseFile('em-volume', mapFile, self.__embdId + '.map', 'map', True)
@@ -81,9 +81,14 @@ class EmReleaseUtil(EntryUpdateBase):
         #
         self._dumpLocalPickle()
 
-    def __getFileContentDictionary(self):
+    def __getFileContentDictionary(self, emMapTypeList):
         ciD = ConfigInfoData(siteId=self._siteId, verbose=self._verbose, log=self._lfh).getConfigDictionary()
         for typeList in self.__additionalTypeList:
+            if typeList[4]:
+                if emMapTypeList and (typeList[0] not in emMapTypeList):
+                    continue
+                #
+            #
             self.__contentD[typeList[0]] = ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]]
         #
         self.__formatD = ciD['FILE_FORMAT_EXTENSION_DICTIONARY']
@@ -250,7 +255,7 @@ class EmReleaseUtil(EntryUpdateBase):
             return
         #
         for typeList in self.__additionalTypeList:
-            if not typeList[0] in self.__contentD:
+            if typeList[0] not in self.__contentD:
                 continue
             #
             for fType in self.__contentD[typeList[0]][0]:
@@ -272,7 +277,7 @@ class EmReleaseUtil(EntryUpdateBase):
                         partExt = '_' + part
                     #
                     sourcePath = self._findArchiveFileName(typeList[0], fType, 'latest', part)
-                    if (not sourcePath) or not os.access(sourcePath, os.F_OK):
+                    if (not sourcePath) or (not os.access(sourcePath, os.F_OK)):
                         continue
                     #
                     self._insertReleseFile('em-volume', sourcePath, self.__embdId + typeList[1] + partExt + '.' + formatExt, typeList[2], typeList[3])

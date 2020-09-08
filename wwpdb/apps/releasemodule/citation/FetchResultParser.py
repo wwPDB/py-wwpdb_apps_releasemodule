@@ -36,6 +36,7 @@ class UniCodeHandler(object):
             u'\u00C2' : 'A',
             u'\u00C3' : 'A',
             u'\u00C4' : 'A',
+            u'\u00C6' : 'Ae',
             u'\u00C7' : 'C',
             u'\u00C8' : 'E',
             u'\u00C9' : 'E',
@@ -64,6 +65,7 @@ class UniCodeHandler(object):
             u'\u00E3' : 'a',
             u'\u00E4' : 'a',
             u'\u00E5' : 'a',
+            u'\u00E6' : 'ae',
             u'\u00E7' : 'c',
             u'\u00E8' : 'e',
             u'\u00E9' : 'e',
@@ -1053,8 +1055,14 @@ class FetchResultParser(object):
         text = ''
         for node in childNodes:
             if node.nodeType == node.ELEMENT_NODE:
+                if text:
+                    text += ' '
+                #
                 text += self._processNodes(node.childNodes, angstromFlag)
             else:
+                if text:
+                    text += ' '
+                #
                 text += self._processData(node, angstromFlag)
             #
         #

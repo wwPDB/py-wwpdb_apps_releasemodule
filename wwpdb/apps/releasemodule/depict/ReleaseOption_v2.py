@@ -60,14 +60,15 @@ def processAuthorApprovalType(existing_value, structure_id):
     text += '</select> &nbsp; &nbsp; &nbsp;\n'
     return text
 
-def getTextBox(name_prefix, structure_id, value):
+def getTextBox(name_prefix, structure_id, value, size="20"):
     text = '<input type="text" name="' + name_prefix + '_' + structure_id \
-         + '" id="' + name_prefix + '_' + structure_id + '" value="' + value + '" size="20" /> '
+         + '" id="' + name_prefix + '_' + structure_id + '" value="' + value + '" size="' + size + '" /> '
     return text
 
-def getSupersedeIDBox(structure_id, spr_entry, display): 
+def getSupersedeIDBox(structure_id, spr_entry, obs_details, display): 
     text = '<span id="span_supersede_' + structure_id + '" style="display:' + display + '">Supersede PDB ID: &nbsp; ' \
-         + getTextBox('supersede', structure_id, spr_entry) + '</span> &nbsp; &nbsp; &nbsp; \n'
+         + getTextBox('supersede', structure_id, spr_entry, size="20") + ' <br/> &nbsp; Obsolete Details: &nbsp; ' \
+         + getTextBox('obspr_details', structure_id, obs_details, size="160") + ' </span> &nbsp; &nbsp; &nbsp; \n'
     return text
 
 def getObsoleteIDBox(structure_id, obs_entry, display):
@@ -181,7 +182,7 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
     text = ''
     pre_select_flag = False
     for t_list in exp_list:
-        if not t_list[0] in dataDict:
+        if t_list[0] not in dataDict:
             continue
         #
         if dataDict[t_list[0]] != 'Y' and dataDict[t_list[0]] != 'y':
@@ -211,7 +212,7 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
             if (t_list[1] in selectedOptions) and selectedOptions[t_list[1]]:
                 value = selectedOptions[t_list[1]]
             #
-        elif (not 'pdb_id' in dataDict) or (not dataDict['pdb_id']):
+        elif ('pdb_id' not in dataDict) or (not dataDict['pdb_id']):
             value = t_list[4][1][0]
         #
         select_text,label = getReleaseManu(t_list[1] + dataDict['structure_id'], value, display_list, '')
@@ -223,7 +224,7 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
     #
     return text,pre_select_flag
 
-def ReleaseOption(dataDict, selectedData, citationFlag, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag):
+def ReleaseOption(dataDict, selectedData, citationFlag, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag, releaseDate):
     selectedOptions = {}
     if (not newReleaseFlag) and ('pre_select' in selectedData) and selectedData['pre_select']:
         selectedOptions = selectedData['pre_select']
@@ -254,18 +255,31 @@ def ReleaseOption(dataDict, selectedData, citationFlag, newReleaseFlag, reObsole
     #
     text += exp_text
     #
+    obspr_text = ''
     if ('pdb_id' in dataDict) and dataDict['pdb_id']:
         spr_entry = ''
         obs_entry = ''
+        obs_details = ''
         if 'obspr' in dataDict:
             for obsprDict in dataDict['obspr']:
-                if (not 'pdb_id' in obsprDict) or (not obsprDict['pdb_id']) or (not 'replace_pdb_id' in obsprDict) or (not obsprDict['replace_pdb_id']):
+                if ('date' not in obsprDict) or (obsprDict['date'] != releaseDate) or ('id' not in obsprDict):
                     continue
                 #
-                if obsprDict['pdb_id'] == dataDict['pdb_id'].upper():
-                    obs_entry = obsprDict['replace_pdb_id']
-                elif obsprDict['replace_pdb_id'] == dataDict['pdb_id'].upper():
-                    spr_entry = obsprDict['pdb_id']
+                if obsprDict['id'].upper() == 'OBSLTE':
+                    if ('replace_pdb_id' in obsprDict) and (obsprDict['replace_pdb_id'].upper() == dataDict['pdb_id'].upper()) and \
+                       ('pdb_id' in obsprDict) and (obsprDict['pdb_id'].upper() != 'NONE'):
+                         spr_entry = obsprDict['pdb_id'].upper()
+                         obspr_text += 'Entry ' + dataDict['pdb_id'].upper() + ' is obsoleted by entry ' + spr_entry + '. '
+                    #
+                    if ('details' in obsprDict) and obsprDict['details']:
+                         obs_details = obsprDict['details']
+                    #
+                elif obsprDict['id'].upper() == 'SPRSDE':
+                    if ('pdb_id' in obsprDict) and (obsprDict['pdb_id'].upper() == dataDict['pdb_id'].upper()) and \
+                       ('replace_pdb_id' in obsprDict) and obsprDict['replace_pdb_id']:
+                        obs_entry = obsprDict['replace_pdb_id'].upper()
+                        obspr_text += 'Entry ' + dataDict ['pdb_id'].upper() + ' is to supersede entry ' + obs_entry + '. '
+                    #
                 #
             #
         #
@@ -287,17 +301,22 @@ def ReleaseOption(dataDict, selectedData, citationFlag, newReleaseFlag, reObsole
                 obs_display = 'none'
             #
         #
-        text += getSupersedeIDBox(dataDict['structure_id'], spr_entry, spr_display)
+        text += getSupersedeIDBox(dataDict['structure_id'], spr_entry, obs_details, spr_display)
         text += getObsoleteIDBox(dataDict['structure_id'], obs_entry, obs_display)
         if spr_entry:
             text += addHiddenInput('author_supersede_' + dataDict['structure_id'], spr_entry)
+        #
+        if obs_details:
+            text += addHiddenInput('author_obspr_details_' + dataDict['structure_id'], obs_details)
         #
         if obs_entry:
             text += addHiddenInput('author_obsolete_' + dataDict['structure_id'], obs_entry)
         #
     #
-    if ('obspr' in dataDict) and (not reObsoleteFlag):
-        text += getObsSprInfo(str(dataDict['pdb_id']).upper(), dataDict['obspr'])
+#   if ('obspr' in dataDict) and (not reObsoleteFlag):
+#       text += getObsSprInfo(str(dataDict['pdb_id']).upper(), dataDict['obspr'])
+    if obspr_text and (not reObsoleteFlag):
+        text += '<br /><span style="color:red;">Warning: ' + obspr_text + '</span>\n'
     #
     if reObsoleteFlag:
         text += addHiddenInput('reobsolete_' + dataDict['structure_id'], 'yes')
