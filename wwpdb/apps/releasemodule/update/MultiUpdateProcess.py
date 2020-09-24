@@ -16,10 +16,10 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 import multiprocessing
 import os
@@ -29,31 +29,35 @@ import traceback
 
 from rcsb.utils.multiproc.MultiProcUtil import MultiProcUtil
 from wwpdb.apps.msgmodule.io.MessagingIo import MessagingIo
+from wwpdb.utils.db.DBLoadUtil import DBLoadUtil
 from wwpdb.utils.db.StatusHistoryUtils import StatusHistoryUtils
 
 from wwpdb.apps.releasemodule.update.EntryPullProcess import EntryPullProcess
 from wwpdb.apps.releasemodule.update.EntryUpdateProcess import EntryUpdateProcess
 from wwpdb.apps.releasemodule.update.UpdateBase import UpdateBase
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
-from wwpdb.utils.db.DBLoadUtil import DBLoadUtil
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.releasemodule.utils.Utility import getCleanValue
-from wwpdb.utils.config.ConfigInfo import ConfigInfo, getSiteId
 
 
 class MultiUpdateProcess(UpdateBase):
     """ Class responsible for release/pull off entries
     """
+
     def __init__(self, reqObj=None, updateList=None, verbose=False, log=sys.stderr):
         super(MultiUpdateProcess, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         self.__updateList = updateList
         self.__task = str(self._reqObj.getValue('task'))
         self.__errorContent = ''
         self.__returnContent = ''
+        if self._cI.get('USE_COMPUTE_CLUSTER'):
+            self.__numProc = len(self.__updateList)
+        else:
+            self.__numProc = int(multiprocessing.cpu_count() / 2)
         #
         #
         self.__statusHUtils = None
-        
+
     def getErrorContent(self):
         return self.__errorContent
 
@@ -67,14 +71,11 @@ class MultiUpdateProcess(UpdateBase):
         if self.__errorContent:
             return
         #
-        if self._cI.get('USE_COMPUTE_CLUSTER'):
-            numProc = len(self.__updateList)
-        else:
-            numProc = int(multiprocessing.cpu_count() / 2)
-        mpu = MultiProcUtil(verbose = True)
-        mpu.set(workerObj = self, workerMethod = 'runMultiProcess')
+        mpu = MultiProcUtil(verbose=True)
+        mpu.set(workerObj=self, workerMethod='runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)
-        ok,failList,retLists,diagList = mpu.runMulti(dataList = self.__updateList, numProc = numProc, numResults = 1)
+        ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+                                                        numResults=1)
         #
         if self.__task == 'Entries in release pending':
             self.__getReturnContentForPullEntries()
@@ -87,41 +88,39 @@ class MultiUpdateProcess(UpdateBase):
         """
         for entryData in self.__updateList:
             idMap = {}
-            for id_type in ( 'pdb_id', 'bmrb_id', 'emdb_id', 'comb_ids' ):
+            for id_type in ('pdb_id', 'bmrb_id', 'emdb_id', 'comb_ids'):
                 if (id_type in entryData) and entryData[id_type]:
                     idMap[id_type] = entryData[id_type]
                 #
             #
             entryPickleFile = self._getEntryPickleFileName(entryData['entry'])
             if not os.access(entryPickleFile, os.F_OK):
-                self._dumpPickle(entryPickleFile, { 'id' : idMap })
+                self._dumpPickle(entryPickleFile, {'id': idMap})
             #
         #
-        if self._cI.get('USE_COMPUTE_CLUSTER'):
-            numProc = len(self.__updateList)
-        else:
-            numProc = int(multiprocessing.cpu_count() / 2)
-        mpu = MultiProcUtil(verbose = True)
-        mpu.set(workerObj = self, workerMethod = 'runMultiProcess')
+        mpu = MultiProcUtil(verbose=True)
+        mpu.set(workerObj=self, workerMethod='runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)
-        ok,failList,retLists,diagList = mpu.runMulti(dataList = self.__updateList, numProc = numProc, numResults = 1)
+        ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+                                                        numResults=1)
         #
         dbLoadFileList = []
         updatedEntryList = []
         for entryData in self.__updateList:
             pickleData = self._loadLocalEntryPickle(entryData['entry'])
             #
-            entryContent,entrySysError,status = self._generateReturnContent(entryData, pickleData['messages'], pickleData['file_status'])
+            entryContent, entrySysError, status = self._generateReturnContent(entryData, pickleData['messages'],
+                                                                              pickleData['file_status'])
             if status != 'OK':
                 continue
             #
             if ('model' in pickleData) and pickleData['model'] and ('session_file' in pickleData['model']) and \
-               pickleData['model']['session_file'] and os.access(pickleData['model']['session_file'], os.F_OK) and \
-               ('update' in pickleData) and pickleData['update']:
+                    pickleData['model']['session_file'] and os.access(pickleData['model']['session_file'], os.F_OK) and \
+                    ('update' in pickleData) and pickleData['update']:
                 dbLoadFileList.append(pickleData['model']['session_file'])
             #
             info = []
-            for item in ( 'entry', 'annotator', 'comb_ids' ):
+            for item in ('entry', 'annotator', 'comb_ids'):
                 if (item in entryData) and entryData[item]:
                     info.append(entryData[item])
                 else:
@@ -141,17 +140,17 @@ class MultiUpdateProcess(UpdateBase):
         rList = []
         for entryData in dataList:
             if self.__task == 'Entries in release pending':
-                pulloffProcess = EntryPullProcess(reqObj=self._reqObj, entryDir=entryData, statusDB=statusDbUtil, \
+                pulloffProcess = EntryPullProcess(reqObj=self._reqObj, entryDir=entryData, statusDB=statusDbUtil,
                                                   verbose=self._verbose, log=self._lfh)
                 pulloffProcess.run()
             else:
-                updateProcess = EntryUpdateProcess(reqObj=self._reqObj, entryDir=entryData, statusDB=statusDbUtil, \
+                updateProcess = EntryUpdateProcess(reqObj=self._reqObj, entryDir=entryData, statusDB=statusDbUtil,
                                                    verbose=self._verbose, log=self._lfh)
                 updateProcess.run()
             #
             rList.append(entryData['entry'])
         #
-        return rList,rList,[]
+        return rList, rList, []
 
     def __initialize(self):
         """
@@ -176,19 +175,19 @@ class MultiUpdateProcess(UpdateBase):
             entryData['annotator'] = str(self._reqObj.getValue('annotator'))
             entryData['option'] = str(self._reqObj.getValue('option'))
             idMap = {}
-            for id_type in ( 'pdb_id', 'bmrb_id', 'emdb_id', 'comb_ids' ):
+            for id_type in ('pdb_id', 'bmrb_id', 'emdb_id', 'comb_ids'):
                 if (id_type in entryData) and entryData[id_type]:
                     idMap[id_type] = entryData[id_type]
                 #
             #
             entryPickleFile = self._getEntryPickleFileName(entryData['entry'])
             if not os.access(entryPickleFile, os.F_OK):
-                self._dumpPickle(entryPickleFile, { 'id' : idMap })
+                self._dumpPickle(entryPickleFile, {'id': idMap})
             #
             if self.__task == 'Entries in release pending':
                 entryPickle = self._loadEntryPickle(entryData['entry'])
                 if entryPickle and ('start_files' in entryPickle) and entryPickle['start_files'] and \
-                   ('model' in entryPickle['start_files']) and entryPickle['start_files']['model']:
+                        ('model' in entryPickle['start_files']) and entryPickle['start_files']['model']:
                     pullEntryIdList.append(entryData['entry'])
                     dbLoadFileList.append(entryPickle['start_files']['model'])
                 #
@@ -198,7 +197,7 @@ class MultiUpdateProcess(UpdateBase):
             #
             entryIdList.append(entryData['entry'])
         #
-        eventLists.append( { 'time' : time.time(), 'task' : self.__task, 'entry_ids' : entryIdList } )
+        eventLists.append({'time': time.time(), 'task': self.__task, 'entry_ids': entryIdList})
         annoIndexPickle['entryDir'] = entryDirs
         annoIndexPickle['eventList'] = eventLists
         self._dumpAnnotatorPickle(annoIndexPickle)
@@ -216,7 +215,8 @@ class MultiUpdateProcess(UpdateBase):
             self.__returnContent += ': '
             #
             pickleData = self._loadLocalEntryPickle(entryData['entry'])
-            entryContent,entrySysError,status = self._generateReturnContent({}, pickleData['messages'], pickleData['file_status'])
+            entryContent, entrySysError, status = self._generateReturnContent({}, pickleData['messages'],
+                                                                              pickleData['file_status'])
             self.__returnContent += entryContent
         #
 
@@ -231,7 +231,8 @@ class MultiUpdateProcess(UpdateBase):
         for entryData in self.__updateList:
             pickleData = self._loadLocalEntryPickle(entryData['entry'])
             #
-            if ('status_code' in entryData) and entryData['status_code'] == 'REL' and ('release' in pickleData) and pickleData['release']: 
+            if ('status_code' in entryData) and entryData['status_code'] == 'REL' and ('release' in pickleData) and \
+                    pickleData['release']:
                 self.__updateStatusHistory(entryData['entry'], entryData['status_code'], entryData['annotator'])
             #
             if ('em_release' in pickleData) and pickleData['em_release']:
@@ -240,8 +241,8 @@ class MultiUpdateProcess(UpdateBase):
                 pdbList.append(entryData['entry'])
             #
             if ('model' in pickleData) and pickleData['model'] and ('session_file' in pickleData['model']) and \
-               pickleData['model']['session_file'] and os.access(pickleData['model']['session_file'], os.F_OK) and \
-               ('update' in pickleData) and pickleData['update']:
+                    pickleData['model']['session_file'] and os.access(pickleData['model']['session_file'], os.F_OK) and \
+                    ('update' in pickleData) and pickleData['update']:
                 dbLoadFileList.append(pickleData['model']['session_file'])
             #
             allContents += '\n\nEntry ' + entryData['entry']
@@ -251,7 +252,8 @@ class MultiUpdateProcess(UpdateBase):
                 allContents += ' ' + entryData['pdb_id']
             #
             allContents += ': '
-            entryContent,entrySysError,status = self._generateReturnContent(entryData, pickleData['messages'], pickleData['file_status'])
+            entryContent, entrySysError, status = self._generateReturnContent(entryData, pickleData['messages'],
+                                                                              pickleData['file_status'])
             if status == 'OK':
                 allContents += '<span style="color:green">OK</span>'
             elif status == 'EM-BLOCKED':
@@ -259,7 +261,7 @@ class MultiUpdateProcess(UpdateBase):
             elif status == 'BLOCKED':
                 allContents += '<span style="color:red">BLOCKED</span>'
             #
-            selectText,selectMap = self._getReleaseOptionFromPickle(pickleData)
+            selectText, selectMap = self._getReleaseOptionFromPickle(pickleData)
             allContents += '\n\nRelease Option: ' + selectText + entryContent
             for error in entrySysError:
                 if error not in allSysErrors:
@@ -287,7 +289,7 @@ class MultiUpdateProcess(UpdateBase):
         else:
             self.__returnContent = str(self._reqObj.getValue('task'))
             if allSysErrors:
-                msgType,msgText = self._getConcatMessageContent(allSysErrors)
+                msgType, msgText = self._getConcatMessageContent(allSysErrors)
                 self.__returnContent += '\n\nSystem related error:\n' + msgText
             #
             if allContents:
@@ -302,7 +304,7 @@ class MultiUpdateProcess(UpdateBase):
         dbLoader = DBLoadUtil(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
         dbLoader.doLoading(dbLoadFileList)
 
-    def __updatePullbackEntryStatus(self, entryIdList): 
+    def __updatePullbackEntryStatus(self, entryIdList):
         if not entryIdList:
             return
         #
@@ -312,7 +314,7 @@ class MultiUpdateProcess(UpdateBase):
         for entryData in self.__updateList:
             if (entryData['entry'] in statusMap) and statusMap[entryData['entry']]:
                 has_status_code = False
-                for item in ( 'status_code', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date' ):
+                for item in ('status_code', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date'):
                     if (item in statusMap[entryData['entry']]) and statusMap[entryData['entry']][item]:
                         if item == 'status_code':
                             has_status_code = True
@@ -338,7 +340,7 @@ class MultiUpdateProcess(UpdateBase):
             pdb_id = getCleanValue(dataDict, 'pdb_id')
             if pdb_id:
                 myD = {}
-                for item in ( 'status_code', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date' ):
+                for item in ('status_code', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date'):
                     if (item in dataDict) and dataDict[item]:
                         myD[item] = str(dataDict[item])
                     #
@@ -369,16 +371,20 @@ class MultiUpdateProcess(UpdateBase):
             #
             okShLoad = False
             okShUpdate = self.__statusHUtils.updateEntryStatusHistory(entryIdList=[entryId], statusCode=status_code, \
-                                         annotatorInitials=annotator, details="Update by release module")
+                                                                      annotatorInitials=annotator,
+                                                                      details="Update by release module")
             if okShUpdate:
                 okShLoad = self.__statusHUtils.loadEntryStatusHistory(entryIdList=[entryId])
             #
             if (self._verbose):
-                self._lfh.write("+MultiUpdateProcess.__updateStatusHistory() %s status history database load status %r\n" % (entryId, okShLoad))
+                self._lfh.write(
+                    "+MultiUpdateProcess.__updateStatusHistory() %s status history database load status %r\n" % (
+                    entryId, okShLoad))
             #
         except:
             if (self._verbose):
-                self._lfh.write("+MultiUpdateProcess.__updateStatusHistory() %s status history update and database load failed with exception\n")
+                self._lfh.write(
+                    "+MultiUpdateProcess.__updateStatusHistory() %s status history update and database load failed with exception\n")
                 traceback.print_exc(file=self._lfh)
             #
         #
