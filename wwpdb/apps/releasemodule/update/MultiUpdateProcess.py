@@ -48,14 +48,8 @@ class MultiUpdateProcess(UpdateBase):
         super(MultiUpdateProcess, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         self.__updateList = updateList
         self.__task = str(self._reqObj.getValue('task'))
-        self.__siteId = self._reqObj.getValue("WWPDB_SITE_ID") if self._reqObj.getValue("WWPDB_SITE_ID") else getSiteId()
-        self.__cI = ConfigInfo(self.__siteId)
         self.__errorContent = ''
         self.__returnContent = ''
-        if self.__cI.get('USE_COMPUTE_CLUSTER'):
-            self.numProc = len(self.__updateList)
-        else:
-            self.numProc = int(multiprocessing.cpu_count() / 2)
         #
         #
         self.__statusHUtils = None
@@ -73,11 +67,14 @@ class MultiUpdateProcess(UpdateBase):
         if self.__errorContent:
             return
         #
-        
+        if self._cI.get('USE_COMPUTE_CLUSTER'):
+            numProc = len(self.__updateList)
+        else:
+            numProc = int(multiprocessing.cpu_count() / 2)
         mpu = MultiProcUtil(verbose = True)
         mpu.set(workerObj = self, workerMethod = 'runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)
-        ok,failList,retLists,diagList = mpu.runMulti(dataList = self.__updateList, numProc = self.numProc, numResults = 1)
+        ok,failList,retLists,diagList = mpu.runMulti(dataList = self.__updateList, numProc = numProc, numResults = 1)
         #
         if self.__task == 'Entries in release pending':
             self.__getReturnContentForPullEntries()
@@ -100,10 +97,14 @@ class MultiUpdateProcess(UpdateBase):
                 self._dumpPickle(entryPickleFile, { 'id' : idMap })
             #
         #
+        if self._cI.get('USE_COMPUTE_CLUSTER'):
+            numProc = len(self.__updateList)
+        else:
+            numProc = int(multiprocessing.cpu_count() / 2)
         mpu = MultiProcUtil(verbose = True)
         mpu.set(workerObj = self, workerMethod = 'runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)
-        ok,failList,retLists,diagList = mpu.runMulti(dataList = self.__updateList, numProc = self.numProc, numResults = 1)
+        ok,failList,retLists,diagList = mpu.runMulti(dataList = self.__updateList, numProc = numProc, numResults = 1)
         #
         dbLoadFileList = []
         updatedEntryList = []
