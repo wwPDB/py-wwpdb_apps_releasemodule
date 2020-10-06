@@ -893,6 +893,18 @@ class FetchResultParser(object):
                         #
                     #
                 #
+            elif node.tagName == 'MedlineJournalInfo':
+                if 'journal_abbrev' in info:
+                    continue
+                #
+                for childnode in node.childNodes:
+                    if childnode.nodeType != childnode.ELEMENT_NODE:
+                        continue
+                    #
+                    if childnode.tagName == 'MedlineTA':
+                        info['journal_abbrev'] = self._processNodes(childnode.childNodes, False)
+                    #
+                #
             #
         #
         if id and info:
