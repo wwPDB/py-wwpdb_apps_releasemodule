@@ -23,20 +23,28 @@ __version__   = "V0.07"
 
 import os, sys, string, traceback
 
+from wwpdb.apps.releasemodule.citation.RisCitationParser import RisCitationParser
 from wwpdb.apps.releasemodule.citation.StringUtil  import calStringSimilarity
 from wwpdb.apps.releasemodule.depict.DepictBase    import DepictBase
 from wwpdb.apps.releasemodule.utils.JournalAbbrev  import JournalAbbrev
+from wwpdb.utils.session.WebUploadUtils            import WebUploadUtils
 
 class DepictCitationForm(DepictBase):
     """ Class responsible for generating citation input form depiction.
     """
     def __init__(self, reqObj=None, resultList=None, verbose=False, log=sys.stderr):
         super(DepictCitationForm, self).__init__(reqObj=reqObj, resultList=resultList, verbose=verbose, log=log)
+        #
+        self.__risCitation = {}
+        #
+        self.__getUploadRISCitation()
 
     def DoRender(self):
         myD = self._initialOverAllDict()
         myD['pubmed_file'] = ''
-        if self._resultList:
+        if self.__risCitation:
+            myD['citation_info'] = self.__depictCitationInfo(self.__risCitation)
+        elif self._resultList:
             myD['citation_info'] = self.__depictCitationInfo(self._resultList[0]['citation'])
         else:
             myD['citation_info'] = ''
@@ -47,6 +55,27 @@ class DepictCitationForm(DepictBase):
         myD['abbrev_info'] = ja.GetJoinQuoterList(',\n')
         #
         return self._processTemplate('citation_request/main_citation_input_form_tmplt.html', myD)
+
+    def __getUploadRISCitation(self):
+        """
+        """
+        wuu = WebUploadUtils(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
+        if not wuu.isFileUpload():
+            return
+        #
+        uploadFileName = wuu.copyToSession(uncompress=False)
+        if not uploadFileName:
+            return
+        #
+        uploadFilePath = os.path.join(self._sessionPath, uploadFileName)
+        if not os.access(uploadFilePath, os.F_OK):
+            return
+        #
+        risParser = RisCitationParser(uploadFilePath)
+        self.__risCitation = risParser.getCitationData()
+        if self.__risCitation:
+            self.__risCitation["citation_id"] = str(self._reqObj.getValue("citation_id"))
+        #
 
     def __getRequestEntryInfo(self):
         items = self._getItemList('citation_request/entry_item_list')
