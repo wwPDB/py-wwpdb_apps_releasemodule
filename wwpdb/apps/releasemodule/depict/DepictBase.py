@@ -75,6 +75,10 @@ class DepictBase(ModuleBaseClass):
         if ('status_code' in dataDict) and (dataDict['status_code'].upper() == 'WDRN'):
             isWdrnEntry = True
         #
+        isEmEntry = False
+        if ('status_code_em' in dataDict) and dataDict['status_code_em'] and (dataDict['status_code_em'] != 'WDRN'):
+            isEmEntry = True
+        #
         self._newReleaseFlag = False
         if ((not model_release_date) or model_release_date == self._rel_date) and (not isWdrnEntry):
             self._newReleaseFlag = True
@@ -108,6 +112,9 @@ class DepictBase(ModuleBaseClass):
         color_status_code = ''
         if ('status_code' in dataDict) and dataDict['status_code']:
             color_status_code = dataDict['status_code']
+            if (color_status_code == 'WDRN') and isEmEntry:
+                color_status_code = dataDict['status_code_em']
+            #
         elif ('status_code_em' in dataDict) and dataDict['status_code_em']:
             color_status_code = dataDict['status_code_em']
         #

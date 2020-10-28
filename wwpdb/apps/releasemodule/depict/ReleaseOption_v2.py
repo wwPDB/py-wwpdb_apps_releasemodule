@@ -133,11 +133,15 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
                 val_list.append(model_list[4])
             #
         #
-    elif ('emdb_release' in dataDict) and dataDict['emdb_release'] and (not isWdrnEntry):
+    elif ('emdb_release' in dataDict) and dataDict['emdb_release']:
         value = 'EMHEADERUpdate'
-        val_list = model_list[1:2]
-        if citationFlag:
-            val_list.append(model_list[4])
+        if isWdrnEntry:
+            val_list.append(model_list[1])
+        else:
+            val_list = model_list[1:2]
+            if citationFlag:
+                val_list.append(model_list[4])
+            #
         #
     #
     if not val_list:
