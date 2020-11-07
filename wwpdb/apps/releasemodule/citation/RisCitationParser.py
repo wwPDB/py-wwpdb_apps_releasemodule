@@ -54,8 +54,12 @@ class RisCitationParser(object):
         #
         tmpCitationData = {}
         #
-        for line in data.split("\n"):
-            if (not line) or (len(line) < 7) or (line[2:6] != "  - "):
+        for line in data.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
+            if not line:
+                continue
+            #
+            line = line.replace("    ", " ").replace("   ", " ").replace("  ", " ")
+            if (not line) or (len(line) < 6) or (line[2:5] != " - "):
                 continue
             #
             if line[0:2] not in ( "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "PY", "Y1", "VL", "SP", "EP", "SN", "DO" ):
@@ -65,7 +69,7 @@ class RisCitationParser(object):
             if line[0:2] in ( "TI", "T1" ):
                 angstromFlag = True
             #
-            value = self.__processValue(line[6:].strip(), angstromFlag)
+            value = self.__processValue(line[5:].strip(), angstromFlag)
             if not value:
                 continue
             #
