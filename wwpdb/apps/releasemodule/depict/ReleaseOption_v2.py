@@ -22,20 +22,23 @@ __version__   = "V0.07"
 
 import os, sys, string, traceback
 
-def getReleaseManu(name, value, val_list, js_class):
-    display_list = [ [ '', ''] ]
-    for list in val_list:
-        display_list.append(list)
+def getReleaseManu(name, value, val_list, js_class, include_empty_selection):
+    display_list = []
+    if include_empty_selection:
+        display_list = [ [ '', ''] ]
+    #
+    for tup_list in val_list:
+        display_list.append(tup_list)
     #
     text = '<select name="' + name + '" id="' + name + '" ' + js_class + '>\n'
     label = ''
-    for list in display_list:
-        text += '<option value="' + list[0] + '" '
-        if value == list[0]:
+    for tup_list in display_list:
+        text += '<option value="' + tup_list[0] + '" '
+        if value == tup_list[0]:
             text += 'selected'
-            label = list[1]
+            label = tup_list[1]
         #
-        text += '>' + list[1] + '</option>\n'
+        text += '>' + tup_list[1] + '</option>\n'
     text += '</select> &nbsp; &nbsp; &nbsp;\n'
     return text,label
 
@@ -153,7 +156,11 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
             value = selectedOptions['status_']
         #
     #
-    text,label = getReleaseManu('status_' + dataDict['structure_id'], value, val_list, 'class="release_status"')
+    include_empty_selection = True
+    if ('emdb_release' in dataDict) and dataDict['emdb_release']:
+        include_empty_selection = False
+    #
+    text,label = getReleaseManu('status_' + dataDict['structure_id'], value, val_list, 'class="release_status"', include_empty_selection)
     pre_select_flag = False
     if newReleaseFlag or (selectedOptions and value and label):
         text += addHiddenInput('pre_select_status_' + dataDict['structure_id'], value + ':' + label)
@@ -219,7 +226,7 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
         elif ('pdb_id' not in dataDict) or (not dataDict['pdb_id']):
             value = t_list[4][1][0]
         #
-        select_text,label = getReleaseManu(t_list[1] + dataDict['structure_id'], value, display_list, '')
+        select_text,label = getReleaseManu(t_list[1] + dataDict['structure_id'], value, display_list, '', True)
         text += t_list[2] + ': &nbsp; ' + select_text
         if newReleaseFlag or (selectedOptions and value and label):
             text += addHiddenInput('pre_select_' + t_list[1] + dataDict['structure_id'], value + ':' + label)
