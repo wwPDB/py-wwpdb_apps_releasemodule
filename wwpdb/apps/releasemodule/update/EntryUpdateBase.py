@@ -365,11 +365,12 @@ class EntryUpdateBase(UpdateBase):
                 #
                 nextArchiveFilePath = self._findArchiveFileName(contentType, formatType, 'next', '1')
                 if (contentType == 'model') and (formatType == 'pdbx'):
-                    isCitationUpdateOnly = False
-                    if ('status_code' in self._entryDir) and self._entryDir['status_code'] == 'CITATIONUpdate':
-                        isCitationUpdateOnly = True
+                    skipVersionNumberUpdate = False
+                    if ('status_code' in self._entryDir) and ((self._entryDir['status_code'] == 'CITATIONUpdate') or
+                       (self._entryDir['status_code'] == 'EMHEADERUpdate')):
+                        skipVersionNumberUpdate = True
                     #
-                    if not isCitationUpdateOnly:
+                    if not skipVersionNumberUpdate:
                         head,tail = ntpath.split(nextArchiveFilePath)
                         vList = tail.split(".V")
                         if len(vList) == 2:

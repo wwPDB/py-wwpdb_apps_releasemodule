@@ -225,8 +225,7 @@ class EmReleaseUtil(EntryUpdateBase):
 
     def __getAdditionalFilePartNumber(self):
         storagePath = os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive', self._entryId)
-        os.chdir(storagePath)
-        for filename in os.listdir('.'):
+        for filename in os.listdir(storagePath):
             if not filename.startswith(self._entryId):
                 continue
             #

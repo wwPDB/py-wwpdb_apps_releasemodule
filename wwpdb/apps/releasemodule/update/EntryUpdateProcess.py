@@ -373,8 +373,7 @@ class EntryUpdateProcess(EntryUpdateBase):
                     # Finding biological assembly files
                     #
                     biolAssemblyList = []
-                    os.chdir(dirPath)
-                    for filename in os.listdir('.'):
+                    for filename in os.listdir(dirPath):
                         if filename.startswith(pdbId + '-assembly'):
                             biolAssemblyList.append(filename)
                         #

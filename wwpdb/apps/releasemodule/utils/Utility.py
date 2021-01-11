@@ -179,8 +179,7 @@ def FindFiles(path):
     """ Find entry files
     """
     list = []
-    os.chdir(path)
-    for filename in os.listdir('.'):
+    for filename in os.listdir(path):
         #if filename.endswith('.cif') and filename[:4] == 'rcsb' and \
         #   (len(filename) == 14 or len(filename) == 17) or \
         #   filename.endswith('.mr') and filename[:4] == 'rcsb' and \
@@ -228,8 +227,7 @@ def FindLogFiles(path):
     """ Find log files
     """
     list = []
-    os.chdir(path)
-    for filename in os.listdir('.'):
+    for filename in os.listdir(path):
         trueFlag = False
         if filename.startswith('release') and filename.endswith('.log'):
             trueFlag = True

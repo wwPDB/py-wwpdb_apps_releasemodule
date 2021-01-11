@@ -62,7 +62,7 @@ class RisCitationParser(object):
             if (not line) or (len(line) < 6) or (line[2:5] != " - "):
                 continue
             #
-            if line[0:2] not in ( "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "PY", "Y1", "VL", "SP", "EP", "SN", "DO" ):
+            if line[0:2] not in ( "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "JF", "PY", "Y1", "VL", "SP", "EP", "SN", "DO" ):
                 continue
             #
             angstromFlag = False
@@ -77,7 +77,7 @@ class RisCitationParser(object):
                 self.__processAuthorName(value)
             elif line[0:2] in ( "TI", "T1" ): # Title
                 tmpCitationData[line[0:2]] = value
-            elif line[0:2] in ( "JO", "JA" ): # Journal
+            elif line[0:2] in ( "JO", "JA", "JF" ): # Journal
                 tmpCitationData[line[0:2]] = value
             elif line[0:2] in ( "PY", "Y1" ): # Year
                 tList = value.split("/")
@@ -96,11 +96,11 @@ class RisCitationParser(object):
                 #
             #elif line[0:2] == "SN": # ISBN/ISSN
             elif line[0:2] == "DO": # DOI
-                self.__convertedCitationData["pdbx_database_id_DOI"] = value
+                self.__convertedCitationData["pdbx_database_id_DOI"] = value.replace('http://doi.org/', '').replace('https://doi.org/', '')
             #
         #
         # Get title, journal_abbrev, year
-        cif_ris_token_map = { "title": ( "TI", "T1" ), "journal_abbrev": ( "JO", "JA" ), "year": ( "PY", "Y1" ) }
+        cif_ris_token_map = { "title": ( "TI", "T1" ), "journal_abbrev": ( "JO", "JA", "JF" ), "year": ( "PY", "Y1" ) }
         #
         for cif_token,ris_tokens in cif_ris_token_map.items():
             for token in ris_tokens:
@@ -170,7 +170,10 @@ class RisCitationParser(object):
                 continue
             #
             found = True
-            cif_author += val[0:1].upper() + "."
+            initList = val.split("-")
+            for init in initList:
+                cif_author += init[0:1].upper() + "."
+            #
         #
         if not found:
             return
