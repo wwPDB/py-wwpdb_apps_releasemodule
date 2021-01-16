@@ -48,55 +48,53 @@ class RisCitationParser(object):
         if (not self.__risfile) or (not os.access(self.__risfile, os.F_OK)):
             return
         #
-        ith = open(self.__risfile, "r")
-        data = ith.read()
-        ith.close()
-        #
         tmpCitationData = {}
         #
-        for line in data.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
-            if not line:
-                continue
-            #
-            line = line.replace("    ", " ").replace("   ", " ").replace("  ", " ")
-            if (not line) or (len(line) < 6) or (line[2:5] != " - "):
-                continue
-            #
-            if line[0:2] not in ( "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "JF", "PY", "Y1", "VL", "SP", "EP", "SN", "DO" ):
-                continue
-            #
-            angstromFlag = False
-            if line[0:2] in ( "TI", "T1" ):
-                angstromFlag = True
-            #
-            value = self.__processValue(line[5:].strip(), angstromFlag)
-            if not value:
-                continue
-            #
-            if line[0:2] in ( "AU", "A1", "A2", "A3", "A4" ): # Author
-                self.__processAuthorName(value)
-            elif line[0:2] in ( "TI", "T1" ): # Title
-                tmpCitationData[line[0:2]] = value
-            elif line[0:2] in ( "JO", "JA", "JF" ): # Journal
-                tmpCitationData[line[0:2]] = value
-            elif line[0:2] in ( "PY", "Y1" ): # Year
-                tList = value.split("/")
-                if (len(tList) > 0) and (len(tList[0]) == 4) and tList[0].isdigit():
-                    tmpCitationData[line[0:2]] = tList[0]
+        with open(self.__risfile, encoding="utf-8") as fin:
+            for line in fin:
+                if not line:
+                    continue
                 #
-            elif line[0:2] == "VL": # Volume number
-                self.__convertedCitationData["journal_volume"] = value
-            elif line[0:2] == "SP": # Start Page
-                if value.isdigit():
-                    self.__convertedCitationData["page_first"] = value
+                line = line.replace("    ", " ").replace("   ", " ").replace("  ", " ")
+                if (not line) or (len(line) < 6) or (line[2:5] != " - "):
+                    continue
                 #
-            elif line[0:2] == "EP": # End Page
-                if value.isdigit():
-                    self.__convertedCitationData["page_last"] = value
+                if line[0:2] not in ( "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "JF", "PY", "Y1", "VL", "SP", "EP", "SN", "DO" ):
+                    continue
                 #
-            #elif line[0:2] == "SN": # ISBN/ISSN
-            elif line[0:2] == "DO": # DOI
-                self.__convertedCitationData["pdbx_database_id_DOI"] = value.replace('http://doi.org/', '').replace('https://doi.org/', '')
+                angstromFlag = False
+                if line[0:2] in ( "TI", "T1" ):
+                    angstromFlag = True
+                #
+                value = self.__processValue(line[5:].strip(), angstromFlag)
+                if not value:
+                    continue
+                #
+                if line[0:2] in ( "AU", "A1", "A2", "A3", "A4" ): # Author
+                    self.__processAuthorName(value)
+                elif line[0:2] in ( "TI", "T1" ): # Title
+                    tmpCitationData[line[0:2]] = value
+                elif line[0:2] in ( "JO", "JA", "JF" ): # Journal
+                    tmpCitationData[line[0:2]] = value
+                elif line[0:2] in ( "PY", "Y1" ): # Year
+                    tList = value.split("/")
+                    if (len(tList) > 0) and (len(tList[0]) == 4) and tList[0].isdigit():
+                        tmpCitationData[line[0:2]] = tList[0]
+                    #
+                elif line[0:2] == "VL": # Volume number
+                    self.__convertedCitationData["journal_volume"] = value
+                elif line[0:2] == "SP": # Start Page
+                    if value.isdigit():
+                        self.__convertedCitationData["page_first"] = value
+                    #
+                elif line[0:2] == "EP": # End Page
+                    if value.isdigit():
+                        self.__convertedCitationData["page_last"] = value
+                    #
+                #elif line[0:2] == "SN": # ISBN/ISSN
+                elif line[0:2] == "DO": # DOI
+                    self.__convertedCitationData["pdbx_database_id_DOI"] = value.replace('http://doi.org/', '').replace('https://doi.org/', '')
+                #
             #
         #
         # Get title, journal_abbrev, year
