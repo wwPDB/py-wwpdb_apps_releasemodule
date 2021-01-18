@@ -98,7 +98,7 @@ class RisCitationParser(object):
             #
         #
         # Get title, journal_abbrev, year
-        cif_ris_token_map = { "title": ( "TI", "T1" ), "journal_abbrev": ( "JO", "JA", "JF" ), "year": ( "PY", "Y1" ) }
+        cif_ris_token_map = { "title": ( "TI", "T1" ), "journal_abbrev": ( "JA", "JF", "JO" ), "year": ( "PY", "Y1" ) }
         #
         for cif_token,ris_tokens in cif_ris_token_map.items():
             for token in ris_tokens:
