@@ -170,7 +170,7 @@ class DbApiUtil(object):
         #
         rowExists = False
         if where:
-            sql = "select * from " + str(table) + " where " + ' and '.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in where.items()])
+            sql = "select * from " + str(table) + " where " + ' and '.join(["%s = '%s'" % (k, str(v).replace("'", "\\'")) for k, v in where.items()])
             rows = self.runSelectSQL(sql)
             if rows and len(rows) > 0:
                 rowExists = True
@@ -180,18 +180,18 @@ class DbApiUtil(object):
             return 'OK'
         #
         if rowExists:
-            sql = "update " + str(table) + " set " + ','.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in data.items()])
+            sql = "update " + str(table) + " set " + ','.join(["%s = '%s'" % (k, str(v).replace("'", "\\'")) for k, v in data.items()])
             if where:
-                sql += ' where ' + ' and '.join(["%s = '%s'" % (k, v.replace("'", "\\'")) for k, v in where.items()])
+                sql += ' where ' + ' and '.join(["%s = '%s'" % (k, str(v).replace("'", "\\'")) for k, v in where.items()])
             #
         else:
             sql = "insert into " + str(table) + " (" + ','.join(['%s' % (k) for k, v in where.items()])
             if data:
                 sql += "," + ','.join(['%s' % (k) for k, v in data.items()])
             #
-            sql += ") values (" + ','.join(["'%s'" % (v.replace("'", "\\'")) for k, v in where.items()])
+            sql += ") values (" + ','.join(["'%s'" % (str(v).replace("'", "\\'")) for k, v in where.items()])
             if data:
-                sql += "," + ','.join(["'%s'" % (v.replace("'", "\\'")) for k, v in data.items()])
+                sql += "," + ','.join(["'%s'" % (str(v).replace("'", "\\'")) for k, v in data.items()])
             #
             sql += ")"
         #
