@@ -62,10 +62,39 @@ class EmReleaseUtil(EntryUpdateBase):
             self.__generateEMapHeader()
         #
         if (not EmXmlHeaderOnly) and (not self._blockEmErrorFlag):
-            self.__getFileContentDictionary(emMapTypeList)
-            mapFile = self._findArchiveFileName('em-volume', 'map', 'latest', '1')
-            if os.access(mapFile, os.F_OK):   
-                self._insertReleseFile('em-volume', mapFile, self.__embdId + '.map', 'map', True)
+            emVolumeContentInfo = self.__getFileContentDictionary(emMapTypeList)
+            # checking file matching with em_map category: DAOTHER-6570/DAOTHER-5842
+            mapFile = ""
+            fileType = ""
+            if emMapTypeList:
+                contentTypeInFileName = emVolumeContentInfo[1]
+                if (contentTypeInFileName in emMapTypeList) and emMapTypeList[contentTypeInFileName]:
+                    for part_type_info in emMapTypeList[contentTypeInFileName]:
+                        part_type_split = part_type_info.split("_")
+                        if len(part_type_split) != 2:
+                            continue
+                        #
+                        for formatType in emVolumeContentInfo[0]:
+                            if self.__formatD[formatType] == part_type_split[1]: # file type match
+                                tmpFile = self._findArchiveFileName("em-volume", formatType, "latest", part_type_split[0])
+                                if os.access(tmpFile, os.F_OK):
+                                    mapFile = tmpFile
+                                    fileType = part_type_split[1]
+                                    break
+                                #
+                            #
+                        #
+                        if mapFile:
+                            break
+                        #
+                    #
+                #
+            else:
+                mapFile = self._findArchiveFileName('em-volume', 'map', 'latest', '1')
+                fileType = "map"
+            #
+            if mapFile and os.access(mapFile, os.F_OK):   
+                self._insertReleseFile('em-volume', mapFile, self.__embdId + '.' + fileType, 'map', True)
             #
             self.__getAdditionalFilePartNumber()
             self.__releaseAdditionalFiles()
@@ -82,21 +111,54 @@ class EmReleaseUtil(EntryUpdateBase):
         self._dumpLocalPickle()
 
     def __getFileContentDictionary(self, emMapTypeList):
+        """
+        """
+        em_map_selected_list = []
         ciD = ConfigInfoData(siteId=self._siteId, verbose=self._verbose, log=self._lfh).getConfigDictionary()
+        self.__formatD = ciD['FILE_FORMAT_EXTENSION_DICTIONARY']
         for typeList in self.__additionalTypeList:
+            # checking file matching with em_map category: DAOTHER-6570/DAOTHER-5842
             if typeList[4]:
-                if emMapTypeList and (typeList[0] not in emMapTypeList):
+                contentTypeInFileName = ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]][1]
+                if emMapTypeList and (contentTypeInFileName not in emMapTypeList):
                     continue
+                #
+                found = False
+                for part_type_info in emMapTypeList[contentTypeInFileName]:
+                    part_type_split = part_type_info.split("_")
+                    if len(part_type_split) != 2:
+                        continue
+                    #
+                    for formatType in ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]][0]:
+                        if self.__formatD[formatType] == part_type_split[1]: # file type match
+                            contentFormatType = typeList[0] + '_' + formatType
+                            if contentFormatType in self.__partD:
+                                if part_type_split[0] not in self.__partD[contentFormatType]:
+                                    self.__partD[contentFormatType].append(part_type_split[0])
+                                #
+                            else:
+                                self.__partD[contentFormatType] = [ part_type_split[0] ]
+                            #
+                            found = True
+                            break
+                        #
+                    #
+                #
+                if found:
+                    em_map_selected_list.append(typeList[0])
                 #
             #
             self.__contentD[typeList[0]] = ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]]
         #
-        self.__formatD = ciD['FILE_FORMAT_EXTENSION_DICTIONARY']
         for k,v in self.__contentD.items():
+            if k in em_map_selected_list:
+                continue
+            #
             for formatType in v[0]:
                 self.__fileExtContentTypeD[v[1] + '_' + self.__formatD[formatType]] = k + '_' + formatType
             #
         #
+        return ciD['CONTENT_TYPE_DICTIONARY']['em-volume']
 
     def __generateEMapHeader(self, validateFlag=False):
         modelfile = os.path.join(self._sessionPath, self._entryId + self._fileTypeList[0][0])

@@ -156,6 +156,8 @@ class DepictBase(ModuleBaseClass):
                 myD[item] = color_status_code
             elif (item in dataDict) and dataDict[item]:
                 myD[item] = dataDict[item]
+            elif item == 'check_option':
+                myD[item] = ''
             else:
                 myD[item] = defaultValue
             #

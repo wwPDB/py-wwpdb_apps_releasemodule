@@ -202,7 +202,10 @@ class ReadCitationFinderResult(object):
                 #
                 # Update similarity score
                 #
-                sim = calStringSimilarity(currDir['c_title'], pdir['title'])
+                sim = 0.0
+                if ('c_title' in currDir) and currDir['c_title'] and ('title' in pdir) and pdir['title']:
+                    sim = calStringSimilarity(currDir['c_title'], pdir['title'])
+                #
                 if sim < 0.5:
                     continue
                 #

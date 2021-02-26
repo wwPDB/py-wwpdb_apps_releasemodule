@@ -41,13 +41,13 @@ class DepictRequest(DepictBase):
         self.__cols = str(len(self.__items) - 1)
         #
 
-    def DoRender(self):
+    def DoRender(self, autoSelectionFlag=False):
         myD = self._initialOverAllDict()
-        myD['table_rows'] = self.__getRows()
+        myD['table_rows'] = self.__getRows(autoSelectionFlag)
         myD['atlist'] = ' '.join(self.__atList)
         return self._processTemplate(self.__formTemplate, myD)
 
-    def __getRows(self):
+    def __getRows(self, autoSelectionFlag):
         text = ''
         count = 0
         for dataDict in self._resultList:
@@ -63,6 +63,9 @@ class DepictRequest(DepictBase):
                 #
             #
             myD,selectedData = self._initialEntryDict(dataDict, self.__items, False, True, '&nbsp;')
+            if autoSelectionFlag:
+                myD['check_option'] = 'checked'
+            #
             myD['comment_start'] = ''
             myD['comment_end'] = ''
             if self._skipReleaseOptionFlag:

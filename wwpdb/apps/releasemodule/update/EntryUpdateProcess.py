@@ -72,7 +72,7 @@ class EntryUpdateProcess(EntryUpdateBase):
             emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
             emUtil.validateXml()
         #
-        emMapTypeList = []
+        emMapTypeList = {}
         if self.__updateFlag:
             updateUtil = UpdateUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
             emMapTypeList = updateUtil.run()
@@ -91,7 +91,13 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         self._loadLocalPickle()
         #
-        if not self._blockErrorFlag:
+        ok_flag = True
+        if self._blockErrorFlag:
+            ok_flag = False
+        elif self._blockEmErrorFlag and self.__EmEntryFlag and self.__GenEmXmlHeaderFlag and (('pdb_id' not in self._entryDir) or (not self._entryDir['pdb_id'])):
+            ok_flag = False
+        #
+        if ok_flag:
             if self.__updateFlag:
                 self._pickleData['update'] = True
                 self._updateDataBase()

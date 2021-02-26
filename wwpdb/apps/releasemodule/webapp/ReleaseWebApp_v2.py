@@ -289,7 +289,8 @@ class ReleaseWebAppWorker(object):
         if not os.access(resultFile, os.F_OK):
             resultFile = os.path.join(citPath, 'citation_finder_WWPDB_DEPLOY_TEST.db')
         #
-        cReader = ReadCitationFinderResult(path=self.__sessionPath, dbUtil=dbUtil, siteId=self.__siteId, pickleFile=resultFile, verbose=False, log=sys.stderr)
+        cReader = ReadCitationFinderResult(path=self.__sessionPath, dbUtil=dbUtil, siteId=self.__siteId, pickleFile=resultFile, \
+                                           verbose=self.__verbose, log=self.__lfh)
         entryList = cReader.getEntryList(self.__owner)
         if entryList:
             self.__reqObj.setValue('task', 'Citation Finder')
@@ -351,7 +352,7 @@ class ReleaseWebAppWorker(object):
             if entryList:
                 self.__reqObj.setValue('task', 'Entries to be released')
                 self.__reqObj.setValue('owner', self.__owner)
-                myD['result_list'] = self.__depcitRequestForm(entryList)
+                myD['result_list'] = self.__depcitRequestForm(entryList=entryList, autoSelection=True)
             else:
                 myDir = {}
                 myDir['sessionid'] = self.__sessionId
@@ -364,13 +365,13 @@ class ReleaseWebAppWorker(object):
         #
         return rC
 
-    def __depcitRequestForm(self, entryList):
+    def __depcitRequestForm(self, entryList=[], autoSelection=False):
         self.__reqObj.setValue('FormTemplate', 'request/request_form_tmplt.html')
         self.__reqObj.setValue('RowTemplate', 'request/request_row_tmplt.html')
         self.__reqObj.setValue('option', 'request_release')
         items = self.__getItemList('request/request_item_list')
         dp = DepictRequest(reqObj=self.__reqObj, resultList=entryList, itemList=items, verbose=self.__verbose, log=self.__lfh)
-        return dp.DoRender()
+        return dp.DoRender(autoSelectionFlag=autoSelection)
 
     def _CitationFinderPage(self):
         """ Launch citation finder page
@@ -441,7 +442,7 @@ class ReleaseWebAppWorker(object):
         entryList = dbUtil.getRequestReleaseEntryInfo(self.__owner)
         #
         if entryList:
-            rC.setText(text=self.__depcitRequestForm(entryList))
+            rC.setText(text=self.__depcitRequestForm(entryList=entryList))
         else:
             myDir = {}
             myDir['sessionid'] = self.__sessionId
@@ -466,7 +467,7 @@ class ReleaseWebAppWorker(object):
         entryList = dbUtil.getExpiredEntryInfo(self.__owner)
         #
         if entryList:
-            rC.setText(text=self.__depcitRequestForm(entryList))
+            rC.setText(text=self.__depcitRequestForm(entryList=entryList))
         else:
             returnText = '<h1 style="text-align:center">' + str(self.__reqObj.getValue('task')) + '</h1></br>' \
                        + '<h2 style="text-align:center">No entry found.</h2>'
@@ -605,7 +606,7 @@ class ReleaseWebAppWorker(object):
         #
         entryList = requestParser.getEntryList()
         if entryList:
-            rC.setText(text=self.__depcitRequestForm(entryList))
+            rC.setText(text=self.__depcitRequestForm(entryList=entryList))
         else:
             rC.setError(errMsg='Unknown error')
         #

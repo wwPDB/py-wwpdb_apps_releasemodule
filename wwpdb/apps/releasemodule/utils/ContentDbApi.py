@@ -79,13 +79,13 @@ class ContentDbApi(object):
       "SELECT_LAST_PDBX_AUDIT_REVISION_HISTORY" : "select structure_id, ordinal, revision_date from pdbx_audit_revision_history where " +
                                                   "structure_id = '%s' order by ordinal desc limit 1",
       "SELECT_ALL_EXPIRED_PDB_ENTRY" : "select structure_id from rcsb_status where ( initial_deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) " +
-                                       "and ( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or " +
+                                       "and (pdb_id is not null) and ( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or " +
                                        " ( date_hold_coordinates < curdate() ) ) order by structure_id",
       "SELECT_ALL_EXPIRED_EM_ENTRY" : "select r.structure_id from rcsb_status r, em_admin e where (r.structure_id = e.structure_id) and " +
                                       "((r.pdb_id is null) or (r.pdb_id = '')) and (e.deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
                                       "(e.current_status in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( e.map_hold_date is null ) or " +
                                       " ( e.map_hold_date < curdate() ) ) order by r.structure_id",
-      "SELECT_EXPIRED_PDB_ENTRY_BY_ANNOTATOR" : "select structure_id from rcsb_status where ( rcsb_annotator = '%s' ) and " +
+      "SELECT_EXPIRED_PDB_ENTRY_BY_ANNOTATOR" : "select structure_id from rcsb_status where ( rcsb_annotator = '%s' ) and (pdb_id is not null) and  " +
                                                 "( initial_deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
                                                 "( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or " +
                                                 "( date_hold_coordinates < curdate() ) ) order by structure_id",

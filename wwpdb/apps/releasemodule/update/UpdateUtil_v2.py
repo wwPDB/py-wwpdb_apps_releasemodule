@@ -46,7 +46,7 @@ class UpdateUtil(EntryUpdateBase):
         self.__pubmedInfo = {}
 
     def run(self):
-        emMapTypeList = []
+        emMapTypeList = {}
         self._loadLocalPickle()
         if self._blockErrorFlag:
             return emMapTypeList
@@ -272,7 +272,7 @@ class UpdateUtil(EntryUpdateBase):
         return cat
 
     def __readOutputFile(self):
-        emMapTypeList = []
+        emMapTypeList = {}
         outputfile = os.path.join(self._sessionPath, self.__outputfile)
         if not os.access(outputfile, os.F_OK):
             return emMapTypeList
@@ -314,8 +314,13 @@ class UpdateUtil(EntryUpdateBase):
         emMapFileTypeList = cifObj.GetValue('em_map_file_type')
         if emMapFileTypeList:
             for typeDict in emMapFileTypeList:
-                if ('type' in typeDict) and typeDict['type']:
-                    emMapTypeList.append(typeDict['type'])
+                if ('type' not in typeDict) or (not typeDict['type']) or ('partNumber' not in typeDict) or (not typeDict['partNumber']):
+                    continue
+                #
+                if typeDict['type'] in emMapTypeList:
+                    emMapTypeList[typeDict['type']].append(typeDict['partNumber'])
+                else:
+                    emMapTypeList[typeDict['type']] = [ typeDict['partNumber'] ]
                 #
             #
         #
