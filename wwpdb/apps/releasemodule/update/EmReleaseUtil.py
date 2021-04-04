@@ -216,9 +216,8 @@ class EmReleaseUtil(EntryUpdateBase):
             translator = CifEMDBTranslator()
             translator.set_logger_logging(log_error=True, error_log_file_name=logFilePath)
             translator.read_emd_map_v2_cif_file()
-            schema = os.path.join(self._cI.get('SITE_EM_DICT_PATH'), 'emdb-v3.xsd')
             if validateFlag:
-                translator.translate_and_validate(in_cif=ciffile, out_xml=xmlfile, in_schema=schema)
+                translator.translate_and_validate(in_cif=ciffile, out_xml=xmlfile)
             else:
                 translator.translate(in_cif=ciffile, out_xml=xmlfile)
             #
