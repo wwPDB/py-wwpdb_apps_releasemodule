@@ -30,6 +30,7 @@ import os, sys
 
 from wwpdb.utils.config.ConfigInfo             import ConfigInfo
 from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
 class ModuleBaseClass(object):
     """ Base Class responsible for all release module activities
@@ -43,6 +44,7 @@ class ModuleBaseClass(object):
         self._sessionPath=None
         self._siteId  = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self._cI=ConfigInfo(self._siteId)
+        self._cICommon=ConfigInfoAppCommon(self._siteId)
         self._topReleaseDir = os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release')
         self._topReleaseBetaDir = os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release_beta')
         self._topReleaseVersionDir = os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release_version')

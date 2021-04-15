@@ -33,8 +33,8 @@ class ReleaseUtil(EntryUpdateBase):
         super(ReleaseUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
         #
         self.__pdbId = self._entryDir['pdb_id'].lower()
-        self.__dictRoot = os.path.abspath(self._cI.get('SITE_PDBX_DICT_PATH'))
-        self.__dictBase = self._cI.get('SITE_PDBX_DICTIONARY_NAME_DICT')['ARCHIVE_CURRENT']
+        self.__dictRoot = os.path.abspath(self._cICommon.get_mmcif_dict_path())
+        self.__dictBase = self._cICommon._get_mmcif_archive_current_dict_filename()
         # 0        1              2                            3                         4                         5           6           7
         # version, cif_extension, current_internal_dictionary, target_public_dictionary, xml_convertor_dictionary, xml_prefix, xml_schema, xml_extension
         self.__CifXmlInfo = self.__readDictionaryInfo()
@@ -47,8 +47,8 @@ class ReleaseUtil(EntryUpdateBase):
                 [ [ '.v5.cif.xml', '.v5.xml' ], [ '.v5.cif.xml-noatom', '-noatom.v5.xml' ], [ '.v5.cif.xml-extatom', '-extatom.v5.xml' ] ] ]
             ]          
             """
-            self.__CifXmlInfo = [ \
-              [ 'v5', '.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd', \
+            self.__CifXmlInfo = [
+              [ 'v5', '.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd',
                 [ [ '.cif.xml', '.xml' ], [ '.cif.xml-noatom', '-noatom.xml' ], [ '.cif.xml-extatom', '-extatom.xml' ] ] ]
             ]          
         #
