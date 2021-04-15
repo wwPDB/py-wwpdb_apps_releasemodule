@@ -34,7 +34,7 @@ class ReleaseUtil(EntryUpdateBase):
         #
         self.__pdbId = self._entryDir['pdb_id'].lower()
         self.__dictRoot = os.path.abspath(self._cICommon.get_mmcif_dict_path())
-        self.__dictBase = self._cICommon._get_mmcif_archive_current_dict_filename()
+        self.__dictBase = self._cICommon.get_mmcif_archive_current_dict_filename()
         # 0        1              2                            3                         4                         5           6           7
         # version, cif_extension, current_internal_dictionary, target_public_dictionary, xml_convertor_dictionary, xml_prefix, xml_schema, xml_extension
         self.__CifXmlInfo = self.__readDictionaryInfo()
