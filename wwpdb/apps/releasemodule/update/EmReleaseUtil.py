@@ -27,7 +27,7 @@ import traceback
 
 from mmcif_utils.trans.InstanceMapper import InstanceMapper
 from wwpdb.utils.config.ConfigInfoData import ConfigInfoData
-# from wwpdb.utils.emdb.cifEMDBTranslator.cifEMDBTranslator import CifEMDBTranslator
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppEm
 from wwpdb.utils.emdb.cif_emdb_translator.cif_emdb_translator import CifEMDBTranslator
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
@@ -174,7 +174,8 @@ class EmReleaseUtil(EntryUpdateBase):
         self._removeFile(emdfile)
         #
         im = InstanceMapper(verbose=self._verbose, log=self._lfh)
-        im.setMappingFilePath(self._cI.get('SITE_EXT_DICT_MAP_EMD_FILE_PATH'))
+        cIA = ConfigInfoAppEm(self._siteId)
+        im.setMappingFilePath(cIA.get_emd_mapping_file_path())
         ok = im.translate(modelfile, emdfile, mode="src-dst")
         if ok:
             xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v3.xml')
