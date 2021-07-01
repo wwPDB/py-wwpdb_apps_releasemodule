@@ -145,7 +145,7 @@ class CitationFormParser(InputFormParser):
         for id_list in pubmed_info_list:
             pubmed_id_list.append(id_list[0])
         #
-        fetch = FetchUtil(path=self.__sessionPath, processLabel='', idList=pubmed_id_list, \
+        fetch = FetchUtil(path=self.__sessionPath, processLabel='', idList=pubmed_id_list,
                           log=self._lfh, verbose=self._verbose)
         fetch.doFetch()
         pubmedInfoMap = fetch.getPubmedInfoMap()

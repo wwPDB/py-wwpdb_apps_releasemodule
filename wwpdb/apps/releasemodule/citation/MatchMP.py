@@ -15,38 +15,42 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys,multiprocessing,traceback
+import multiprocessing
+import sys
+import traceback
 
-from wwpdb.apps.releasemodule.citation.MatchUtil  import MatchUtil
+from wwpdb.apps.releasemodule.citation.MatchUtil import MatchUtil
+
 
 class MatchWorker(multiprocessing.Process):
     """
     """
-    def __init__(self, termMap=None, pubmedInfo=None, taskQueue=None, resultQueue=None, \
+
+    def __init__(self, termMap=None, pubmedInfo=None, taskQueue=None, resultQueue=None,
                  log=sys.stderr, verbose=False):
         multiprocessing.Process.__init__(self)
         self.__termMap = termMap
         self.__pubmedInfo = pubmedInfo
-        self.__taskQueue=taskQueue
-        self.__resultQueue=resultQueue
-        self.__lfh=log
-        self.__verbose=verbose
+        self.__taskQueue = taskQueue
+        self.__resultQueue = resultQueue
+        self.__lfh = log
+        self.__verbose = verbose
 
-    def getMatchList(self,entry):
-        mUtil = MatchUtil(entry=entry, termMap=self.__termMap, pubmedInfo=self.__pubmedInfo, \
+    def getMatchList(self, entry):
+        mUtil = MatchUtil(entry=entry, termMap=self.__termMap, pubmedInfo=self.__pubmedInfo,
                           log=self.__lfh, verbose=self.__verbose)
         mUtil.run()
         return mUtil.getMatchList()
 
     def run(self):
-        processName=self.name
+        processName = self.name
         while True:
-            nextList=self.__taskQueue.get()
+            nextList = self.__taskQueue.get()
             # end of queue condition
             if nextList is None:
                 break
@@ -62,9 +66,11 @@ class MatchWorker(multiprocessing.Process):
             self.__resultQueue.put(resultList)
         #
 
+
 class MatchMP(object):
     """
     """
+
     def __init__(self, entryList=None, termMap=None, pubmedInfo=None, log=sys.stderr, verbose=False):
         """
         """
@@ -83,8 +89,8 @@ class MatchMP(object):
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
         #
-        workers = [ MatchWorker(termMap=self.__termMap, pubmedInfo=self.__pubmedInfo, taskQueue=taskQueue, \
-                    resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) for i in range(numProc) ]
+        workers = [MatchWorker(termMap=self.__termMap, pubmedInfo=self.__pubmedInfo, taskQueue=taskQueue,
+                               resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose) for i in range(numProc)]
         #
         for w in workers:
             w.start()
@@ -117,4 +123,3 @@ class MatchMP(object):
 
     def getMatchResultMap(self):
         return self.__matchResultMap
-

@@ -15,24 +15,26 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle as pickle
 
-import operator, os, shutil, string, sys
 import logging
+import operator
+import os
+import sys
+from wwpdb.io.locator.PathInfo import PathInfo
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
+from wwpdb.utils.session.WebRequest import InputRequest
 
-from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.apps.releasemodule.update.MultiUpdateProcess import MultiUpdateProcess
 from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
-from wwpdb.io.locator.PathInfo import PathInfo
-from wwpdb.utils.session.WebRequest import InputRequest
 
 
 class AutoReRelease(object):
@@ -42,16 +44,18 @@ class AutoReRelease(object):
         self.__siteId = siteId
         self.__verbose = verbose
         self.__lfh = log
-        self.__cI = ConfigInfo(self.__siteId)
-        self.__citationPath = os.path.join(self.__cI.get("SITE_DEPLOY_PATH"), "reference", "citation_finder")
+        self.__cICommon = ConfigInfoAppCommon(self.__siteId)
+        self.__citationPath = self.__cICommon.get_citation_finder_path()
         self.__sObj = None
         self.__sessionId = None
         self.__sessionPath = None
         #
         self.__reqObj = InputRequest({}, verbose=self.__verbose, log=self.__lfh)
-        self.__reqObj.setValue("TopSessionPath", self.__cI.get("SITE_WEB_APPS_TOP_SESSIONS_PATH"))
-        self.__reqObj.setValue("TopPath", self.__cI.get("SITE_WEB_APPS_TOP_PATH"))
-        self.__reqObj.setValue("TemplatePath", os.path.join(self.__cI.get("SITE_WEB_APPS_TOP_PATH"), "htdocs", "releasemodule", "templates"))
+        self.__reqObj.setValue("TopSessionPath", self.__cICommon.get_site_web_apps_top_sessions_path())
+        self.__reqObj.setValue("TopPath", self.__cICommon.get_site_web_apps_top_path())
+        self.__reqObj.setValue("TemplatePath",
+                               os.path.join(self.__cICommon.get_site_web_apps_top_path(), "htdocs", "releasemodule",
+                                            "templates"))
         self.__reqObj.setValue("WWPDB_SITE_ID", self.__siteId)
         self.__reqObj.setValue("option", "citation_update")
         self.__reqObj.setValue("task", "Citation Finder")
@@ -81,9 +85,9 @@ class AutoReRelease(object):
         #
         self.__lfh.write("AutoReRelease.ReleaseProcess() - found %d entries.\n" % len(entryList))
         for entryInfo in entryList:
-            for key1,value1 in entryInfo.items():
+            for key1, value1 in entryInfo.items():
                 if key1 == "pubmed":
-                    for key2,value2 in value1[0].items():
+                    for key2, value2 in value1[0].items():
                         self.__lfh.write("pubmed %r=%r\n" % (key2, value2))
                     #
                 else:
@@ -108,8 +112,8 @@ class AutoReRelease(object):
             #
             ofh.write("Dep ID         Ann   IDs\n")
             for entryInfo in updatedEntryList:
-                ofh.write("%-12s   %-3s   %s\n" % ( entryInfo[0], entryInfo[1], entryInfo[2] ))
-                self.__lfh.write("%-12s   %-3s   %s\n" % ( entryInfo[0], entryInfo[1], entryInfo[2] ))
+                ofh.write("%-12s   %-3s   %s\n" % (entryInfo[0], entryInfo[1], entryInfo[2]))
+                self.__lfh.write("%-12s   %-3s   %s\n" % (entryInfo[0], entryInfo[1], entryInfo[2]))
             #
         else:
             ofh.write("No entry has been re-released this week.\n")
@@ -120,9 +124,9 @@ class AutoReRelease(object):
         """ Join existing session or create new session as required.
         """
         #
-        self.__sObj            = self.__reqObj.newSessionObj()
-        self.__sessionId       = self.__sObj.getId()
-        self.__sessionPath     = self.__sObj.getPath()
+        self.__sObj = self.__reqObj.newSessionObj()
+        self.__sessionId = self.__sObj.getId()
+        self.__sessionPath = self.__sObj.getPath()
         if (self.__verbose):
             self.__lfh.write("------------------------------------------------------\n")
             self.__lfh.write("+AutoReRelease._getSession() - creating/joining session %s\n" % self.__sessionId)
@@ -144,9 +148,9 @@ class AutoReRelease(object):
         entryList = []
         entryIdMap = {}
         pubmedInfoMap = {}
-        for ann,dataList in annotEntryMap.items():
+        for ann, dataList in annotEntryMap.items():
             for dataDict in dataList:
-                if (not "status_code" in dataDict) or ( dataDict["status_code"] != "REL"):
+                if (not "status_code" in dataDict) or (dataDict["status_code"] != "REL"):
                     continue
                 #
                 if dataDict["structure_id"] in entryIdMap:
@@ -162,7 +166,7 @@ class AutoReRelease(object):
                     continue
                 #
                 EntryInfo = dbUtil.getEntryInfo([dataDict["structure_id"]])
-                if (not EntryInfo) or (not "status_code" in EntryInfo[0]) or ( EntryInfo[0]["status_code"] != "REL"):
+                if (not EntryInfo) or (not "status_code" in EntryInfo[0]) or (EntryInfo[0]["status_code"] != "REL"):
                     continue
                 #
                 if ("post_rel_recvd_coord" in EntryInfo[0]) and (EntryInfo[0]["post_rel_recvd_coord"].upper() == "Y"):
@@ -179,13 +183,13 @@ class AutoReRelease(object):
                     continue
                 #
                 newDataDict = {}
-                for item in ( "bmrb_id", "comb_ids", "emdb_id", "exp_method", "pdb_id", "wf_status_code" ):
+                for item in ("bmrb_id", "comb_ids", "emdb_id", "exp_method", "pdb_id", "wf_status_code"):
                     if (item in EntryInfo[0]) and EntryInfo[0][item]:
                         newDataDict[item] = EntryInfo[0][item]
                     #
                 #
-                for item_pair in ( ( "annotator", "rcsb_annotator" ), ( "approval_type", "author_approval_type" ), \
-                                   ( "da_status_code", "status_code" ), ( "entry", "structure_id") ):
+                for item_pair in (("annotator", "rcsb_annotator"), ("approval_type", "author_approval_type"),
+                                  ("da_status_code", "status_code"), ("entry", "structure_id")):
                     if (item_pair[1] in EntryInfo[0]) and EntryInfo[0][item_pair[1]]:
                         newDataDict[item_pair[0]] = EntryInfo[0][item_pair[1]]
                     #
@@ -197,7 +201,7 @@ class AutoReRelease(object):
                     newDataDict["emdb_release"] = True
                 #
                 pubmedInfo["id"] = "primary"
-                newDataDict["pubmed"] = [ pubmedInfo ]
+                newDataDict["pubmed"] = [pubmedInfo]
                 entryList.append(newDataDict)
                 if not pubmedInfo["pdbx_database_id_PubMed"] in pubmedInfoMap:
                     pubmedInfoMap[pubmedInfo["pdbx_database_id_PubMed"]] = pubmedInfo
@@ -222,7 +226,7 @@ class AutoReRelease(object):
         #
         for pdir in dataDict["pubmed"]:
             foundMatch = False
-            for item in ( "pdbx_database_id_PubMed", "pdbx_database_id_DOI" ):
+            for item in ("pdbx_database_id_PubMed", "pdbx_database_id_DOI"):
                 if (not item in dataDict) or (not dataDict[item]) or (not item in pdir) or (not pdir[item]):
                     continue
                 #
@@ -243,7 +247,7 @@ class AutoReRelease(object):
             if pdir["pdbx_database_id_PubMed"] in unwanted_pubmed_list:
                 continue
             #
-            for item in ( "page_first", "page_last" ):
+            for item in ("page_first", "page_last"):
                 if (not item in pdir) or (not pdir[item]):
                     continue
                 #
@@ -252,11 +256,13 @@ class AutoReRelease(object):
                 #
             #
             hasDifference = False
-            for item in ( "pdbx_database_id_PubMed", "pdbx_database_id_DOI", "page_first", "page_last", "journal_volume", "year" ):
+            for item in (
+            "pdbx_database_id_PubMed", "pdbx_database_id_DOI", "page_first", "page_last", "journal_volume", "year"):
                 if (not item in pdir) or (not pdir[item]):
                     continue
                 #
-                if (not item in dataDict) or (not dataDict[item]) or (str(dataDict[item]).strip() != str(pdir[item]).strip()):
+                if (not item in dataDict) or (not dataDict[item]) or (
+                        str(dataDict[item]).strip() != str(pdir[item]).strip()):
                     hasDifference = True
                     break
                 #
@@ -275,7 +281,8 @@ class AutoReRelease(object):
         """ Get unwanted pubmed ID list
         """
         try:
-            archiveDirPath = self.__pI.getDirPath(dataSetId=structure_id, wfInstanceId=None, contentType="model", formatType="pdbx", \
+            archiveDirPath = self.__pI.getDirPath(dataSetId=structure_id, wfInstanceId=None, contentType="model",
+                                                  formatType="pdbx",
                                                   fileSource="archive", versionId="latest", partNumber=1)
             #
             pickle_file = os.path.join(archiveDirPath, "marked_pubmed_id.pic")
@@ -290,6 +297,7 @@ class AutoReRelease(object):
             return []
         #
 
+
 if __name__ == '__main__':
     # Create logger
     logger = logging.getLogger()
@@ -299,5 +307,5 @@ if __name__ == '__main__':
     logger.addHandler(ch)
     logger.setLevel(logging.INFO)
 
-    releaseUtil = AutoReRelease(siteId=os.environ["WWPDB_SITE_ID"], verbose = True, log = sys.stderr)
+    releaseUtil = AutoReRelease(siteId=os.environ["WWPDB_SITE_ID"], verbose=True, log=sys.stderr)
     releaseUtil.ReleaseProcess(sys.argv[1])

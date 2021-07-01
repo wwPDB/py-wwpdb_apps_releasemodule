@@ -16,44 +16,49 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle as pickle
 
-import copy, operator, os, sys, string, traceback
+import operator
+import os
+import sys
+from wwpdb.io.locator.PathInfo import PathInfo
 
-from wwpdb.apps.releasemodule.citation.FetchUtil  import FetchUtil
+from wwpdb.apps.releasemodule.citation.FetchUtil import FetchUtil
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
-from wwpdb.apps.releasemodule.utils.CombineDbApi  import CombineDbApi
-from wwpdb.io.locator.PathInfo                    import PathInfo
+from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
+
+
 #
 
 class ReadCitationFinderResult(object):
     """ Class responsible for handling citation finder result file.
 
     """
+
     def __init__(self, path='.', dbUtil=None, siteId=None, pickleFile=None, verbose=False, log=sys.stderr):
         self.__sessionPath = path
-        self.__dbUtil      = dbUtil
-        self.__siteId      = siteId
-        self.__pickleFile  = pickleFile
-        self.__verbose     = verbose
-        self.__lfh         = log
+        self.__dbUtil = dbUtil
+        self.__siteId = siteId
+        self.__pickleFile = pickleFile
+        self.__verbose = verbose
+        self.__lfh = log
         #
-        self.__annotEntryMap  = {}
+        self.__annotEntryMap = {}
         self.__foundEntryList = []
-        self.__entryIdList    = []
-        self.__pubmedInfoMap  = {}
+        self.__entryIdList = []
+        self.__pubmedInfoMap = {}
         self.__validEntryList = []
         #
-        self.__items = ( 'pdbx_database_id_DOI', 'pdbx_database_id_PubMed', 'title', 'journal_abbrev', 'journal_volume', \
-                         'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author', 'author_list' )
+        self.__items = ('pdbx_database_id_DOI', 'pdbx_database_id_PubMed', 'title', 'journal_abbrev', 'journal_volume',
+                        'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author', 'author_list')
         #
         self._deserialize()
 
@@ -76,7 +81,7 @@ class ReadCitationFinderResult(object):
             return
         #
         if annotator == 'ALL':
-            for ann,dataList in list(self.__annotEntryMap.items()):
+            for ann, dataList in list(self.__annotEntryMap.items()):
                 for dataDict in dataList:
                     self.__entryIdList.append(dataDict['structure_id'])
                     self.__foundEntryList.append(dataDict)
@@ -109,7 +114,8 @@ class ReadCitationFinderResult(object):
                 continue
             #
             for pdir in dataDict['pubmed']:
-                if (not 'pdbx_database_id_PubMed' in pdir) or (not pdir['pdbx_database_id_PubMed']) or (pdir['pdbx_database_id_PubMed'] in uniqueMap):
+                if (not 'pdbx_database_id_PubMed' in pdir) or (not pdir['pdbx_database_id_PubMed']) or (
+                        pdir['pdbx_database_id_PubMed'] in uniqueMap):
                     continue
                 #
                 uniqueMap[pdir['pdbx_database_id_PubMed']] = 'y'
@@ -132,7 +138,7 @@ class ReadCitationFinderResult(object):
             return
         #
         if not self.__dbUtil:
-            self.__dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+            self.__dbUtil = CombineDbApi(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
         #
         RelList = self.__dbUtil.getFunctionCall(False, 'getThisWeekRelEntries', [annotator])
         if not RelList:
@@ -149,13 +155,16 @@ class ReadCitationFinderResult(object):
             #
             # Get current entry information from database
             #
-            if (not EntryInfoMap) or (not oldDir['structure_id'] in EntryInfoMap) or (not EntryInfoMap[oldDir['structure_id']]):
+            if (not EntryInfoMap) or (not oldDir['structure_id'] in EntryInfoMap) or (
+            not EntryInfoMap[oldDir['structure_id']]):
                 continue
             #
             currDir = EntryInfoMap[oldDir['structure_id']]
-            if ('rcsb_annotator' in currDir) and str(currDir['rcsb_annotator']) != '' and currDir['rcsb_annotator'].upper() != 'NULL' and \
-               currDir['rcsb_annotator'].upper() != 'UNASSIGN' and currDir['rcsb_annotator'].upper() != annotator and annotator != 'OTHER' and \
-               annotator != 'ALL':
+            if ('rcsb_annotator' in currDir) and str(currDir['rcsb_annotator']) != '' and currDir[
+                'rcsb_annotator'].upper() != 'NULL' and \
+                    currDir['rcsb_annotator'].upper() != 'UNASSIGN' and currDir[
+                'rcsb_annotator'].upper() != annotator and annotator != 'OTHER' and \
+                    annotator != 'ALL':
                 continue
             #
             isDEPLocked = False
@@ -174,7 +183,8 @@ class ReadCitationFinderResult(object):
             #
             # Get current citation information from database
             #
-            if EntryCitationInfoMap and (oldDir['structure_id'] in EntryCitationInfoMap) and EntryCitationInfoMap[oldDir['structure_id']]:
+            if EntryCitationInfoMap and (oldDir['structure_id'] in EntryCitationInfoMap) and EntryCitationInfoMap[
+                oldDir['structure_id']]:
                 currDir = self.__getCitationInfo(currDir, EntryCitationInfoMap[oldDir['structure_id']])
             #
             # Get marked unwanted pubmed ID list
@@ -213,8 +223,10 @@ class ReadCitationFinderResult(object):
                 #
                 # Check if entry already had same pubmed information
                 #
-                if EntryCitationInfoMap and (oldDir['structure_id'] in EntryCitationInfoMap) and EntryCitationInfoMap[oldDir['structure_id']]:
-                    code = self.__compareCitationInfo(EntryCitationInfoMap[oldDir['structure_id']], pdir, (currDir['structure_id'] in RelList))
+                if EntryCitationInfoMap and (oldDir['structure_id'] in EntryCitationInfoMap) and EntryCitationInfoMap[
+                    oldDir['structure_id']]:
+                    code = self.__compareCitationInfo(EntryCitationInfoMap[oldDir['structure_id']], pdir,
+                                                      (currDir['structure_id'] in RelList))
                     #
                     # Skip already updated entry
                     #
@@ -269,7 +281,8 @@ class ReadCitationFinderResult(object):
     def __getUnwantedPubMedIDList(self, structure_id):
         pubmed_id_list = []
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
-        archiveDirPath = pI.getDirPath(dataSetId=structure_id, wfInstanceId=None, contentType='model', formatType='pdbx', \
+        archiveDirPath = pI.getDirPath(dataSetId=structure_id, wfInstanceId=None, contentType='model',
+                                       formatType='pdbx',
                                        fileSource='archive', versionId='latest', partNumber=1)
         pickle_file = os.path.join(archiveDirPath, 'marked_pubmed_id.pic')
         if not os.access(pickle_file, os.F_OK):
@@ -284,9 +297,9 @@ class ReadCitationFinderResult(object):
         code = ' '
         if (not 'pdbx_database_id_PubMed' in cinfo) or (not 'pdbx_database_id_PubMed' in pdir):
             if ('pdbx_database_id_PubMed' in pdir) and pdir['pdbx_database_id_PubMed'] and \
-               ('pdbx_database_id_DOI' in pdir) and pdir['pdbx_database_id_DOI'] and \
-               ('pdbx_database_id_DOI' in cinfo) and cinfo['pdbx_database_id_DOI'] and \
-               (pdir['pdbx_database_id_DOI'] == cinfo['pdbx_database_id_DOI']):
+                    ('pdbx_database_id_DOI' in pdir) and pdir['pdbx_database_id_DOI'] and \
+                    ('pdbx_database_id_DOI' in cinfo) and cinfo['pdbx_database_id_DOI'] and \
+                    (pdir['pdbx_database_id_DOI'] == cinfo['pdbx_database_id_DOI']):
                 return 'checked'
             #
             return code
@@ -296,7 +309,7 @@ class ReadCitationFinderResult(object):
         #
         code = 'checked'
         #
-        for item in ( 'pdbx_database_id_DOI', 'page_first', 'page_last', 'journal_volume', 'year' ):
+        for item in ('pdbx_database_id_DOI', 'page_first', 'page_last', 'journal_volume', 'year'):
             #
             # Not allowed missing value in citation
             #
@@ -312,8 +325,8 @@ class ReadCitationFinderResult(object):
                 return code
             #
         #
-        if ('similarity_score' in pdir) and (float(pdir['similarity_score']) > 0.98 or \
-           (release_flag and float(pdir['similarity_score']) > 0.9)):
+        if ('similarity_score' in pdir) and (float(pdir['similarity_score']) > 0.98 or
+                                             (release_flag and float(pdir['similarity_score']) > 0.9)):
             code = 'skip'
         #
         return code
@@ -321,7 +334,7 @@ class ReadCitationFinderResult(object):
     def __sortMatchedList(self, in_list):
         matchlist = []
         dmap = {}
-        for dir in in_list: 
+        for dir in in_list:
             dmap[dir['pdbx_database_id_PubMed']] = dir
             list = []
             list.append(dir['pdbx_database_id_PubMed'])
@@ -370,6 +383,7 @@ class ReadCitationFinderResult(object):
                 self.__validEntryList.append(dmap[list1[0]])
             #
         #
+
 
 if __name__ == '__main__':
     cReader = ReadCitationFinderResult(pickleFile=sys.argv[1], verbose=False, log=sys.stderr)

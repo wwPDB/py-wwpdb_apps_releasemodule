@@ -16,12 +16,14 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import operator, os, sys, string, traceback
+import os
+import sys
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -29,9 +31,11 @@ except ImportError:
 
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
 
+
 class CheckResult(object):
     """
     """
+
     def __init__(self, path='.', input='result.db', log=sys.stderr, verbose=False):
         """ Initial CheckResult class
         """
@@ -53,7 +57,7 @@ class CheckResult(object):
     def Check(self):
         map = self.__annotEntryMap
         self.__annotEntryMap = {}
-        for k,list in map.items():
+        for k, list in map.items():
             elist = []
             for dir in list:
                 print(dir['structure_id'] + ': ' + dir['c_title'])
@@ -80,6 +84,7 @@ class CheckResult(object):
         fb = open('new_citation_finder.db', 'wb')
         pickle.dump(self.__annotEntryMap, fb)
         fb.close()
+
 
 if __name__ == '__main__':
     cf = CheckResult(input=sys.argv[1], log=sys.stderr, verbose=False)

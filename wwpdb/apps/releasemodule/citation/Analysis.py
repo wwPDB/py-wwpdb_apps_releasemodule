@@ -16,28 +16,33 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import copy, operator, os, sys, string, time, traceback
+import copy
+
+import operator
+import time
+
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-from mmcif.api.PdbxContainers                  import *
-from mmcif.io.PdbxWriter                      import PdbxWriter
-from wwpdb.utils.config.ConfigInfo                 import ConfigInfo
+from mmcif.api.PdbxContainers import *
+from mmcif.io.PdbxWriter import PdbxWriter
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
-from wwpdb.apps.releasemodule.citation.MatchMP   import MatchMP
-from wwpdb.apps.releasemodule.citation.MatchUtil import MatchUtil
-from wwpdb.apps.releasemodule.utils.Utility      import *
+from wwpdb.apps.releasemodule.citation.MatchMP import MatchMP
+from wwpdb.apps.releasemodule.utils.Utility import *
+
 
 class Analysis(object):
     """
     """
+
     def __init__(self, siteId="WWPDB_DEPLOY_TEST", path='.', input='result.db', log=sys.stderr, verbose=False):
         """ Initial Analysis class
         """
@@ -54,7 +59,7 @@ class Analysis(object):
         #
         self._deserialize()
         #
-        self.__cI = ConfigInfo(siteId)
+        self.__cICommon = ConfigInfoAppCommon(siteId)
 
     def _deserialize(self):
         fb = open(self.__picklefile, 'rb')
@@ -64,7 +69,7 @@ class Analysis(object):
         fb.close()
 
     def _runMatchMP(self):
-        mp = MatchMP(entryList=self.__candidateList, termMap=self.__termMap, \
+        mp = MatchMP(entryList=self.__candidateList, termMap=self.__termMap,
                      pubmedInfo=self.__pubmedInfo, log=self.__lfh, verbose=self.__verbose)
         mp.run()
         self.__matchResultMap = mp.getMatchResultMap()
@@ -83,7 +88,7 @@ class Analysis(object):
                 if entry_id in self.__matchResultMap:
                     mList = self.__matchResultMap[entry_id]
                 #
-            #else:
+            # else:
             #    mUtil = MatchUtil(entry=cdt, termMap=self.__termMap, pubmedInfo=self.__pubmedInfo, \
             #                      log=self.__lfh, verbose=self.__verbose)
             #    mUtil.run()
@@ -97,7 +102,7 @@ class Analysis(object):
                 if list[0] not in self.__pubmedInfo:
                     continue
                 #
-                pdir =  copy.deepcopy(self.__pubmedInfo[list[0]])
+                pdir = copy.deepcopy(self.__pubmedInfo[list[0]])
                 pdir['similarity_score'] = list[1]
                 plist.append(pdir)
             #
@@ -122,7 +127,7 @@ class Analysis(object):
         #
         map = self.__annotEntryMap
         self.__annotEntryMap = {}
-        for k,list in map.items():
+        for k, list in map.items():
             if len(list) < 2:
                 self.__annotEntryMap[k] = list
             else:
@@ -130,7 +135,7 @@ class Analysis(object):
                 slist = []
                 for cdt in list:
                     dmap[cdt['structure_id']] = cdt
-                    tlist = [cdt['structure_id'], cdt['pubmed'][0]['similarity_score']] 
+                    tlist = [cdt['structure_id'], cdt['pubmed'][0]['similarity_score']]
                     slist.append(tlist)
                 #
                 slist.sort(key=operator.itemgetter(1))
@@ -164,11 +169,11 @@ class Analysis(object):
         if curCat:
             curContainer.append(curCat)
         #
-        myDataList=[]
+        myDataList = []
         myDataList.append(curContainer)
         filename = os.path.join(self.__sessionPath, self.__resultfile)
         ofh = open(filename, 'w')
-        pdbxW=PdbxWriter(ofh)
+        pdbxW = PdbxWriter(ofh)
         pdbxW.write(myDataList)
         ofh.close()
 
@@ -184,8 +189,8 @@ class Analysis(object):
         row = 0
         for cdt in self.__candidateList:
             if 'structure_id' not in cdt or \
-               'c_title' not in cdt or \
-               'pubmed_author' not in cdt:
+                    'c_title' not in cdt or \
+                    'pubmed_author' not in cdt:
                 continue
             #
             cat.setValue(str(cdt['structure_id']), 'structure_id', row)
@@ -204,7 +209,7 @@ class Analysis(object):
         cat.appendAttribute('pubmed_ids')
         #
         row = 0
-        for key,list in self.__termMap.items():
+        for key, list in self.__termMap.items():
             cat.setValue(str(key), 'author', row)
             cat.setValue(str(','.join(list)), 'pubmed_ids', row)
             row += 1
@@ -220,7 +225,7 @@ class Analysis(object):
         cat.appendAttribute('title')
         #
         row = 0
-        for key,dir in self.__pubmedInfo.items():
+        for key, dir in self.__pubmedInfo.items():
             cat.setValue(str(dir['pdbx_database_id_PubMed']), 'id', row)
             cat.setValue(str(dir['title']), 'title', row)
             row += 1
@@ -232,7 +237,7 @@ class Analysis(object):
         f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
-        f.write('setenv RCSBROOT   ' + self.__cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')
+        f.write('setenv RCSBROOT   ' + self.__cICommon.get_site_annot_tools_path() + '\n')
         f.write('setenv BINPATH  ${RCSBROOT}/bin\n')
         f.write('#\n')
         f.write('${BINPATH}/CitationMatch -input ' + self.__resultfile + \
@@ -253,8 +258,8 @@ class Analysis(object):
         #
         for dir in rlist:
             if 'structure_id' not in dir or \
-               'pubmed_id' not in dir or \
-               'similarity_score' not in dir:
+                    'pubmed_id' not in dir or \
+                    'similarity_score' not in dir:
                 continue
             #
             structure_id = dir['structure_id']
@@ -273,7 +278,7 @@ class Analysis(object):
         #
         map = self.__matchResultMap
         self.__matchResultMap = {}
-        for k,list in map.items():
+        for k, list in map.items():
             if len(list) > 1:
                 list.sort(key=operator.itemgetter(1))
                 list.reverse()
@@ -285,22 +290,23 @@ class Analysis(object):
         self._runCitationMatch()
         self._readCitationMatchResult()
         self._sortMatchResultMap()
-        #self._runMatchMP()
+        # self._runMatchMP()
         self._getMatchList()
         self._sortEntryMap()
 
     def getResult(self):
         return self.__annotEntryMap
 
+
 if __name__ == '__main__':
-    startTime=time.time()
+    startTime = time.time()
     cf = Analysis(log=sys.stderr, verbose=False)
     cf.Read()
     dir = cf.getResult()
-    endTime=time.time()
+    endTime = time.time()
     diffTime = endTime - startTime
     print(diffTime)
-    for k,list in list(dir.items()):
-        print('annot='+k+': Total='+str(len(list)))
+    for k, list in list(dir.items()):
+        print('annot=' + k + ': Total=' + str(len(list)))
         for d in list:
             print(d['structure_id'] + '=' + str(len(d['pubmed'])))

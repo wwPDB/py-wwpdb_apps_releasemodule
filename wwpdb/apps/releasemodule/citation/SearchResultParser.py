@@ -16,14 +16,15 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
-
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 from xml.dom import minidom
-import sys, os
+
+import sys
+
 
 class SearchResultParser(object):
     """Parse Pubmed search result xml file, return pubmed id list
@@ -37,10 +38,10 @@ class SearchResultParser(object):
     def getIdList(self):
         return self.__pubmedIdList
 
-    def  _parseXml(self):
+    def _parseXml(self):
         try:
             __doc = minidom.parse(self.__xmlfile)
-            self.__pubmedIdList= self._parseDoc(__doc)
+            self.__pubmedIdList = self._parseDoc(__doc)
         except:
             pass
 
@@ -56,6 +57,7 @@ class SearchResultParser(object):
             #
         #
         return idlist
+
 
 if __name__ == "__main__":
     parser = SearchResultParser(sys.argv[1])

@@ -16,35 +16,39 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys,multiprocessing,traceback
+import multiprocessing
+import sys
+import traceback
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
 
-from wwpdb.apps.releasemodule.citation.SearchUtil  import SearchUtil
+from wwpdb.apps.releasemodule.citation.SearchUtil import SearchUtil
 from wwpdb.apps.releasemodule.utils.MultiProcLimit import MultiProcLimit
-from wwpdb.utils.config.ConfigInfo                   import ConfigInfo
+
 
 class SearchWorker(multiprocessing.Process):
     """
     """
-    def __init__(self, path='.', processLabel='', siteId = None, taskQueue=None, resultQueue=None, \
-                 mpl = None, log=sys.stderr, verbose=False):
+
+    def __init__(self, path='.', processLabel='', siteId=None, taskQueue=None, resultQueue=None,
+                 mpl=None, log=sys.stderr, verbose=False):
         multiprocessing.Process.__init__(self)
         self.__sessionPath = path
         self.__processLabel = processLabel
-        self.__taskQueue=taskQueue
-        self.__resultQueue=resultQueue
-        self.__lfh=log
-        self.__verbose=verbose
+        self.__taskQueue = taskQueue
+        self.__resultQueue = resultQueue
+        self.__lfh = log
+        self.__verbose = verbose
         self.__mpl = mpl
         self.__siteId = siteId
 
-    def fetchEntryList(self,term):
-        search = SearchUtil(path=self.__sessionPath, processLabel=self.__processLabel, \
-                          term=term, siteId = self.__siteId, log=self.__lfh, verbose=self.__verbose)
+    def fetchEntryList(self, term):
+        search = SearchUtil(path=self.__sessionPath, processLabel=self.__processLabel,
+                            term=term, siteId=self.__siteId, log=self.__lfh, verbose=self.__verbose)
         # Speed limit
         if self.__mpl:
             self.__mpl.waitnext()
@@ -52,9 +56,9 @@ class SearchWorker(multiprocessing.Process):
         return search.getPubmedIdList()
 
     def run(self):
-        processName=self.name
+        processName = self.name
         while True:
-            nextList=self.__taskQueue.get()
+            nextList = self.__taskQueue.get()
             # end of queue condition
             if nextList is None:
                 break
@@ -73,10 +77,12 @@ class SearchWorker(multiprocessing.Process):
             self.__resultQueue.put(resultList)
         #
 
+
 class SearchMP(object):
     """
     """
-    def __init__(self, path='.', termList=None, siteId = None, log=sys.stderr, verbose=False):
+
+    def __init__(self, path='.', termList=None, siteId=None, log=sys.stderr, verbose=False):
         """
         """
         self.__siteId = siteId
@@ -108,10 +114,10 @@ class SearchMP(object):
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
         #
-        workers = [ SearchWorker(path=self.__sessionPath, processLabel=str(i+1), taskQueue=taskQueue, \
-                       resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose, \
-                       siteId = self.__siteId, mpl = mpl) \
-                       for i in range(numProc) ]
+        workers = [SearchWorker(path=self.__sessionPath, processLabel=str(i + 1), taskQueue=taskQueue,
+                                resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose,
+                                siteId=self.__siteId, mpl=mpl) \
+                   for i in range(numProc)]
         #
         for w in workers:
             w.start()
@@ -145,6 +151,7 @@ class SearchMP(object):
     def getTermMap(self):
         return self.__termMap
 
+
 if __name__ == '__main__':
     f = open(sys.argv[1], 'r')
     data = f.read()
@@ -153,7 +160,7 @@ if __name__ == '__main__':
     termlist = data.split('\n')
     termlist.remove('')
     print('termlist=' + str(len(termlist)))
-    cf = SearchMP(termList=termlist,log=sys.stderr, verbose=False)
+    cf = SearchMP(termList=termlist, log=sys.stderr, verbose=False)
     cf.run()
     dir = cf.getTermMap()
     print('dir=' + str(len(dir)))
