@@ -48,15 +48,20 @@ class CitationUpdate:
     def clean_up(self):
         shutil.rmtree(self.citation_updates_path, ignore_errors=True)
 
+    def run_citation_finder(self):
+        CitationFinder(siteId=self.get_site_id(), path=self.get_citation_updates_path(),
+                       output=self.get_db_output()).searchPubmed()
+
+    def run_auto_re_release(self):
+        AutoReRelease(siteId=self.get_site_id()).ReleaseProcess(outputFile=self.get_auto_rerelease_output_file())
+
 
 def run_citation_finder():
     cu = CitationUpdate()
     cu.make_citation_updates_path()
     cu.make_citation_finder_path()
-    CitationFinder(siteId=cu.get_site_id(), path=cu.get_citation_updates_path(),
-                   output=cu.get_db_output()).searchPubmed()
-
-    AutoReRelease(siteId=cu.get_site_id()).ReleaseProcess(outputFile=cu.get_auto_rerelease_output_file())
+    cu.run_citation_finder()
+    cu.run_auto_re_release()
     cu.clean_up()
 
 
