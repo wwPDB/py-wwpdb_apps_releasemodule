@@ -22,7 +22,7 @@ __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
 import os, sys
-from wwpdb.utils.config.ConfigInfo  import ConfigInfo
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 from wwpdb.apps.wf_engine.engine.dbAPI import dbAPI
 
 def isDEPLocked(depid):
@@ -299,8 +299,9 @@ def FindReleaseFiles(siteId, entry_dir):
     if not id_list:
         return returnMap
     #
-    cI = ConfigInfo(siteId)
-    opReleaseDir = os.path.join(cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release')
+    cIcommon = ConfigInfoAppCommon(siteId)
+    opReleaseDir = cIcommon.get_for_release_path()
+
     map = {}
     for id in id_list:
         lower_id = id.lower()

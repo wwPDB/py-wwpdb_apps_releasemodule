@@ -16,18 +16,23 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import sys, os
 from xml.dom import minidom
+
+import os
+import sys
+
 from wwpdb.apps.releasemodule.citation.FetchResultParser import UniCodeHandler
+
 
 class RisCitationParser(object):
     """ Parse citation information from ris file.
     """
+
     def __init__(self, risfile=None):
         """
         """
@@ -59,48 +64,50 @@ class RisCitationParser(object):
                 if (not line) or (len(line) < 6) or (line[2:5] != " - "):
                     continue
                 #
-                if line[0:2] not in ( "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "JF", "PY", "Y1", "VL", "SP", "EP", "SN", "DO" ):
+                if line[0:2] not in (
+                "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "JF", "PY", "Y1", "VL", "SP", "EP", "SN", "DO"):
                     continue
                 #
                 angstromFlag = False
-                if line[0:2] in ( "TI", "T1" ):
+                if line[0:2] in ("TI", "T1"):
                     angstromFlag = True
                 #
                 value = self.__processValue(line[5:].strip(), angstromFlag)
                 if not value:
                     continue
                 #
-                if line[0:2] in ( "AU", "A1", "A2", "A3", "A4" ): # Author
+                if line[0:2] in ("AU", "A1", "A2", "A3", "A4"):  # Author
                     self.__processAuthorName(value)
-                elif line[0:2] in ( "TI", "T1" ): # Title
+                elif line[0:2] in ("TI", "T1"):  # Title
                     tmpCitationData[line[0:2]] = value
-                elif line[0:2] in ( "JO", "JA", "JF" ): # Journal
+                elif line[0:2] in ("JO", "JA", "JF"):  # Journal
                     tmpCitationData[line[0:2]] = value
-                elif line[0:2] in ( "PY", "Y1" ): # Year
+                elif line[0:2] in ("PY", "Y1"):  # Year
                     tList = value.split("/")
                     if (len(tList) > 0) and (len(tList[0]) == 4) and tList[0].isdigit():
                         tmpCitationData[line[0:2]] = tList[0]
                     #
-                elif line[0:2] == "VL": # Volume number
+                elif line[0:2] == "VL":  # Volume number
                     self.__convertedCitationData["journal_volume"] = value
-                elif line[0:2] == "SP": # Start Page
+                elif line[0:2] == "SP":  # Start Page
                     if value.isdigit():
                         self.__convertedCitationData["page_first"] = value
                     #
-                elif line[0:2] == "EP": # End Page
+                elif line[0:2] == "EP":  # End Page
                     if value.isdigit():
                         self.__convertedCitationData["page_last"] = value
                     #
-                #elif line[0:2] == "SN": # ISBN/ISSN
-                elif line[0:2] == "DO": # DOI
-                    self.__convertedCitationData["pdbx_database_id_DOI"] = value.replace('http://doi.org/', '').replace('https://doi.org/', '')
+                # elif line[0:2] == "SN": # ISBN/ISSN
+                elif line[0:2] == "DO":  # DOI
+                    self.__convertedCitationData["pdbx_database_id_DOI"] = value.replace('http://doi.org/', '').replace(
+                        'https://doi.org/', '')
                 #
             #
         #
         # Get title, journal_abbrev, year
-        cif_ris_token_map = { "title": ( "TI", "T1" ), "journal_abbrev": ( "JA", "JF", "JO" ), "year": ( "PY", "Y1" ) }
+        cif_ris_token_map = {"title": ("TI", "T1"), "journal_abbrev": ("JA", "JF", "JO"), "year": ("PY", "Y1")}
         #
-        for cif_token,ris_tokens in cif_ris_token_map.items():
+        for cif_token, ris_tokens in cif_ris_token_map.items():
             for token in ris_tokens:
                 if token in tmpCitationData:
                     self.__convertedCitationData[cif_token] = tmpCitationData[token]
@@ -177,14 +184,15 @@ class RisCitationParser(object):
             return
         #
         if "author" in self.__convertedCitationData:
-            self.__convertedCitationData["author"].append( { "name" : cif_author, "orcid" : "" } )
+            self.__convertedCitationData["author"].append({"name": cif_author, "orcid": ""})
         else:
-            self.__convertedCitationData["author"] = [ { "name" : cif_author, "orcid" : "" } ]
+            self.__convertedCitationData["author"] = [{"name": cif_author, "orcid": ""}]
         #
+
 
 if __name__ == "__main__":
     parser = RisCitationParser(sys.argv[1])
     citDict = parser.getCitationData()
-    for key,val in citDict.items():
-        sys.stderr.write("%r=%r\n" % (key,val))
+    for key, val in citDict.items():
+        sys.stderr.write("%r=%r\n" % (key, val))
     #

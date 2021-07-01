@@ -15,41 +15,43 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle as pickle
 
-import copy, operator, os, sys, string, traceback
+import sys
 
-from wwpdb.apps.releasemodule.citation.FetchUtil  import FetchUtil
+from wwpdb.apps.releasemodule.citation.FetchUtil import FetchUtil
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
-from wwpdb.apps.releasemodule.utils.ContentDbApi  import ContentDbApi
-from wwpdb.apps.releasemodule.utils.Utility       import isDEPLocked
+from wwpdb.apps.releasemodule.utils.Utility import isDEPLocked
+
+
 #
 
 class MonitorCitationUpdate(object):
     """
     """
+
     def __init__(self, path='.', siteId=None, pickleFile=None, resultFile=None, verbose=False, log=sys.stderr):
         self.__sessionPath = path
-        self.__siteId      = siteId
-        self.__pickleFile  = pickleFile
-        self.__resultFile  = resultFile
-        self.__verbose     = verbose
-        self.__lfh         = log
+        self.__siteId = siteId
+        self.__pickleFile = pickleFile
+        self.__resultFile = resultFile
+        self.__verbose = verbose
+        self.__lfh = log
         #
-        self.__annotEntryMap  = {}
-        self.__foundAnnotEntryMap  = {}
+        self.__annotEntryMap = {}
+        self.__foundAnnotEntryMap = {}
         self.__allPubmedIdList = []
-        self.__pubmedInfoMap  = {}
+        self.__pubmedInfoMap = {}
         #
-        self.__annotatorList = [ 'BH', 'BN', 'CS', 'EP', 'GG', 'IP', 'LD', 'LT', 'MRS', 'MZ', 'SG', 'YHL' ]
+        self.__annotatorList = ['BH', 'BN', 'CS', 'EP', 'GG', 'IP', 'LD', 'LT', 'MRS', 'MZ', 'SG', 'YHL']
         #
         self._deserialize()
 
@@ -64,7 +66,7 @@ class MonitorCitationUpdate(object):
         #
         self.__getPubmedInfoMap()
         #
-        db = DBUtil(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        db = DBUtil(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
         fw = open(self.__resultFile, 'w')
         fw.write('Annot. \t Found \t Updated\n')
         for ann in self.__annotatorList:
@@ -110,8 +112,8 @@ class MonitorCitationUpdate(object):
 
     def __printCitationUpdateStats(self, f, db, annotator, foundEntryList):
         #
-        items = [ 'pdbx_database_id_DOI', 'title', 'journal_abbrev', 'journal_volume',
-                  'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author' ]
+        items = ['pdbx_database_id_DOI', 'title', 'journal_abbrev', 'journal_volume',
+                 'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author']
         #
         RelList = db.getThisWeekRelEntries(annotator)
         #
@@ -186,7 +188,7 @@ class MonitorCitationUpdate(object):
                 else:
                     num_hit += 1
             #
-            #if found_update:
+            # if found_update:
             #    num_update += 1
             #
         #
@@ -202,7 +204,7 @@ class MonitorCitationUpdate(object):
         #
         code = 'checked'
         #
-        for item in ( 'pdbx_database_id_DOI', 'page_first', 'page_last', 'journal_volume', 'year'):
+        for item in ('pdbx_database_id_DOI', 'page_first', 'page_last', 'journal_volume', 'year'):
             #
             # Not allowed missing value in citation
             #
@@ -218,12 +220,14 @@ class MonitorCitationUpdate(object):
                 return code
             #
         #
-        if ('similarity_score' in dir) and (float(dir['similarity_score']) > 0.98 or (release_flag and float(dir['similarity_score']) > 0.9)):
+        if ('similarity_score' in dir) and (
+                float(dir['similarity_score']) > 0.98 or (release_flag and float(dir['similarity_score']) > 0.9)):
             code = 'skip'
         #
         return code
 
+
 if __name__ == '__main__':
-    monitor = MonitorCitationUpdate(path=sys.argv[1], siteId=sys.argv[2], pickleFile=sys.argv[3], \
+    monitor = MonitorCitationUpdate(path=sys.argv[1], siteId=sys.argv[2], pickleFile=sys.argv[3],
                                     resultFile=sys.argv[4], verbose=False, log=sys.stderr)
     monitor.getEntryList()

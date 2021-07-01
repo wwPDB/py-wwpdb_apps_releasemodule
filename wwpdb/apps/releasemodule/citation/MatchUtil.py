@@ -15,18 +15,21 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import operator, os, sys, string, traceback
+import operator
+import sys
 
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
+
 
 class MatchUtil(object):
     """
     """
+
     def __init__(self, entry=None, termMap=None, pubmedInfo=None, log=sys.stderr, verbose=False):
         """ Initial MatchUtil class
         """
@@ -39,9 +42,9 @@ class MatchUtil(object):
 
     def run(self):
         if 'rcsb_annotator' not in self.__entry or \
-           'c_title' not in self.__entry or \
-           'pubmed_author' not in self.__entry or \
-           'structure_id' not in self.__entry:
+                'c_title' not in self.__entry or \
+                'pubmed_author' not in self.__entry or \
+                'structure_id' not in self.__entry:
             return
         #
         idlist = self._getUniquePubmedIdList()
@@ -73,8 +76,8 @@ class MatchUtil(object):
         for id in idlist:
             if id not in self.__pubmedInfo:
                 continue
-            sim = calStringSimilarity(self.__entry['c_title'], \
-                               self.__pubmedInfo[id]['title'])
+            sim = calStringSimilarity(self.__entry['c_title'],
+                                      self.__pubmedInfo[id]['title'])
             if sim < 0.5:
                 continue
             #
@@ -85,4 +88,3 @@ class MatchUtil(object):
         #
         self.__pubmedMatchList.sort(key=operator.itemgetter(1))
         self.__pubmedMatchList.reverse()
-

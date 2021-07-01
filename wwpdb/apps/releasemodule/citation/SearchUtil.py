@@ -16,21 +16,22 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
 
 from wwpdb.apps.releasemodule.citation.SearchResultParser import SearchResultParser
-from wwpdb.apps.releasemodule.utils.Utility               import *
-from wwpdb.utils.config.ConfigInfo                          import ConfigInfo
+from wwpdb.apps.releasemodule.utils.Utility import *
+
 
 class SearchUtil(object):
     """
     """
-    def __init__(self, path='.', processLabel='', term=None, siteId = None, log=sys.stderr, verbose=False):
+
+    def __init__(self, path='.', processLabel='', term=None, siteId=None, log=sys.stderr, verbose=False):
         """
         """
         self.__sessionPath = path
@@ -49,18 +50,18 @@ class SearchUtil(object):
         if self.__apikey:
             api = "&api_key=" + self.__apikey
         else:
-            api =""
+            api = ""
         query = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?" \
-              + "db=pubmed&term=" + self.__term + "&reldate=730&retmax=10000&retmode=xml" + api
+                + "db=pubmed&term=" + self.__term + "&reldate=730&retmax=10000&retmode=xml" + api
         #
         if self.__processLabel:
             scriptfile = 'search_' + self.__processLabel + '.csh'
-            xmlfile    = 'search_' + self.__processLabel + '.xml'
-            logfile    = 'search_command_' + self.__processLabel + '.log'
+            xmlfile = 'search_' + self.__processLabel + '.xml'
+            logfile = 'search_command_' + self.__processLabel + '.log'
         else:
             scriptfile = getFileName(self.__sessionPath, 'search', 'csh')
-            xmlfile    = getFileName(self.__sessionPath, 'search', 'xml')
-            logfile    = getFileName(self.__sessionPath, 'search_command', 'log')
+            xmlfile = getFileName(self.__sessionPath, 'search', 'xml')
+            logfile = getFileName(self.__sessionPath, 'search_command', 'log')
         #
         script = os.path.join(self.__sessionPath, scriptfile)
         f = open(script, 'w')
@@ -81,8 +82,9 @@ class SearchUtil(object):
     def getPubmedIdList(self):
         return self.__pubmedIdList
 
+
 if __name__ == '__main__':
-    cf = SearchUtil(term='Badger+J[au]',log=sys.stderr, verbose=False)
+    cf = SearchUtil(term='Badger+J[au]', log=sys.stderr, verbose=False)
     cf.doSearch()
     list = cf.getPubmedIdList()
     print(list)

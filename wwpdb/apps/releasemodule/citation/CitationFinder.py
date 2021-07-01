@@ -16,32 +16,40 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle as pickle
 
-import copy, operator, os, sys, string, time, traceback
+import copy
+import operator
+import time
 
-from mmcif.api.PdbxContainers                    import DataContainer
-from mmcif.api.DataCategory                      import DataCategory
-from mmcif.io.PdbxWriter                         import PdbxWriter
-from wwpdb.io.file.mmCIFUtil                     import mmCIFUtil
-from wwpdb.apps.releasemodule.citation.FetchMP   import FetchMP
-from wwpdb.apps.releasemodule.citation.SearchMP  import SearchMP
+from mmcif.api.DataCategory import DataCategory
+from mmcif.api.PdbxContainers import DataContainer
+from mmcif.io.PdbxWriter import PdbxWriter
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.utils.config.ConfigInfo  import ConfigInfo
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
+
+from wwpdb.apps.releasemodule.citation.FetchMP import FetchMP
+from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
-from wwpdb.apps.releasemodule.utils.Utility      import *
+from wwpdb.apps.releasemodule.utils.Utility import *
+
 
 class CitationFinder(object):
     """
     """
-    def __init__(self, siteId="WWPDB_DEPLOY_TEST", path='.', output='citation_finder.db', log=sys.stderr, verbose=False):
+
+    def __init__(self, siteId="WWPDB_DEPLOY_TEST", path='.', output='citation_finder.db', log=sys.stderr,
+                 verbose=False):
         """ Initial CitationFinder class
         """
         self.__siteId = siteId
@@ -59,6 +67,7 @@ class CitationFinder(object):
         self.__annotEntryMap = {}
 
         self.__cI = ConfigInfo(self.__siteId)
+        self.__cICommon = ConfigInfoAppCommon(self.__siteId)
 
     def searchPubmed(self):
         Time1 = time.time()
@@ -175,14 +184,14 @@ class CitationFinder(object):
 
     def _getAuthorList(self):
         """ Get Author term list
-        """ 
+        """
         if not self.__candidateList:
             return
         #
         map = {}
-        #list = []
+        # list = []
         for cdt in self.__candidateList:
-            #list.append(cdt['structure_id'])
+            # list.append(cdt['structure_id'])
             if not 'pubmed_author' in cdt:
                 continue
             #
@@ -194,7 +203,7 @@ class CitationFinder(object):
                 self.__authorList.append(term)
             #
         #
-        #print list
+        # print list
 
     def _runAuthorSearch(self):
         """ Run NCBI Pubmed author search 
@@ -202,7 +211,7 @@ class CitationFinder(object):
         if not self.__authorList:
             return
         #
-        aSearch = SearchMP(siteId = self.__siteId, termList=self.__authorList, log=self.__lfh, verbose=self.__verbose)
+        aSearch = SearchMP(siteId=self.__siteId, termList=self.__authorList, log=self.__lfh, verbose=self.__verbose)
         aSearch.run()
         self.__termMap = aSearch.getTermMap()
 
@@ -213,7 +222,7 @@ class CitationFinder(object):
             return
         #
         map = {}
-        for key,list in self.__termMap.items():
+        for key, list in self.__termMap.items():
             for id in list:
                 if id in map:
                     continue
@@ -229,7 +238,7 @@ class CitationFinder(object):
         if not self.__pubmedIdList:
             return
         #
-        pFetch = FetchMP(siteId = self.__siteId, idList=self.__pubmedIdList, log=self.__lfh, verbose=self.__verbose)
+        pFetch = FetchMP(siteId=self.__siteId, idList=self.__pubmedIdList, log=self.__lfh, verbose=self.__verbose)
         pFetch.run()
         self.__pubmedInfo = pFetch.getPubmedInfoMap()
 
@@ -250,11 +259,11 @@ class CitationFinder(object):
         if curCat:
             curContainer.append(curCat)
         #
-        myDataList=[]
+        myDataList = []
         myDataList.append(curContainer)
         filename = os.path.join(self.__sessionPath, 'input.cif')
         ofh = open(filename, 'w')
-        pdbxW=PdbxWriter(ofh)
+        pdbxW = PdbxWriter(ofh)
         pdbxW.write(myDataList)
         ofh.close()
 
@@ -288,7 +297,7 @@ class CitationFinder(object):
         cat.appendAttribute('pubmed_ids')
         #
         row = 0
-        for key,list in self.__termMap.items():
+        for key, list in self.__termMap.items():
             cat.setValue(str(key), 'author', row)
             cat.setValue(str(','.join(list)), 'pubmed_ids', row)
             row += 1
@@ -304,7 +313,7 @@ class CitationFinder(object):
         cat.appendAttribute('title')
         #
         row = 0
-        for key,dir in self.__pubmedInfo.items():
+        for key, dir in self.__pubmedInfo.items():
             cat.setValue(str(dir['pdbx_database_id_PubMed']), 'id', row)
             cat.setValue(str(dir['title']), 'title', row)
             row += 1
@@ -316,7 +325,7 @@ class CitationFinder(object):
         f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
-        f.write('setenv RCSBROOT   ' + self.__cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')
+        f.write('setenv RCSBROOT   ' + self.__cICommon.get_site_annot_tools_path() + '\n')
         f.write('setenv BINPATH  ${RCSBROOT}/bin\n')
         f.write('#\n')
         f.write('${BINPATH}/CitationMatch -input input.cif -output matchresult.cif\n')
@@ -341,7 +350,7 @@ class CitationFinder(object):
             structure_id = dir['structure_id']
             pubmed_id = dir['pubmed_id']
             similarity_score = dir['similarity_score']
-            if  structure_id in self.__matchResultMap:
+            if structure_id in self.__matchResultMap:
                 self.__matchResultMap[structure_id].append([dir['pubmed_id'], dir['similarity_score']])
             else:
                 self.__matchResultMap[structure_id] = [[dir['pubmed_id'], dir['similarity_score']]]
@@ -354,7 +363,7 @@ class CitationFinder(object):
         #
         map = self.__matchResultMap
         self.__matchResultMap = {}
-        for k,list in map.items():
+        for k, list in map.items():
             if len(list) > 1:
                 list.sort(key=operator.itemgetter(1))
                 list.reverse()
@@ -381,7 +390,7 @@ class CitationFinder(object):
                 if not list[0] in self.__pubmedInfo:
                     continue
                 #
-                pdir =  copy.deepcopy(self.__pubmedInfo[list[0]])
+                pdir = copy.deepcopy(self.__pubmedInfo[list[0]])
                 pdir['similarity_score'] = list[1]
                 plist.append(pdir)
             #
@@ -412,7 +421,7 @@ class CitationFinder(object):
         #
         map = self.__annotEntryMap
         self.__annotEntryMap = {}
-        for k,list in map.items():
+        for k, list in map.items():
             if len(list) < 2:
                 self.__annotEntryMap[k] = list
             else:
@@ -420,7 +429,7 @@ class CitationFinder(object):
                 slist = []
                 for cdt in list:
                     dmap[cdt['structure_id']] = cdt
-                    tlist = [cdt['structure_id'], cdt['pubmed'][0]['similarity_score']] 
+                    tlist = [cdt['structure_id'], cdt['pubmed'][0]['similarity_score']]
                     slist.append(tlist)
                 #
                 slist.sort(key=operator.itemgetter(1))
@@ -445,9 +454,9 @@ class CitationFinder(object):
 
 
 if __name__ == '__main__':
-    startTime=time.time()
+    startTime = time.time()
     cf = CitationFinder(siteId=sys.argv[1], path=sys.argv[2], output=sys.argv[3], log=sys.stderr, verbose=False)
     cf.searchPubmed()
-    endTime=time.time()
+    endTime = time.time()
     diffTime = endTime - startTime
     print(diffTime)
