@@ -39,7 +39,7 @@ from wwpdb.utils.config.ConfigInfo import ConfigInfo
 import os.path
 cI = ConfigInfo()
 FILE_UPLOAD_TEMP_DIR = os.path.join(
-    cI.get("SITE_DEPOSIT_STORAGE_PATH"),
+    cI.get("SITE_ARCHIVE_STORAGE_PATH"),
     "deposit",
     "temp_files")
 if not os.path.exists(FILE_UPLOAD_TEMP_DIR):
