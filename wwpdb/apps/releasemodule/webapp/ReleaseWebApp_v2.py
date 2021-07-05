@@ -29,6 +29,7 @@ except ImportError:
 import os, sys, tarfile, types, traceback
 
 from wwpdb.utils.config.ConfigInfo                                import ConfigInfo
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 from wwpdb.utils.session.WebRequest                                import InputRequest,ResponseContent
 from wwpdb.apps.releasemodule.citation.ReadCitationFinderResult_v2 import ReadCitationFinderResult
 from wwpdb.apps.releasemodule.depict.DepictAnnotatorHistory     import DepictAnnotatorHistory
@@ -157,6 +158,7 @@ class ReleaseWebAppWorker(object):
         self.__reqObj=reqObj
         self.__siteId  = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
         self.__cI=ConfigInfo(self.__siteId)
+        self.__cICommon = ConfigInfoAppCommon(self.__siteId)
         self.__annotator = str(self.__reqObj.getValue('annotator'))
         self.__owner = str(self.__reqObj.getValue('owner'))
         if not self.__owner and self.__annotator:
@@ -283,13 +285,13 @@ class ReleaseWebAppWorker(object):
         myD['instance']   = str(self.__reqObj.getValue('instance'))
         myD['annotator']  = self.__annotator
         myD['owner_selection']  = self.__getAnnotatorSelection(dbUtil, self.__owner, 'owner')
-        citPath = os.path.join(self.__cI.get('SITE_DEPLOY_PATH'), 'reference', 'citation_finder')
+        citPath = self.__cICommon.get_citation_finder_path()
         resultFile = os.path.join(citPath, 'citation_finder_' + self.__siteId + '.db')
         self.__lfh.write("+ReleaseWebAppWorker._StandaloneOp() resultFile %s\n" % resultFile)
         if not os.access(resultFile, os.F_OK):
             resultFile = os.path.join(citPath, 'citation_finder_WWPDB_DEPLOY_TEST.db')
         #
-        cReader = ReadCitationFinderResult(path=self.__sessionPath, dbUtil=dbUtil, siteId=self.__siteId, pickleFile=resultFile, \
+        cReader = ReadCitationFinderResult(path=self.__sessionPath, dbUtil=dbUtil, siteId=self.__siteId, pickleFile=resultFile,
                                            verbose=self.__verbose, log=self.__lfh)
         entryList = cReader.getEntryList(self.__owner)
         if entryList:
@@ -385,13 +387,13 @@ class ReleaseWebAppWorker(object):
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
         #
         #
-        citPath = os.path.join(self.__cI.get('SITE_DEPLOY_PATH'), 'reference', 'citation_finder')
+        citPath = self.__cICommon.get_citation_finder_path()
         resultFile = os.path.join(citPath, 'citation_finder_' + self.__siteId + '.db')
         self.__lfh.write("+ReleaseWebAppWorker._StandaloneOp() resultFile %s\n" % resultFile)
         if not os.access(resultFile, os.F_OK):
             resultFile = os.path.join(citPath, 'citation_finder_WWPDB_DEPLOY_TEST.db')
         #
-        cReader = ReadCitationFinderResult(path=self.__sessionPath, dbUtil=None, siteId=self.__siteId, pickleFile=resultFile, \
+        cReader = ReadCitationFinderResult(path=self.__sessionPath, dbUtil=None, siteId=self.__siteId, pickleFile=resultFile,
                                            verbose=self.__verbose, log=self.__lfh)
         entryList = cReader.getEntryList(self.__owner)
         if entryList:
