@@ -423,6 +423,19 @@ class UniCodeHandler(object):
             u'\u03C4': ' tau ',
             u'\u03C5': ' upsilon ',
             u'\u03C6': ' phi ',
+            u'\u03D5': ' phi ',
+            u'\u1D60': ' phi ',
+            u'\u1D69': ' phi ',
+            u'\u1D6D7': ' phi ',
+            u'\u1D711': ' phi ',
+            u'\u1D74B': ' phi ',
+            u'\u1D785': ' phi ',
+            u'\u1D7BF': ' phi ',
+            u'\u1D6DF': ' phi ',
+            u'\u1D719': ' phi ',
+            u'\u1D753': ' phi ',
+            u'\u1D78D': ' phi ',
+            u'\u1D7C7': ' phi ',
             u'\u03C7': ' chi ',
             u'\u03C8': ' psi ',
             u'\u03C9': ' omega ',
@@ -1094,9 +1107,9 @@ class FetchResultParser(object):
 
 if __name__ == "__main__":
     parser = FetchResultParser(sys.argv[1])
-    list = parser.getPubmedInfoList()
-    for dir in list:
-        for k, v in dir.items():
+    pList = parser.getPubmedInfoList()
+    for pdir in pList:
+        for k, v in pdir.items():
             if (type(v) == tuple) or (type(v) == list) or (type(v) == dict):
                 print(k + '=')
                 print(v)
