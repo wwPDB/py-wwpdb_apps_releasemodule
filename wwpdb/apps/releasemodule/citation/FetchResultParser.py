@@ -1102,15 +1102,9 @@ class FetchResultParser(object):
 if __name__ == "__main__":
     import types
     parser = FetchResultParser(sys.argv[1])
-<<<<<<< HEAD
-    list = parser.getPubmedInfoList()
-    for dir in list:
-        for k,v in dir.items():
-=======
     pList = parser.getPubmedInfoList()
     for pdir in pList:
         for k, v in pdir.items():
->>>>>>> 4354da5 (More variants of phi handled)
             if (type(v) == tuple) or (type(v) == list) or (type(v) == dict):
                 print(k + '=')
                 print(v)
