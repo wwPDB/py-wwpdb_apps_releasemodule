@@ -439,30 +439,45 @@ class CombineDbApi(object):
         elif (not pdbxObsSprMap) and depuiObsSprMap:
             return depuiObsSprMap
         #
-        for k,list in depuiObsSprMap.items():
-            if k in pdbxObsSprMap:
+        for entry_key,obsSprList in depuiObsSprMap.items():
+            if entry_key in pdbxObsSprMap:
                 found = False
-                for dir in pdbxObsSprMap[k]:
-                    if dir['pdb_id'] == list[0]['pdb_id']:
+                for obsSprDict in pdbxObsSprMap[entry_key]:
+                    """
+                    if obsSprDict['pdb_id'] == obsSprList[0]['pdb_id']:
                         found = True
-                        replace_id = dir['replace_pdb_id'] + ' ' + list[0]['replace_pdb_id']
+                        replace_id = obsSprDict['replace_pdb_id'] + ' ' + obsSprList[0]['replace_pdb_id']
                         tmp_list = replace_id.replace(',', ' ').split(' ')
                         relace_id_list = []
-                        for id in tmp_list:
-                            if not id:
+                        for pdb_id in tmp_list:
+                            if not pdb_id:
                                 continue
                             #
-                            relace_id_list.append(id)
+                            relace_id_list.append(pdb_id)
                         #
                         uniq_list = sorted(set(relace_id_list))
-                        dir['replace_pdb_id'] = ' '.join(uniq_list)
+                        obsSprDict['replace_pdb_id'] = ' '.join(uniq_list)
+                    #
+                    """
+                    if (obsSprDict['pdb_id'] == obsSprList[0]['pdb_id']) and (obsSprDict['id'] == obsSprList[0]['id']):
+                        pdbxReplaceIdList = self.__getReplaceIdList(obsSprDict)
+                        depuiReplaceIdList = self.__getReplaceIdList(obsSprList[0])
+                        if depuiReplaceIdList:
+                            foundList = []
+                            for replace_pdb_id in depuiReplaceIdList:
+                                foundList.append(replace_pdb_id)
+                            #
+                            if len(foundList) == len(depuiReplaceIdList):
+                                found = True
+                            #
+                        #
                     #
                 #
                 if not found:
-                    pdbxObsSprMap[k].append(list[0])
+                    pdbxObsSprMap[entry_key].append(obsSprList[0])
                 #
             else:
-                pdbxObsSprMap[k] = list
+                pdbxObsSprMap[entry_key] = obsSprList
             #
         #
         return pdbxObsSprMap
@@ -544,11 +559,25 @@ class CombineDbApi(object):
             replace_pdb_id = str(obsD['replace_pdb_id']).upper()
             #
             myD = {}
+            myD['id'] = 'SPRSDE'
             myD['pdb_id'] = pdb_id
             myD['replace_pdb_id'] = replace_pdb_id
             retMap[obsD['structure_id']] = [ myD ]
         #
         return retMap
+
+    def __getReplaceIdList(self, dictObj):
+        if (not dictObj) or ('replace_pdb_id' not in dictObj):
+            return []
+        #
+        relace_id_list = []
+        for pdb_id in dictObj['replace_pdb_id'].upper().replace(',', ' ').split(' '):
+            if not pdb_id:
+                continue
+            #
+            relace_id_list.append(pdb_id)
+        #
+        return relace_id_list
 
     def __processAuthorList(self, author_list):
         org_authors = author_list

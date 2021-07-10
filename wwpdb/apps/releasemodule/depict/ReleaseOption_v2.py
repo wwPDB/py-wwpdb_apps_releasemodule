@@ -273,7 +273,8 @@ def ReleaseOption(dataDict, selectedData, citationFlag, newReleaseFlag, reObsole
         obs_details = ''
         if 'obspr' in dataDict:
             for obsprDict in dataDict['obspr']:
-                if ('date' not in obsprDict) or (obsprDict['date'] != releaseDate) or ('id' not in obsprDict):
+#               if ('date' not in obsprDict) or (obsprDict['date'] != releaseDate) or ('id' not in obsprDict):
+                if ('id' not in obsprDict) or (('date' in obsprDict) and (obsprDict['date'] != releaseDate)):
                     continue
                 #
                 if obsprDict['id'].upper() == 'OBSLTE':

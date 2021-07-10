@@ -51,8 +51,12 @@ class SearchUtil(object):
             api = "&api_key=" + self.__apikey
         else:
             api = ""
-        query = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?" \
-                + "db=pubmed&term=" + self.__term + "&reldate=730&retmax=10000&retmode=xml" + api
+        #
+        query = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?" + "db=pubmed&term=" + self.__term
+        if self.__term.endswith("[aid]"):
+            query += "&retmode=xml" + api
+        else:
+            query += "&reldate=730&retmax=10000&retmode=xml" + api
         #
         if self.__processLabel:
             scriptfile = 'search_' + self.__processLabel + '.csh'

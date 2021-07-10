@@ -23,7 +23,8 @@ __version__   = "V0.07"
 
 import copy, operator, os, string, sys, traceback
 
-from wwpdb.apps.releasemodule.citation.FetchUtil     import FetchUtil
+from wwpdb.apps.releasemodule.citation.FetchUtil import FetchUtil
+from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
 from wwpdb.apps.releasemodule.update.InputFormParser_v2 import InputFormParser
 #
 
@@ -80,8 +81,10 @@ class CitationFormParser(InputFormParser):
                 pubmed_list[0] = pubmed_list[0] + ':primary'
             #
         #
-        input_pubmed_ids = {}
+        input_pubmed_doi_ids = {}
         input_citation_ids = {}
+        doi_id_list = []
+        doi_term_list = []
         allow_citation_ids = self.__getAllowCitationIDs()
         #
         lists = []
@@ -90,35 +93,41 @@ class CitationFormParser(InputFormParser):
                 continue
             #
             ids = ids.strip()
-            list = ids.split(':')
-            if len(list) != 2:
-                self._errorContent = 'Syntax error for pubmed ID.\n'
+            split_id_list = ids.split(':')
+            if len(split_id_list) != 2:
+                self._errorContent = 'Syntax error for Pubmed or DOI ID.\n'
                 return []
             #
-            if not list[0].isdigit():
-                self._errorContent += 'Invalid pubmed ID: ' + list[0] + '.\n'
+            foundError = False
+            if (not split_id_list[0].isdigit()) and (split_id_list[0].find('/') == -1):
+                self._errorContent += 'Invalid Pubmed or DOI ID: ' + split_id_list[0] + '.\n'
+                foundError = True
             #
-            if (not list[1] in allow_citation_ids) and (not list[1].isdigit()):
-                self._errorContent += 'Invalid citation ID: ' + list[1] + '.\n'
+            if split_id_list[0].find('/') != -1:
+                doi_id_list.append(split_id_list[0])
+                doi_term_list.append(split_id_list[0] + "[aid]")
             #
-            if list[0] in input_pubmed_ids:
-                self._errorContent += 'Repeat pubmed ID: ' + list[0] + '.\n'
+            if (not split_id_list[1] in allow_citation_ids) and (not split_id_list[1].isdigit()):
+                self._errorContent += 'Invalid citation ID: ' + split_id_list[1] + '.\n'
             #
-            if list[1] in input_citation_ids:
-                self._errorContent += 'Repeat citation ID: ' + list[1] + '.\n'
+            if split_id_list[0] in input_pubmed_doi_ids:
+                self._errorContent += 'Repeat Pubmed or DOI ID: ' + split_id_list[0] + '.\n'
             #
-            input_pubmed_ids[list[0]] = 'y'
-            input_citation_ids[list[1]] = 'y'
+            if split_id_list[1] in input_citation_ids:
+                self._errorContent += 'Repeat citation ID: ' + split_id_list[1] + '.\n'
+            #
+            input_pubmed_doi_ids[split_id_list[0]] = 'y'
+            input_citation_ids[split_id_list[1]] = 'y'
             if self._errorContent:
                 continue
             #
-            if list[1] in allow_citation_ids:
-                list.append(allow_citation_ids[list[1]])
+            if split_id_list[1] in allow_citation_ids:
+                split_id_list.append(allow_citation_ids[split_id_list[1]])
             else:
-                list.append(int(list[1]) + 11)
+                split_id_list.append(int(split_id_list[1]) + 11)
             #
-            self.__selected_citation_id_list.append(list[1])
-            lists.append(list)
+            self.__selected_citation_id_list.append(split_id_list[1])
+            lists.append(split_id_list)
         #
         if self._errorContent:
             return []
@@ -126,7 +135,27 @@ class CitationFormParser(InputFormParser):
         if len(lists) > 1:
             lists.sort(key=operator.itemgetter(2))
         #
-        return lists
+        if len(doi_id_list) == 0:
+            return lists
+        #
+        aSearch = SearchMP(path=self.__sessionPath, siteId=self._siteId, termList=doi_term_list, log=self._lfh, verbose=self._verbose)
+        aSearch.run()
+        termMap = aSearch.getTermMap()
+        #
+        updatedList = []
+        for sub_list in lists:
+            if sub_list[0] in doi_id_list:
+                if (sub_list[0] + "[aid]") in termMap:
+                    sub_list[0] = termMap[sub_list[0] + "[aid]"][0]
+                    updatedList.append(sub_list)
+                else:
+                    self._errorContent += 'No pubmed information for ID: ' + sub_list[0] + '.\n'
+                #
+            else:
+                updatedList.append(sub_list)
+            #
+        #
+        return updatedList
 
     def __getAllowCitationIDs(self):
         a_c_ids = [ 'primary', 'original_data_1', 'original_data_2', 'original_data_3',
@@ -134,8 +163,8 @@ class CitationFormParser(InputFormParser):
                     'original_data_8', 'original_data_9', 'original_data_10' ]
         allow_citation_ids = {}
         order = 0
-        for id in a_c_ids:
-            allow_citation_ids[id] = order
+        for a_c_id in a_c_ids:
+            allow_citation_ids[a_c_id] = order
             order += 1
         #
         return allow_citation_ids
@@ -145,8 +174,7 @@ class CitationFormParser(InputFormParser):
         for id_list in pubmed_info_list:
             pubmed_id_list.append(id_list[0])
         #
-        fetch = FetchUtil(path=self.__sessionPath, processLabel='', idList=pubmed_id_list,
-                          log=self._lfh, verbose=self._verbose)
+        fetch = FetchUtil(path=self.__sessionPath, processLabel='', idList=pubmed_id_list, log=self._lfh, verbose=self._verbose)
         fetch.doFetch()
         pubmedInfoMap = fetch.getPubmedInfoMap()
         #

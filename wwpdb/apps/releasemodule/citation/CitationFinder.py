@@ -48,8 +48,7 @@ class CitationFinder(object):
     """
     """
 
-    def __init__(self, siteId="WWPDB_DEPLOY_TEST", path='.', output='citation_finder.db', log=sys.stderr,
-                 verbose=False):
+    def __init__(self, siteId="WWPDB_DEPLOY_TEST", path='.', output='citation_finder.db', log=sys.stderr, verbose=False):
         """ Initial CitationFinder class
         """
         self.__siteId = siteId
@@ -59,7 +58,7 @@ class CitationFinder(object):
         self.__verbose = verbose
         self.__candidateList = []
         self.__annotatorList = []
-        self.__authorList = []
+        self.__termList = []
         self.__termMap = {}
         self.__pubmedIdList = []
         self.__pubmedInfo = {}
@@ -85,14 +84,14 @@ class CitationFinder(object):
         print(diffTime)
         #
         Time1 = time.time()
-        self._getAuthorList()
+        self._getTermList()
         Time2 = time.time()
         diffTime = Time2 - Time1
-        print('__authorList=' + str(len(self.__authorList)))
+        print('__authorList=' + str(len(self.__termList)))
         print(diffTime)
         #
         Time1 = time.time()
-        self._runAuthorSearch()
+        self._runNCBIPubmedSearch()
         Time2 = time.time()
         diffTime = Time2 - Time1
         print('__termMap=' + str(len(self.__termMap)))
@@ -182,36 +181,40 @@ class CitationFinder(object):
         connect = StatusDbApi(siteId=self.__siteId, verbose=True, log=self.__lfh)
         self.__annotatorList = connect.getAnnoList(siteId=site)
 
-    def _getAuthorList(self):
+    def _getTermList(self):
         """ Get Author term list
         """
         if not self.__candidateList:
             return
         #
-        map = {}
-        # list = []
+        temp_map = {}
         for cdt in self.__candidateList:
-            # list.append(cdt['structure_id'])
-            if not 'pubmed_author' in cdt:
+            if 'pdbx_database_id_DOI' in cdt:
+                term = str(cdt['pdbx_database_id_DOI']) + '[aid]'
+                if term not in temp_map:
+                    temp_map[term] = 'y'
+                    self.__termList.append(term)
+                #
+            #
+            if 'pubmed_author' not in cdt:
                 continue
             #
             for term in cdt['pubmed_author']:
-                if term in map:
+                if term in temp_map:
                     continue
                 #
-                map[term] = 'y'
-                self.__authorList.append(term)
+                temp_map[term] = 'y'
+                self.__termList.append(term)
             #
         #
-        # print list
 
-    def _runAuthorSearch(self):
-        """ Run NCBI Pubmed author search 
+    def _runNCBIPubmedSearch(self):
+        """ Run NCBI Pubmed author snd DOI earch 
         """
-        if not self.__authorList:
+        if not self.__termList:
             return
         #
-        aSearch = SearchMP(siteId=self.__siteId, termList=self.__authorList, log=self.__lfh, verbose=self.__verbose)
+        aSearch = SearchMP(siteId=self.__siteId, termList=self.__termList, log=self.__lfh, verbose=self.__verbose)
         aSearch.run()
         self.__termMap = aSearch.getTermMap()
 
@@ -221,14 +224,14 @@ class CitationFinder(object):
         if not self.__termMap:
             return
         #
-        map = {}
-        for key, list in self.__termMap.items():
-            for id in list:
-                if id in map:
+        tmap = {}
+        for key, plist in self.__termMap.items():
+            for pid in plist:
+                if pid in tmap:
                     continue
                 #
-                map[id] = 'y'
-                self.__pubmedIdList.append(id)
+                tmap[pid] = 'y'
+                self.__pubmedIdList.append(pid)
             #
         #
 
@@ -251,7 +254,7 @@ class CitationFinder(object):
         if curCat:
             curContainer.append(curCat)
         #
-        curCat = self._getAuthorPubmedIdMappingCategory()
+        curCat = self._getTermPubmedIdMappingCategory()
         if curCat:
             curContainer.append(curCat)
         #
@@ -275,31 +278,41 @@ class CitationFinder(object):
         cat.appendAttribute('structure_id')
         cat.appendAttribute('c_title')
         cat.appendAttribute('pubmed_author')
+        cat.appendAttribute('pdbx_database_id_PubMed')
+        cat.appendAttribute('pdbx_database_id_DOI')
+        cat.appendAttribute('DOI_term')
         #
         row = 0
         for cdt in self.__candidateList:
-            if (not 'structure_id' in cdt) or (not 'c_title' in cdt) or (not 'pubmed_author' in cdt):
+            if ('structure_id' not in cdt) or ('c_title' not in cdt) or ('pubmed_author' not in cdt):
                 continue
             #
             cat.setValue(str(cdt['structure_id']), 'structure_id', row)
             cat.setValue(str(cdt['c_title'].replace('#', '')), 'c_title', row)
             cat.setValue(str(','.join(cdt['pubmed_author'])), 'pubmed_author', row)
+            if 'pdbx_database_id_PubMed' in cdt:
+                cat.setValue(str(cdt['pdbx_database_id_PubMed']), 'pdbx_database_id_PubMed', row) 
+            #
+            if 'pdbx_database_id_DOI' in cdt:
+                cat.setValue(str(cdt['pdbx_database_id_DOI']), 'pdbx_database_id_DOI', row) 
+                cat.setValue(str(cdt['pdbx_database_id_DOI']) + '[aid]', 'DOI_term', row)
+            #
             row += 1
         #
         return cat
 
-    def _getAuthorPubmedIdMappingCategory(self):
+    def _getTermPubmedIdMappingCategory(self):
         if not self.__termMap:
             return None
         #
-        cat = DataCategory('author_pubmed_mapping')
-        cat.appendAttribute('author')
+        cat = DataCategory('term_pubmed_mapping')
+        cat.appendAttribute('term')
         cat.appendAttribute('pubmed_ids')
         #
         row = 0
-        for key, list in self.__termMap.items():
-            cat.setValue(str(key), 'author', row)
-            cat.setValue(str(','.join(list)), 'pubmed_ids', row)
+        for key, plist in self.__termMap.items():
+            cat.setValue(str(key), 'term', row)
+            cat.setValue(str(','.join(plist)), 'pubmed_ids', row)
             row += 1
         #
         return cat
@@ -313,9 +326,9 @@ class CitationFinder(object):
         cat.appendAttribute('title')
         #
         row = 0
-        for key, dir in self.__pubmedInfo.items():
-            cat.setValue(str(dir['pdbx_database_id_PubMed']), 'id', row)
-            cat.setValue(str(dir['title']), 'title', row)
+        for key, v_dict in self.__pubmedInfo.items():
+            cat.setValue(str(v_dict['pdbx_database_id_PubMed']), 'id', row)
+            cat.setValue(str(v_dict['title']), 'title', row)
             row += 1
         #
         return cat
@@ -343,17 +356,17 @@ class CitationFinder(object):
         if not rlist:
             return
         #
-        for dir in rlist:
-            if (not 'structure_id' in dir) or (not 'pubmed_id' in dir) or (not 'similarity_score' in dir):
+        for rdic in rlist:
+            if ('structure_id' not in rdic) or ('pubmed_id' not in rdic) or ('similarity_score' not in rdic):
                 continue
             #
-            structure_id = dir['structure_id']
-            pubmed_id = dir['pubmed_id']
-            similarity_score = dir['similarity_score']
+            structure_id = rdic['structure_id']
+            pubmed_id = rdic['pubmed_id']
+            similarity_score = rdic['similarity_score']
             if structure_id in self.__matchResultMap:
-                self.__matchResultMap[structure_id].append([dir['pubmed_id'], dir['similarity_score']])
+                self.__matchResultMap[structure_id].append([rdic['pubmed_id'], rdic['similarity_score']])
             else:
-                self.__matchResultMap[structure_id] = [[dir['pubmed_id'], dir['similarity_score']]]
+                self.__matchResultMap[structure_id] = [[rdic['pubmed_id'], rdic['similarity_score']]]
             #
         #
 
@@ -361,13 +374,14 @@ class CitationFinder(object):
         if not self.__matchResultMap:
             return
         #
-        map = self.__matchResultMap
+        r_map = self.__matchResultMap
         self.__matchResultMap = {}
-        for k, list in map.items():
-            if len(list) > 1:
-                list.sort(key=operator.itemgetter(1))
-                list.reverse()
-            self.__matchResultMap[k] = list
+        for k, r_list in r_map.items():
+            if len(r_list) > 1:
+                r_list.sort(key=operator.itemgetter(1))
+                r_list.reverse()
+            #
+            self.__matchResultMap[k] = r_list
         #
 
     def _getMatchList(self):
@@ -382,16 +396,16 @@ class CitationFinder(object):
             #
             entry_id = cdt['structure_id']
             #
-            if not entry_id in self.__matchResultMap:
+            if entry_id not in self.__matchResultMap:
                 continue
             #
             plist = []
-            for list in self.__matchResultMap[entry_id]:
-                if not list[0] in self.__pubmedInfo:
+            for mlist in self.__matchResultMap[entry_id]:
+                if mlist[0] not in self.__pubmedInfo:
                     continue
                 #
-                pdir = copy.deepcopy(self.__pubmedInfo[list[0]])
-                pdir['similarity_score'] = list[1]
+                pdir = copy.deepcopy(self.__pubmedInfo[mlist[0]])
+                pdir['similarity_score'] = mlist[1]
                 plist.append(pdir)
             #
             if not plist:
@@ -419,15 +433,15 @@ class CitationFinder(object):
         if not self.__annotEntryMap:
             return
         #
-        map = self.__annotEntryMap
+        a_map = self.__annotEntryMap
         self.__annotEntryMap = {}
-        for k, list in map.items():
-            if len(list) < 2:
-                self.__annotEntryMap[k] = list
+        for k, vlist in a_map.items():
+            if len(vlist) < 2:
+                self.__annotEntryMap[k] = vlist
             else:
                 dmap = {}
                 slist = []
-                for cdt in list:
+                for cdt in vlist:
                     dmap[cdt['structure_id']] = cdt
                     tlist = [cdt['structure_id'], cdt['pubmed'][0]['similarity_score']]
                     slist.append(tlist)
@@ -437,7 +451,7 @@ class CitationFinder(object):
                 #
                 rlist = []
                 for tlist in slist:
-                    if not tlist[0] in dmap:
+                    if tlist[0] not in dmap:
                         continue
                     #
                     rlist.append(dmap[tlist[0]])

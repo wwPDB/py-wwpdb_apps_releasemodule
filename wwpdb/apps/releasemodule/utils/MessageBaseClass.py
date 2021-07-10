@@ -77,6 +77,7 @@ class MessageBaseClass(ModuleBaseClass):
             #
             blockFlag,returnText = self.__getReturnContent(entryMessageContent, fileStatus, typeList[5])
             if blockFlag:
+                """
                 if (typeList[5] == 'em') and hasPdbRelease:
                     if entryStatus == 'OK':
                         entryStatus = 'EM-BLOCKED'
@@ -84,6 +85,8 @@ class MessageBaseClass(ModuleBaseClass):
                 else:
                     entryStatus = 'BLOCKED'
                 #
+                """
+                entryStatus = 'BLOCKED'
             #
             if typeList[5] == 'coor':
                 if entryDir['status_code' + typeList[1]] == 'EMHEADERUpdate' and returnText == ' OK':

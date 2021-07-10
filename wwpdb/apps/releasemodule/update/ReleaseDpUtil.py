@@ -228,6 +228,16 @@ class ReleaseDpUtil(EntryUpdateBase):
         if not os.access(os.path.join(self._sessionPath, tarFile), os.F_OK):
             self._insertEntryMessage(errType="pdb", errMessage="Generating pdb bundle file(s) failed.", messageType="warning", uniqueFlag=True)
             return
+        else:
+            statinfo = os.stat(os.path.join(self._sessionPath, tarFile))
+            if statinfo.st_size < 15000:
+                tarObj = tarfile.open(name=os.path.join(self._sessionPath, tarFile), mode="r:gz")
+                namelist = tarObj.getnames()
+                if not namelist:
+                    self._insertEntryMessage(errType="pdb", errMessage="Generating pdb bundle file(s) failed.", messageType="warning", uniqueFlag=True)
+                    return
+                #
+            #
         #
         self._insertReleseFile("model", os.path.join(self._sessionPath, tarFile), tarFile, "", False)
 

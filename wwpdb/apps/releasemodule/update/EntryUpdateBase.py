@@ -140,12 +140,16 @@ class EntryUpdateBase(UpdateBase):
             realType = self._fileTypeMap[realType][1]
         #
         if messageType == 'error':
+            """
             if errType == 'em':
                 self._blockEmErrorFlag = True
             else:
                 self._blockErrorFlag = True
                 self._blockEmErrorFlag = True
             #
+            """
+            self._blockErrorFlag = True
+            self._blockEmErrorFlag = True
             self._insertFileStatus(realType, False)
             if realType == 'cif' or realType == 'xml' or realType == 'pdb':
                 self._insertFileStatus('coor', False)

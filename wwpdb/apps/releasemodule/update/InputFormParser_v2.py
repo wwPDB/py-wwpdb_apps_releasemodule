@@ -37,8 +37,8 @@ class InputFormParser(object):
         self._entryList        = []
         self._entryRequestFlag = True
         #
-        self.__siteId = str(self. _reqObj.getValue("WWPDB_SITE_ID"))
-        self._dbUtil  = CombineDbApi(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
+        self._siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
+        self._dbUtil  = CombineDbApi(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
         #
 
     def getErrorContent(self):
