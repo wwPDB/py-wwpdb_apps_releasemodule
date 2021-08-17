@@ -323,11 +323,17 @@ class CitationFinder(object):
         #
         cat = DataCategory('pubmed_info')
         cat.appendAttribute('id')
+        cat.appendAttribute('doi')
         cat.appendAttribute('title')
         #
         row = 0
         for key, v_dict in self.__pubmedInfo.items():
             cat.setValue(str(v_dict['pdbx_database_id_PubMed']), 'id', row)
+            if 'pdbx_database_id_DOI' in v_dict:
+                cat.setValue(str(v_dict['pdbx_database_id_DOI']), 'doi', row)
+            else:
+                cat.setValue('?', 'doi', row)
+            #
             cat.setValue(str(v_dict['title']), 'title', row)
             row += 1
         #

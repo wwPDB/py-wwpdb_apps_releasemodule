@@ -37,6 +37,8 @@ class JournalAbbrev(object):
         self.__lfh       = log
         self.__verbose   = verbose
         self.__jalist = []
+        self.__jamaps = {}
+        self.__issnmaps = {}
         self.__getCIFile()
         self.__getJAList()
 
@@ -49,28 +51,36 @@ class JournalAbbrev(object):
         self.__ciffile = os.path.join(self.__cI.get('SITE_ANNOT_TOOLS_PATH'), 'data', 'ascii', 'ndb_refn.cif')
 
     def __getJAList(self):
-        map = {}
+        Map = {}
         cifObj = mmCIFUtil(filePath=self.__ciffile)
-        list = cifObj.GetValue('ndb_refn')
-        for dir in list:
-            if not 'issn' in dir:
-                if dir['publication'] != 'TO BE PUBLISHED':
+        nlist = cifObj.GetValue('ndb_refn')
+        for Dir in nlist:
+            if not 'issn' in Dir:
+                if Dir['publication'] != 'TO BE PUBLISHED':
                     continue
                 #
             #
-            if dir['issn'] != 'ISSN' and dir['issn'] != 'ESSN':
+            if Dir['issn'] != 'ISSN' and Dir['issn'] != 'ESSN':
                 continue
             #
-            cs = dir['publication'].strip()
+            cs = Dir['publication'].strip()
             if cs.find('\n') != -1 or cs[0:6] == 'THESIS':
                 continue
             #
-            if cs in map:
+            if cs in Map:
+                if ('issn_code' in Dir) and Dir['issn_code'].strip():
+                    self.__issnmaps[Dir['issn_code'].strip()] = Map[cs]
+                #
                 continue
             #
-            map[cs] = 'yes'
-            cs  = self.__processJournalAbbrev(cs)
-            self.__jalist.append(cs)
+            pcs  = self.__processJournalAbbrev(cs)
+            Map[cs] = pcs
+            self.__jalist.append(pcs)
+            cs1 = self.__standardJournalAbbrev(pcs)
+            self.__jamaps[cs1] = pcs
+            if ('issn_code' in Dir) and Dir['issn_code'].strip():
+                self.__issnmaps[Dir['issn_code'].strip()] = pcs
+            #
         #
         self.__jalist.sort()
 
@@ -92,21 +102,45 @@ class JournalAbbrev(object):
         #
         return newabbrev
 
+    def __standardJournalAbbrev(self, abbrev):
+        inlist = abbrev.lower().strip().replace('\n', ' ').replace('.', ' ').replace(',', ' ').split(' ')
+        outlist = []
+        for val in inlist:
+            if not val:
+                continue
+            #
+            outlist.append(val)
+        #
+        return ' '.join(outlist)
+
     def GetList(self):
         return self.__jalist
 
     def GetQuoterList(self):
-        list = []
+        rlist = []
         for abbrev in self.__jalist:
-            list.append('"' + abbrev + '"')
+            rlist.append('"' + abbrev + '"')
         #
-        return list
+        return rlist
 
     def GetJoinList(self, delimiter):
         return delimiter.join(self.__jalist)
 
     def GetJoinQuoterList(self, delimiter):
         return delimiter.join(self.GetQuoterList())
+
+    def FindJournalAbbrev(self, abbrev):
+        std_abbrev = self.__standardJournalAbbrev(abbrev)
+        if std_abbrev in self.__jamaps:
+            return self.__jamaps[std_abbrev]
+        #
+        return ''
+
+    def FindJournalAbbrevWithISSN(self, issn):
+        if issn.strip() in self.__issnmaps:
+            return self.__issnmaps[issn.strip()]
+        #
+        return ''
 
 if __name__ == '__main__':
     c=JournalAbbrev(ciffile='/net/wwpdb_da/da_top/tools-centos-6/packages/annotation/data/ascii/ndb_refn.cif', verbose=True, log=sys.stderr)

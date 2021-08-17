@@ -35,6 +35,7 @@ class DepictCitationForm(DepictBase):
     def __init__(self, reqObj=None, resultList=None, verbose=False, log=sys.stderr):
         super(DepictCitationForm, self).__init__(reqObj=reqObj, resultList=resultList, verbose=verbose, log=log)
         #
+        self.__ja = JournalAbbrev(reqObj=self._reqObj, verbose=self._verbose, log=self._reqObj)
         self.__risCitation = {}
         #
         self.__getUploadRISCitation()
@@ -51,8 +52,7 @@ class DepictCitationForm(DepictBase):
         myD['entry_info'] = self.__getRequestEntryInfo()
         myD['finder_summary'] = ''
         myD['idlist'] = ' '.join(self._IdList)
-        ja = JournalAbbrev(reqObj=self._reqObj, verbose=self._verbose, log=self._reqObj)
-        myD['abbrev_info'] = ja.GetJoinQuoterList(',\n')
+        myD['abbrev_info'] = self.__ja.GetJoinQuoterList(',\n')
         #
         return self._processTemplate('citation_request/main_citation_input_form_tmplt.html', myD)
 
@@ -75,6 +75,19 @@ class DepictCitationForm(DepictBase):
         self.__risCitation = risParser.getCitationData()
         if self.__risCitation:
             self.__risCitation["citation_id"] = str(self._reqObj.getValue("citation_id"))
+            self.__risCitation["citation_id_text"] = str(self._reqObj.getValue("citation_id"))
+            abbrev = ""
+            if ("journal_abbrev" in self.__risCitation) and self.__risCitation["journal_abbrev"]:
+                abbrev = self.__ja.FindJournalAbbrev(self.__risCitation["journal_abbrev"])
+            if (not abbrev) and ("journal_issn" in self.__risCitation) and self.__risCitation["journal_issn"]:
+                abbrev = self.__ja.FindJournalAbbrevWithISSN(self.__risCitation["journal_issn"])
+            #
+            if abbrev:
+                self.__risCitation["journal_abbrev"] = abbrev
+            else:
+                self.__risCitation["citation_id_text"] = str(self._reqObj.getValue("citation_id")) + ' &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:red">' + \
+                   'Please select the proper "Journal Abbrev." for journal "' + self.__risCitation["journal_abbrev"] + '" using auto suggestion.</span>'
+            #
         #
 
     def __getRequestEntryInfo(self):
@@ -135,9 +148,12 @@ class DepictCitationForm(DepictBase):
             if (item in dataDict) and dataDict[item]:
                 val = str(dataDict[item])
             #
-            if item != 'citation_id':
+            if (item != 'citation_id') and (item != 'citation_id_text'):
                 val = self.__getTextArea(item, val)
             #
+            if (val == '') and (item == 'citation_id_text') and ('citation_id' in dataDict):
+                val = dataDict['citation_id']
+            # 
             myD[item] = val
         #
         myD['max_author_num'] = str(max_author_num)

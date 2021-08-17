@@ -64,8 +64,7 @@ class RisCitationParser(object):
                 if (not line) or (len(line) < 6) or (line[2:5] != " - "):
                     continue
                 #
-                if line[0:2] not in (
-                "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "JF", "PY", "Y1", "VL", "SP", "EP", "SN", "DO"):
+                if line[0:2] not in ( "AU", "A1", "A2", "A3", "A4", "TI", "T1", "JO", "JA", "JF", "PY", "Y1", "VL", "SP", "EP", "SN", "DO" ):
                     continue
                 #
                 angstromFlag = False
@@ -97,7 +96,8 @@ class RisCitationParser(object):
                     if value.isdigit():
                         self.__convertedCitationData["page_last"] = value
                     #
-                # elif line[0:2] == "SN": # ISBN/ISSN
+                elif line[0:2] == "SN": # ISBN/ISSN
+                    self.__convertedCitationData["journal_issn"] = value
                 elif line[0:2] == "DO":  # DOI
                     self.__convertedCitationData["pdbx_database_id_DOI"] = value.replace('http://doi.org/', '').replace(
                         'https://doi.org/', '')

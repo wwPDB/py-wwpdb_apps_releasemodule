@@ -216,17 +216,17 @@ class ReadCitationFinderResult(object):
                 if ('c_title' in currDir) and currDir['c_title'] and ('title' in pdir) and pdir['title']:
                     sim = calStringSimilarity(currDir['c_title'], pdir['title'])
                 #
+                skip_flag = False
                 if sim < 0.5:
-                    continue
+                    skip_flag = True
                 #
                 pdir['similarity_score'] = '%.3f' % sim
+                pdir['sort_score'] = '%.3f' % sim
                 #
                 # Check if entry already had same pubmed information
                 #
-                if EntryCitationInfoMap and (oldDir['structure_id'] in EntryCitationInfoMap) and EntryCitationInfoMap[
-                    oldDir['structure_id']]:
-                    code = self.__compareCitationInfo(EntryCitationInfoMap[oldDir['structure_id']], pdir,
-                                                      (currDir['structure_id'] in RelList))
+                if EntryCitationInfoMap and (oldDir['structure_id'] in EntryCitationInfoMap) and EntryCitationInfoMap[oldDir['structure_id']]:
+                    code = self.__compareCitationInfo(EntryCitationInfoMap[oldDir['structure_id']], pdir, (currDir['structure_id'] in RelList))
                     #
                     # Skip already updated entry
                     #
@@ -234,8 +234,15 @@ class ReadCitationFinderResult(object):
                         plist = []
                         break
                     elif code == 'checked':
-                        check_option = code
+                        pdir['sort_score'] = '%.3f' % (1.0 + sim)
+                        skip_flag = False
+                        if sim > 0.5:
+                            check_option = code
+                        #
                     #
+                #
+                if skip_flag:
+                    continue
                 #
                 pdir['type'] = 'radio'
                 pdir['citation_id'] = 'primary'
@@ -255,7 +262,7 @@ class ReadCitationFinderResult(object):
             t_list = []
             t_list.append(currDir['structure_id'])
             t_list.append(plist[0]['pdbx_database_id_PubMed'])
-            t_list.append(plist[0]['similarity_score'])
+            t_list.append(plist[0]['sort_score'])
             rlist.append(t_list)
         #
         if not rlist:
@@ -325,8 +332,7 @@ class ReadCitationFinderResult(object):
                 return code
             #
         #
-        if ('similarity_score' in pdir) and (float(pdir['similarity_score']) > 0.98 or
-                                             (release_flag and float(pdir['similarity_score']) > 0.9)):
+        if ('similarity_score' in pdir) and (float(pdir['similarity_score']) > 0.98 or (release_flag and float(pdir['similarity_score']) > 0.9)):
             code = 'skip'
         #
         return code
@@ -334,19 +340,19 @@ class ReadCitationFinderResult(object):
     def __sortMatchedList(self, in_list):
         matchlist = []
         dmap = {}
-        for dir in in_list:
-            dmap[dir['pdbx_database_id_PubMed']] = dir
-            list = []
-            list.append(dir['pdbx_database_id_PubMed'])
-            list.append(dir['similarity_score'])
-            matchlist.append(list)
+        for tdir in in_list:
+            dmap[tdir['pdbx_database_id_PubMed']] = tdir
+            tlist = []
+            tlist.append(tdir['pdbx_database_id_PubMed'])
+            tlist.append(tdir['sort_score'])
+            matchlist.append(tlist)
         #
         matchlist.sort(key=operator.itemgetter(1))
         matchlist.reverse()
         #
         out_list = []
-        for list in matchlist:
-            out_list.append(dmap[list[0]])
+        for tlist in matchlist:
+            out_list.append(dmap[tlist[0]])
         return out_list
 
     def __sortEntryList(self, rlist, dmap):
@@ -359,8 +365,8 @@ class ReadCitationFinderResult(object):
         self.__validEntryList = []
         score = rlist[0][2]
         tlist = []
-        for list in rlist:
-            if list[2] != score:
+        for llist in rlist:
+            if llist[2] != score:
                 if tlist:
                     if len(tlist) > 1:
                         tlist.sort(key=operator.itemgetter(1))
@@ -372,7 +378,7 @@ class ReadCitationFinderResult(object):
                 #
                 tlist = []
             #
-            tlist.append(list)
+            tlist.append(llist)
         #
         if tlist:
             if len(tlist) > 1:
