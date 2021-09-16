@@ -21,8 +21,8 @@ class CitationUpdate:
         self.citation_finder_path = cICommon.get_citation_finder_path()
         db_output = "citation_finder_{}.db".format(self.wwpdb_site)
         auto_update_output = "auto_re-release_{}.log".format(self.wwpdb_site)
-        self.db_output_path = os.path.join(self.citation_updates_path, db_output)
-        self.auto_release_output = os.path.join(self.citation_updates_path, auto_update_output)
+        self.db_output_path = os.path.join(self.citation_finder_path, db_output)
+        self.auto_release_output = os.path.join(self.citation_finder_path, auto_update_output)
 
     def get_site_id(self):
         return self.wwpdb_site
@@ -62,7 +62,7 @@ def run_citation_finder():
     cu.make_citation_finder_path()
     cu.run_citation_finder()
     cu.run_auto_re_release()
-    cu.clean_up()
+    # cu.clean_up()
 
 
 if __name__ == '__main__':
