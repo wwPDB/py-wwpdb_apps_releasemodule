@@ -68,6 +68,7 @@ class SearchUtil(object):
             logfile = getFileName(self.__sessionPath, 'search_command', 'log')
         #
         script = os.path.join(self.__sessionPath, scriptfile)
+        print(script)
         f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
@@ -77,6 +78,7 @@ class SearchUtil(object):
         RunScript(self.__sessionPath, scriptfile, logfile)
         #
         filename = os.path.join(self.__sessionPath, xmlfile)
+        print(filename)
         if not os.access(filename, os.F_OK):
             return
         #
