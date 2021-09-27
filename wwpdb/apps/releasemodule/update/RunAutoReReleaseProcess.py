@@ -77,7 +77,7 @@ def run_citation_finder(site_id=None):
     cu.make_citation_finder_path()
     cu.run_citation_finder()
     cu.run_auto_re_release()
-    # cu.clean_up()
+    cu.clean_up()
 
 
 if __name__ == '__main__':
