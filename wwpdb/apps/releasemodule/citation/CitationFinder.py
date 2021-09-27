@@ -209,12 +209,13 @@ class CitationFinder(object):
         #
 
     def _runNCBIPubmedSearch(self):
-        """ Run NCBI Pubmed author snd DOI earch 
+        """ Run NCBI Pubmed author and DOI search
         """
         if not self.__termList:
             return
         #
-        aSearch = SearchMP(siteId=self.__siteId, termList=self.__termList, log=self.__lfh, verbose=self.__verbose)
+        aSearch = SearchMP(siteId=self.__siteId, termList=self.__termList, log=self.__lfh, verbose=self.__verbose,
+                           path=self.__sessionPath)
         aSearch.run()
         self.__termMap = aSearch.getTermMap()
 
@@ -241,7 +242,8 @@ class CitationFinder(object):
         if not self.__pubmedIdList:
             return
         #
-        pFetch = FetchMP(siteId=self.__siteId, idList=self.__pubmedIdList, log=self.__lfh, verbose=self.__verbose)
+        pFetch = FetchMP(siteId=self.__siteId, idList=self.__pubmedIdList, log=self.__lfh, verbose=self.__verbose,
+                         path=self.__sessionPath)
         pFetch.run()
         self.__pubmedInfo = pFetch.getPubmedInfoMap()
 
