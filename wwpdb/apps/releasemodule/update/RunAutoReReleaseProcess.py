@@ -1,10 +1,17 @@
 import os
 import shutil
+import logging
+import argparse
+
+
 from wwpdb.utils.config.ConfigInfo import getSiteId
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
 from wwpdb.apps.releasemodule.citation.CitationFinder import CitationFinder
 from wwpdb.apps.releasemodule.update.AutoReRelease import AutoReRelease
+
+logger = logging.getLogger()
+
 
 
 def make_directory(my_directory):
@@ -14,8 +21,8 @@ def make_directory(my_directory):
 
 class CitationUpdate:
 
-    def __init__(self):
-        self.wwpdb_site = getSiteId()
+    def __init__(self, site_id=None):
+        self.wwpdb_site = site_id if site_id else getSiteId()
         cICommon = ConfigInfoAppCommon(self.wwpdb_site)
         self.citation_updates_path = cICommon.get_citation_update_path()
         self.citation_finder_path = cICommon.get_citation_finder_path()
@@ -56,8 +63,8 @@ class CitationUpdate:
         AutoReRelease(siteId=self.get_site_id()).ReleaseProcess(outputFile=self.get_auto_rerelease_output_file())
 
 
-def run_citation_finder():
-    cu = CitationUpdate()
+def run_citation_finder(site_id=None):
+    cu = CitationUpdate(site_id=site_id)
     cu.make_citation_updates_path()
     cu.make_citation_finder_path()
     cu.run_citation_finder()
@@ -66,4 +73,11 @@ def run_citation_finder():
 
 
 if __name__ == '__main__':
-    run_citation_finder()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', help='debugging', action='store_const', dest='loglevel',
+                        const=logging.DEBUG,
+                        default=logging.INFO)
+    parser.add_argument('--site_id', help='wwPDB site ID', type=str)
+    args = parser.parse_args()
+    logger.setLevel(args.loglevel)
+    run_citation_finder(site_id=args.site_id)
