@@ -3,7 +3,6 @@ import shutil
 import logging
 import argparse
 
-
 from wwpdb.utils.config.ConfigInfo import getSiteId
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
@@ -13,9 +12,9 @@ from wwpdb.apps.releasemodule.update.AutoReRelease import AutoReRelease
 logger = logging.getLogger()
 
 
-
 def make_directory(my_directory):
     if not os.path.exists(my_directory):
+        logging.info('making directory: {}'.format(my_directory))
         os.makedirs(my_directory)
 
 
@@ -32,18 +31,22 @@ class CitationUpdate:
         self.auto_release_output = os.path.join(self.citation_updates_path, auto_update_output)
 
     def get_site_id(self):
+        logging.info('using site ID: {}'.format(self.wwpdb_site))
         return self.wwpdb_site
 
     def get_citation_finder_path(self):
         return self.citation_finder_path
 
     def get_db_output(self):
+        logging.info('output citation DB to {}'.format(self.db_output_path))
         return self.db_output_path
 
     def get_auto_rerelease_output_file(self):
+        logging.info('output log to {}'.format(self.auto_release_output))
         return self.auto_release_output
 
     def get_citation_updates_path(self):
+        logging.info('citation update directory {}'.format(self.citation_updates_path))
         return self.citation_updates_path
 
     def make_citation_finder_path(self):
@@ -56,11 +59,15 @@ class CitationUpdate:
         shutil.rmtree(self.citation_updates_path, ignore_errors=True)
 
     def run_citation_finder(self):
+        logging.info('starting citation finder')
         CitationFinder(siteId=self.get_site_id(), path=self.get_citation_updates_path(),
                        output=self.get_db_output()).searchPubmed()
+        logging.info('finished citation finder')
 
     def run_auto_re_release(self):
+        logging.info('starting auto re-release')
         AutoReRelease(siteId=self.get_site_id()).ReleaseProcess(outputFile=self.get_auto_rerelease_output_file())
+        logging.info('finished auto re-release')
 
 
 def run_citation_finder(site_id=None):
