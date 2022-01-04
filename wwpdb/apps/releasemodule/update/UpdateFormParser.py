@@ -25,6 +25,9 @@ import os, sys, string, traceback
 
 from wwpdb.apps.releasemodule.citation.FetchResultParser import UniCodeHandler
 from wwpdb.apps.releasemodule.utils.CombineDbApi         import CombineDbApi
+from wwpdb.apps.releasemodule.utils.TimeUtil             import TimeUtil
+from wwpdb.io.file.mmCIFUtil                             import mmCIFUtil
+from wwpdb.io.locator.PathInfo                           import PathInfo
 #
 
 class UpdateFormParser(object):
@@ -34,7 +37,16 @@ class UpdateFormParser(object):
         self.__verbose=verbose
         self.__lfh=log
         self.__reqObj=reqObj
+        #
+        self.__sObj=self.__reqObj.newSessionObj()
+        self.__sessionId=self.__sObj.getId()
+        self.__sessionPath=self.__sObj.getPath()
+        #
         self.__siteId  = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
+        self.__pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
+        #
+        t = TimeUtil()
+        self.__rel_date = t.NextWednesday()
         #
         self.__codeHandler = UniCodeHandler()
         self.__errorContent = ''
@@ -241,6 +253,7 @@ class UpdateFormParser(object):
             if citation:
                 dataDict['citation'] = citation
             #
+            self.__checkPreviousCoordinateRelease(entry, dataDict)
             self.__updateList.append(dataDict)
             if check_flag and (entry in ret_map) and ret_map[entry]:
                 self.__checkIdMap[entry] = ret_map[entry]
@@ -419,3 +432,40 @@ class UpdateFormParser(object):
             #
         #
         return keepCitationMap
+
+    def __checkPreviousCoordinateRelease(self, entry, dataDict):
+        """
+        """
+        if "pdb_id" not in dataDict:
+            return
+        #
+        hasExperimentalDataRelease = False
+        for status_item in ( "status_code_cs", "status_code_em", "status_code_mr", "status_code_nmr_data", "status_code_sf"):
+            if (status_item in dataDict) and ((dataDict[status_item] == "REL") or (dataDict[status_item] == "REREL")):
+                hasExperimentalDataRelease = True
+                break
+            #
+        #
+        if not hasExperimentalDataRelease:
+            return
+        #
+        if ("status_code" in dataDict) and ((dataDict["status_code"] == "REL") or (dataDict["status_code"] == "REREL")):
+            return
+        #
+        try:
+            latestArchiveFilePath = self.__pI.getFilePath(dataSetId=entry, wfInstanceId=None, contentType="model", formatType="pdbx", \
+                                                          fileSource='archive', versionId="latest", partNumber="1")
+            if not os.access(latestArchiveFilePath, os.F_OK):
+                return
+            #
+            cifObj = mmCIFUtil(filePath=latestArchiveFilePath)
+            historyList = cifObj.GetValue("pdbx_audit_revision_history")
+            for historyDict in historyList:
+                if ("revision_date" in historyDict) and (historyDict["revision_date"] == self.__rel_date):
+                    self.__errorContent += "The model coordinate file has been previously re-released for entry '" + entry + "'.\n"
+                    return
+                #
+            #
+        except:
+            traceback.print_exc(file=self.__lfh)
+        #

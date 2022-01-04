@@ -166,7 +166,15 @@ class RisCitationParser(object):
         """
         aList = ris_author.split(" ")
         if aList[0][-1] != ",":
-            return
+            tList = ris_author.split(",")
+            if len(tList) == 2:
+                aList = []
+                aList.append(tList[0] + ",")
+                xList = tList[1].split(" ")
+                aList.extend(xList)
+            else:
+                return
+            #
         #
         found = False
         cif_author = aList[0] + " "
