@@ -105,7 +105,7 @@ class RisCitationParser(object):
             #
         #
         # Get title, journal_abbrev, year
-        cif_ris_token_map = {"title": ("TI", "T1"), "journal_abbrev": ("JA", "JF", "JO"), "year": ("PY", "Y1")}
+        cif_ris_token_map = {"title": ("TI", "T1"), "journal_abbrev": ("JA", "JO", "JF"), "year": ("PY", "Y1")}
         #
         for cif_token, ris_tokens in cif_ris_token_map.items():
             for token in ris_tokens:
@@ -135,7 +135,7 @@ class RisCitationParser(object):
             import HTMLParser
             parser = HTMLParser.HTMLParser()
         #
-        doc = minidom.parseString("<RisStringTag>" + parser.unescape(ris_value) + "</RisStringTag>")
+        doc = minidom.parseString("<RisStringTag>" + parser.unescape(ris_value).replace("&", "&#38;").replace("<", "&#60;") + "</RisStringTag>")
         return self.__processNodes(doc.getElementsByTagName("RisStringTag")[0].childNodes, angstromFlag)
 
     def __processNodes(self, childNodes, angstromFlag):
