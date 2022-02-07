@@ -203,11 +203,13 @@ class UpdateFormParser(object):
                 p_list = []
                 for pubmed_id in pubmed_list:
                     p_dir = {}
-                    val = str(self.__reqObj.getValue('title_' + entry + '_' + pubmed_id))
+                    #val = str(self.__reqObj.getValue('title_' + entry + '_' + pubmed_id))
+                    val = self.__codeHandler.process(self.__reqObj.getValue('title_' + entry + '_' + pubmed_id), False)
                     if val:
                         p_dir['title'] = val
                     #
-                    val = str(self.__reqObj.getValue('author_' + entry + '_' + pubmed_id))
+                    #val = str(self.__reqObj.getValue('author_' + entry + '_' + pubmed_id))
+                    val = self.__codeHandler.process(self.__reqObj.getValue('author_' + entry + '_' + pubmed_id), False)
                     if val:
                         p_dir['author'] = val
                     #
