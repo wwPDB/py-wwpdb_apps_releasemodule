@@ -21,7 +21,7 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys
+import os, sys, tarfile
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
