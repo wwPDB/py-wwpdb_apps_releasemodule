@@ -98,14 +98,27 @@ class TimeUtil(object):
     def __getFormatDate(self, i_day):
         """
         """
-        futuretime = self.__currenttime + i_day * 86400
+        futuretime = self.__check_daylight_saving(self.__currenttime, self.__currenttime + i_day * 86400)
         return time.strftime("%Y-%m-%d", time.localtime(futuretime))
 
     def __getPDBFormatDate(self, i_day):
         """
         """
-        futuretime = self.__currenttime + i_day * 86400
+        futuretime = self.__check_daylight_saving(self.__currenttime, self.__currenttime + i_day * 86400)
         return time.strftime("%d-%b-%y", time.localtime(futuretime)).upper()
+
+    def __check_daylight_saving(self, currenttime, futuretime):
+        """
+        """
+        current_flag = time.localtime(currenttime).tm_isdst
+        future_flag = time.localtime(futuretime).tm_isdst
+        if (current_flag == 0) and (future_flag > 0):
+            return (futuretime - 3600)
+        elif (current_flag > 0) and (future_flag == 0):
+            return (futuretime + 3600)
+        else:
+            return futuretime
+        #
 
 if __name__ == '__main__':
     t =TimeUtil()

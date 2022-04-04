@@ -386,11 +386,11 @@ class EntryUpdateProcess(EntryUpdateBase):
                     #
                     for biolCifFile in biolAssemblyList:
                         biolPdbFile = biolCifFile.replace('-assembly', '.pdb').replace('.cif', '')
-                        if os.access(os.path.join(dirPath, biolPdbFile),  os.F_OK):
-                            # Removing cif format assembly file in for_release and for_release_beta directories
-                            self._removeFile(os.path.join(dirPath, biolCifFile))
-                            self._removeFile(os.path.join(betaDirPath, biolCifFile))
-                        #
+#                       if os.access(os.path.join(dirPath, biolPdbFile),  os.F_OK):
+#                           # Removing cif format assembly file in for_release and for_release_beta directories
+#                           self._removeFile(os.path.join(dirPath, biolCifFile))
+#                           self._removeFile(os.path.join(betaDirPath, biolCifFile))
+#                       #
                         # Removing pdb format assembly file in for_release_version directory
                         self._removeFile(os.path.join(versionDirPath, biolPdbFile))
                         #
