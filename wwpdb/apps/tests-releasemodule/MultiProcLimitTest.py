@@ -9,7 +9,9 @@ import logging
 import time
 
 from rcsb.utils.multiproc.MultiProcUtil import MultiProcUtil
+from rcsb.utils.multiproc.MultiProcPoolUtil import MultiProcPoolUtil
 from wwpdb.apps.releasemodule.utils.MultiProcLimit import MultiProcLimit
+from wwpdb.apps.releasemodule.utils.OSVersion import OSVersion
 
 logging.basicConfig(level=logging.INFO, format=u'MAIN-%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s')
 logger = logging.getLogger()
@@ -56,13 +58,21 @@ class TestMultiProcLimit(unittest.TestCase):
         
         mpl = MultiProcLimit(rateLimit)
         optD = {'mpl': mpl}
-        mpu = MultiProcUtil(verbose=True)
-        mpu.setOptions(optionsD=optD)
-
         start = time.time()
-        mpu.set(workerObj=self, workerMethod="workerOne")
-        ok, failList, retLists, diagList = mpu.runMulti(dataList=dataList, numProc=numProc, numResults=1,
-                                                        chunkSize=chunkSize)
+
+        if OSVersion().IsRhel8Like() is False:
+            mpu = MultiProcUtil(verbose=True)
+            mpu.setOptions(optionsD=optD)
+            mpu.set(workerObj=self, workerMethod="workerOne")
+            ok, failList, retLists, diagList = mpu.runMulti(dataList=dataList, numProc=numProc, numResults=1,
+                                                            chunkSize=chunkSize)
+        else:
+            mppu = MultiProcUtil(verbose=True)
+            mppu.setOptions(optionsD=optD)
+            mppu.set(workerObj=self, workerMethod="workerOne")
+            ok, failList, retLists, diagList = mppu.runMulti(dataList=dataList, numProc=numProc, numResults=1,
+                                                            chunkSize=chunkSize)
+
         self.assertEqual(len(failList), 0)
         self.assertTrue(ok)
         end = time.time()

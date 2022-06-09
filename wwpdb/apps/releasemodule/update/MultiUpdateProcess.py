@@ -27,6 +27,7 @@ import sys
 import time
 import traceback
 
+from rcsb.utils.multiproc.MultiProcPoolUtil import MultiProcPoolUtil
 from rcsb.utils.multiproc.MultiProcUtil import MultiProcUtil
 from wwpdb.apps.msgmodule.io.MessagingIo import MessagingIo
 from wwpdb.utils.db.DBLoadUtil import DBLoadUtil
@@ -38,6 +39,7 @@ from wwpdb.apps.releasemodule.update.UpdateBase import UpdateBase
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.releasemodule.utils.Utility import getCleanValue
+from wwpdb.apps.releasemodule.utils.OSVersion import OSVersion
 
 
 class MultiUpdateProcess(UpdateBase):
@@ -71,11 +73,18 @@ class MultiUpdateProcess(UpdateBase):
         if self.__errorContent:
             return
         #
-        mpu = MultiProcUtil(verbose=True)
-        mpu.set(workerObj=self, workerMethod='runMultiProcess')
-        mpu.setWorkingDir(self._sessionPath)
-        ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
-                                                        numResults=1)
+        if OSVersion().IsRhel8Like() is False:
+            mpu = MultiProcUtil(verbose=True)
+            mpu.set(workerObj=self, workerMethod='runMultiProcess')
+            mpu.setWorkingDir(self._sessionPath)
+            ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+                                                            numResults=1)
+        else:
+            mppu = MultiProcPoolUtil(verbose=True)
+            mppu.set(workerObj=self, workerMethod='runMultiProcess')
+            mppu.setWorkingDir(self._sessionPath)
+            ok, failList, retLists, diagList = mppu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+                                                            numResults=1)
         #
         if self.__task == 'Entries in release pending':
             self.__getReturnContentForPullEntries()
@@ -98,10 +107,17 @@ class MultiUpdateProcess(UpdateBase):
                 self._dumpPickle(entryPickleFile, {'id': idMap})
             #
         #
-        mpu = MultiProcUtil(verbose=True)
-        mpu.set(workerObj=self, workerMethod='runMultiProcess')
-        mpu.setWorkingDir(self._sessionPath)
-        ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+        if OSVersion().IsRhel8Like() is False:
+            mpu = MultiProcUtil(verbose=True)
+            mpu.set(workerObj=self, workerMethod='runMultiProcess')
+            mpu.setWorkingDir(self._sessionPath)
+            ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+                                                        numResults=1)
+        else:
+            mppu = MultiProcPoolUtil(verbose=True)
+            mppu.set(workerObj=self, workerMethod='runMultiProcess')
+            mppu.setWorkingDir(self._sessionPath)
+            ok, failList, retLists, diagList = mppu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
                                                         numResults=1)
         #
         dbLoadFileList = []
