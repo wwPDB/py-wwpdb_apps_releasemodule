@@ -12,43 +12,19 @@ __email__ = "peisach@rcsb.rutgers.edu"
 __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.01"
 
-import platform
 import os
 import unittest
+import sys
 
-#####################  setup DepUi test environment here from emdb translator############
-HERE = os.path.abspath(os.path.dirname(__file__))
-TOPDIR = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
-TESTOUTPUT = os.path.join(HERE, 'test-output', platform.python_version())
-if not os.path.exists(TESTOUTPUT):
-    os.makedirs(TESTOUTPUT)
-mockTopPath = os.path.join(TOPDIR, 'wwpdb', 'mock-data')
-rwMockTopPath = os.path.join(TESTOUTPUT)
 
-# Must create config file before importing ConfigInfo
-from wwpdb.utils.testing.SiteConfigSetup import SiteConfigSetup
-from wwpdb.utils.testing.CreateRWTree import CreateRWTree
-# Copy site-config and selected items
-crw = CreateRWTree(mockTopPath, TESTOUTPUT)
-crw.createtree(['site-config', 'depuiresources', 'emdresources'])
-# Use populate r/w site-config using top mock site-config
-SiteConfigSetup().setupEnvironment(rwMockTopPath, rwMockTopPath)
+if __package__ is None or __package__ == "":
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from commonsetup import HERE  # noqa:  F401 pylint: disable=import-error,unused-import
+else:
+    from .commonsetup import HERE  # noqa: F401 pylint: disable=relative-beyond-top-level
 
-# Setup DepUI specific directories
-from wwpdb.utils.config.ConfigInfo import ConfigInfo
-import os.path
-cI = ConfigInfo()
-FILE_UPLOAD_TEMP_DIR = os.path.join(
-    cI.get("SITE_ARCHIVE_STORAGE_PATH"),
-    "deposit",
-    "temp_files")
-if not os.path.exists(FILE_UPLOAD_TEMP_DIR):
-    os.makedirs(FILE_UPLOAD_TEMP_DIR)
-
-# Django envivonment setup
-#os.environ['DJANGO_SETTINGS_MODULE'] = "wwpdb.apps.deposit.settings"
-os.environ['IN_ANNOTATION'] = "no"
-################################################
+from wwpdb.utils.session.WebRequest import InputRequest
+from wwpdb.utils.config.ConfigInfo import ConfigInfo, getSiteId
 from wwpdb.apps.releasemodule.webapp.ReleaseWebApp_v2 import ReleaseWebApp
 from wwpdb.apps.releasemodule.citation.CitationFinder import CitationFinder
 from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
@@ -58,30 +34,25 @@ from wwpdb.apps.releasemodule.citation.MonitorCitationUpdate import MonitorCitat
 
 class ImportTests(unittest.TestCase):
     def setUp(self):
+        self.__lfh = sys.stderr
+        self.__verbose = True
         self.__siteId = 'WWPDB_DEPLOY_TEST'
-        pass
+        self.__cI = ConfigInfo(self.__siteId)
+        self.__topPath = self.__cI.get("SITE_WEB_APPS_TOP_PATH")
+        self.__topSessionPath = self.__cI.get("SITE_WEB_APPS_TOP_SESSIONS_PATH")
+        self.__reqObj = InputRequest(paramDict={}, verbose=self.__verbose, log=self.__lfh)
+        self.__reqObj.setValue("WWPDB_SITE_ID", self.__siteId)
+        self.__reqObj.setValue("TopSessionPath", self.__topSessionPath)
+        self.__reqObj.setValue("TopPath", self.__topPath)
+        self.__reqObj.setDefaultReturnFormat(return_format="html")
 
     def testInstantiate(self):
         """Tests simple instantiation"""
         c = CitationFinder()
-        #d = ReleaseWebApp(reqObj)
+        d = ReleaseWebApp(self.__reqObj)
+        smp = SearchMP()
+        fmp = FetchMP()
 
-    def testSearch(self):
-        """Test search for an author"""
-        authorList = ['Peisach+E[au]', 'Doudna+JA[au]']
-        aSearch = SearchMP(siteId=self.__siteId, termList=authorList, path=TESTOUTPUT)
-        aSearch.run()
-        termMap = aSearch.getTermMap()
-        # This could fail if Ezra Peisach does not publish anything in several years
-        self.assertNotEqual(termMap, {}, "Search test returned no entries")
-
-    def testFetch(self):
-        """Test fetch author"""
-        idList=['30357411', '96883512', '29174494', '28190782']
-        pFetch = FetchMP(siteId=self.__siteId, idList=idList, path=TESTOUTPUT)
-        pFetch.run()
-        pubmedInfo = pFetch.getPubmedInfoMap()
-        self.assertNotEqual(pubmedInfo, {}, "Failed to fetch info from NCBI")
 
 if __name__ == '__main__':
     unittest.main()
