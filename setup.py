@@ -4,7 +4,6 @@
 # Update:
 #
 import re
-import glob
 
 from setuptools import find_packages
 from setuptools import setup
@@ -51,7 +50,7 @@ setup(
     packages=find_packages(exclude=['wwpdb.apps.tests-releasemodule',
                                     'mock-data']),
     # Enables Manifest to be used
-    #include_package_data = True,
+    # include_package_data = True,
     package_data={
         # If any package contains *.md or *.rst ...  files, include them:
         '': ['*.md', '*.rst', "*.txt", "*.cfg"],

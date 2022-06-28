@@ -24,12 +24,12 @@ else:
     from .commonsetup import HERE  # noqa: F401 pylint: disable=relative-beyond-top-level
 
 from wwpdb.utils.session.WebRequest import InputRequest
-from wwpdb.utils.config.ConfigInfo import ConfigInfo, getSiteId
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.apps.releasemodule.webapp.ReleaseWebApp_v2 import ReleaseWebApp
 from wwpdb.apps.releasemodule.citation.CitationFinder import CitationFinder
 from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
 from wwpdb.apps.releasemodule.citation.FetchMP import FetchMP
-from wwpdb.apps.releasemodule.citation.MonitorCitationUpdate import MonitorCitationUpdate
+from wwpdb.apps.releasemodule.citation.MonitorCitationUpdate import MonitorCitationUpdate  # noqa: F401  pytlint: disable=unused-import
 
 
 class ImportTests(unittest.TestCase):
@@ -48,10 +48,10 @@ class ImportTests(unittest.TestCase):
 
     def testInstantiate(self):
         """Tests simple instantiation"""
-        c = CitationFinder()
-        d = ReleaseWebApp(self.__reqObj)
-        smp = SearchMP()
-        fmp = FetchMP()
+        _c = CitationFinder()  # noqa: F841
+        _d = ReleaseWebApp(self.__reqObj)  # noqa: F841
+        _smp = SearchMP()  # noqa: F841
+        _fmp = FetchMP()  # noqa: F841
 
 
 if __name__ == '__main__':
