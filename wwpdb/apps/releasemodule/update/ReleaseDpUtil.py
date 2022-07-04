@@ -51,7 +51,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         self.__releasingSfFile()
         self.__releasingMrFile()
         self.__releasingCsFile()
-        #self.__releasingNefFile()
+        self.__releasingNefFile()
         if self._blockErrorFlag:
             if ("status_code_em" in self._pickleData) and self._pickleData["status_code_em"]:
                 self._insertFileStatus("em", False)
