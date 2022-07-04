@@ -295,10 +295,10 @@ class EntryUpdateProcess(EntryUpdateBase):
                     rtn_message = self._copyFileUtil(fileList[0], os.path.join(targetPath, fileList[1]))
                     if rtn_message == 'ok':
                         self._insertAction('Copied ' + fileList[0] + ' to ' + os.path.join(targetPath, fileList[1]) + '.')
-                    elif returnType == 'not found':
+                    elif rtn_message == 'not found':
                         self._insertEntryMessage(errType=typeList[5], errMessage="Can't find " + os.path.join(targetPath, fileList[1]) + " file for entry " \
                                                  + self._entryId + ".", uniqueFlag=True)
-                    elif returnType == 'copy failed':
+                    elif rtn_message == 'copy failed':
                         self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + " file to " + os.path.join(targetPath, fileList[1]) \
                                                  + " file failed for entry " + self._entryId + ".", uniqueFlag=True)
                     #
