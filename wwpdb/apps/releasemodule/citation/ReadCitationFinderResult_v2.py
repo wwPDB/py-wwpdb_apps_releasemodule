@@ -138,7 +138,7 @@ class ReadCitationFinderResult(object):
             return
         #
         if not self.__dbUtil:
-            self.__dbUtil = CombineDbApi(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
+            self.__dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         #
         RelList = self.__dbUtil.getFunctionCall(False, 'getThisWeekRelEntries', [annotator])
         if not RelList:

@@ -26,17 +26,19 @@ import os,sys,traceback
 from wwpdb.apps.releasemodule.utils.ContentDbApi   import ContentDbApi
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.releasemodule.utils.Utility        import getCleanValue,getCombIDs,getCombStatus
+from wwpdb.io.locator.PathInfo                     import PathInfo
 
 class CombineDbApi(object):
     """
     """
-    def __init__(self, siteId=None, verbose=False, log=sys.stderr):
+    def __init__(self, siteId=None, path="/var/tmp", verbose=False, log=sys.stderr):
         """
            connect to local database
         """
         self.__lfh       = log
         self.__verbose   = verbose
         self.__siteId    = siteId
+        self.__sessionPath = path
         self.__ContentDB = None
         self.__StatusDB  = None
    
@@ -324,7 +326,10 @@ class CombineDbApi(object):
         pdbIdMap = self.__getPdbIdMap(selectedEntryList) 
         obsprMap = self.__getObsSprMap(id_string, pdbIdMap)
         #
+        pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
+        #
         for myD in selectedEntryList:
+            self.__lfh.write("structure_id=%s exp_method=%s\n" % (myD['structure_id'], myD['exp_method']))
             if myD['structure_id'] in majorIssueEntryList:
                 myD['major_issue'] = 'YES'
             #
@@ -333,6 +338,22 @@ class CombineDbApi(object):
                 for item in ( 'pdb_id', 'status_code' ):
                     if item in myD:
                         del myD[item]
+                    #
+                #
+            elif ('exp_method' in myD) and ((myD['exp_method'].upper().find("ELECTRON CRYSTALLOGRAPHY") != -1) or \
+                 (myD['exp_method'].upper().find("ELECTRON MICROSCOPY") != -1) or (myD['exp_method'].upper().find("ELECTRON TOMOGRAPHY") != -1)):
+                emVolumeFile = pI.getFilePath(dataSetId=myD['structure_id'], wfInstanceId=None, contentType='em-volume', formatType='map', \
+                                              fileSource='archive', versionId='latest', partNumber=1)
+                if (not emVolumeFile) or (not os.access(emVolumeFile, os.F_OK)):
+                    assoicatedEmdIdList = self.__ContentDB.getAssoicatedEmdId(myD['structure_id'])
+                    if len(assoicatedEmdIdList) > 0:
+                        warning_message = 'The entry does not have the associated map. The associated EMDB ID'
+                        if len(assoicatedEmdIdList) > 1:
+                            warning_message += 's = [ ' + ', '.join(assoicatedEmdIdList) + ' ].'
+                        else:
+                            warning_message += ' = [ ' + assoicatedEmdIdList[0] + ' ].'
+                        #
+                        myD['warning_message'] = warning_message
                     #
                 #
             #

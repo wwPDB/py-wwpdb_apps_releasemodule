@@ -94,6 +94,8 @@ class ContentDbApi(object):
                                                "(e.deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and " +
                                                "(e.current_status in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( e.map_hold_date is null ) or " +
                                                " ( e.map_hold_date < curdate() ) ) order by r.structure_id",
+      "SELECT_EMDB_ID_FROM_DATABASE_2" : "select database_code from database_2 where Structure_ID = '%s' and database_id = 'EMDB'",
+      "SELECT_EMDB_ID_FROM_DATABASE_RELATED" : "select db_id from pdbx_database_related where Structure_ID = '%s' and db_name = 'EMDB' and content_type = 'associated EM volume'",
     }
     #
     def __init__(self, siteId=None, verbose=False, log=sys.stderr):
@@ -275,13 +277,26 @@ class ContentDbApi(object):
         #
         return release_date  
 
-    def __getSelectedIDList(self, key, parameter):
+    def getAssoicatedEmdId(self, entryid):
+        emdIdList = self.__getSelectedIDList('SELECT_EMDB_ID_FROM_DATABASE_2', (entryid), item='database_code')
+        print(emdIdList)
+        emdIdList1 = self.__getSelectedIDList('SELECT_EMDB_ID_FROM_DATABASE_RELATED', (entryid), item='db_id')
+        print(emdIdList1)
+        for emdId in emdIdList1:
+            if emdId not in emdIdList:
+                emdIdList.append(emdId)
+            #
+        #
+        print(emdIdList)
+        return emdIdList
+
+    def __getSelectedIDList(self, key, parameter, item='structure_id'):
         idlist = []
         rows = self.__dbApi.selectData(key=key, parameter=parameter)
         if rows:
             for row in rows:
-                if ('structure_id' in row) and row['structure_id']:
-                    idlist.append(row['structure_id'])
+                if (item in row) and row[item]:
+                    idlist.append(row[item])
                 #
             #
         #
@@ -349,6 +364,7 @@ if __name__ == '__main__':
     print c.getCitation(sys.argv[2])
     print c.getCitationInfo(sys.argv[2])
     print c.getCitationAuthorList(sys.argv[2])
-    """
     print((c.getLastPdbxAuditRevisionHistory(sys.argv[1])))
     print((c.getLastReleaseDate(sys.argv[1])))
+    """
+    c.getAssoicatedEmdId(sys.argv[1])

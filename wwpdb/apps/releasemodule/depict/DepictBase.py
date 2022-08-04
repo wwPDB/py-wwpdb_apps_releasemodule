@@ -107,6 +107,16 @@ class DepictBase(ModuleBaseClass):
             self.__reObsoleteEmFlag = True
         #
         myD = {}
+        if not requestFlag:
+            myD['warning_comment_start'] = '<!--'
+            myD['warning_comment_end'] = '-->'
+            myD['warning_message'] = ''
+            if ('warning_message' in dataDict) and dataDict['warning_message']:
+                myD['warning_comment_start'] = ''
+                myD['warning_comment_end'] = ''
+                myD['warning_message'] = dataDict['warning_message']
+            #
+        #
         myD['status_color'] = '#000000'
         self._skipReleaseOptionFlag = False
         color_status_code = ''

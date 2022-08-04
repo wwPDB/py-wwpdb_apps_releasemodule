@@ -73,6 +73,10 @@ class DepictRequest(DepictBase):
                 myD['comment_end'] = '-->'
             #
             text += self._processTemplate(self.__rowTemplate, myD)
+            if ('warning_message' in dataDict) and dataDict['warning_message']:
+                text += '<tr><td style="text-align:left;" colspan="' + self.__cols + '"><font color="#FF0000">Warning: &nbsp; &nbsp; ' \
+                      + dataDict['warning_message'] + ' </font></td></tr>\n'
+            #
             if (self.__option != 'pull_release') and (not self._skipReleaseOptionFlag):
                 text += '<tr><td style="text-align:left;" colspan="' + self.__cols + '">Release Option: &nbsp; &nbsp; ' \
                       + self._getReleaseOption(dataDict, selectedData, False) + '</td></tr>\n'

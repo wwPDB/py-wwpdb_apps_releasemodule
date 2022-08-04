@@ -276,7 +276,7 @@ class ReleaseWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="html")        
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
         #
         myD = {}
         myD['sessionid']  = self.__sessionId
@@ -318,7 +318,7 @@ class ReleaseWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="html")        
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
         #
         entryId = str(self.__reqObj.getValue('identifier'))
         citation_update = str(self.__reqObj.getValue('citation_update'))
@@ -440,7 +440,7 @@ class ReleaseWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="json")        
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
         entryList = dbUtil.getRequestReleaseEntryInfo(self.__owner)
         #
         if entryList:
@@ -465,7 +465,7 @@ class ReleaseWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="json")        
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
         entryList = dbUtil.getExpiredEntryInfo(self.__owner)
         #
         if entryList:
@@ -488,7 +488,7 @@ class ReleaseWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="json")        
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
         entryList = []
         id_list = self.__getReleasedEntryList(dbUtil)
         if id_list:
@@ -626,7 +626,7 @@ class ReleaseWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="json")        
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
         entryList = dbUtil.getEntriesWithStatusList(self.__owner, statusList)
         foundList = []
         if entryList:

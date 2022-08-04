@@ -144,7 +144,7 @@ class AutoReRelease(object):
     def __findMatchEntryList(self, annotEntryMap):
         """ Find entry list with matched PUBMED ID or DOI citation
         """
-        dbUtil = CombineDbApi(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         entryList = []
         entryIdMap = {}
         pubmedInfoMap = {}

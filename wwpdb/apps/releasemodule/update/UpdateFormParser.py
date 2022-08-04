@@ -91,7 +91,7 @@ class UpdateFormParser(object):
         statusMapping['status_code_em'] = 'da_status_code_em'
         statusMapping['wf_status_code'] = 'wf_status_code'
         statusMapping['wf_status_code_em'] = 'wf_status_code_em'
-        dbUtil = CombineDbApi(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         ret_map = dbUtil.getEntryInfoMap(entryList)
         #
         option = str(self.__reqObj.getValue('option'))

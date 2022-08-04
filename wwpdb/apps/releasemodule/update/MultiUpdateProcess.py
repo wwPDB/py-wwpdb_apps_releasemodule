@@ -223,6 +223,8 @@ class MultiUpdateProcess(UpdateBase):
     def __finalize(self):
         """
         """
+        emdObsList = []
+        pdbObsList = []
         emdList = []
         pdbList = []
         dbLoadFileList = []
@@ -235,7 +237,11 @@ class MultiUpdateProcess(UpdateBase):
                     pickleData['release']:
                 self.__updateStatusHistory(entryData['entry'], entryData['status_code'], entryData['annotator'])
             #
-            if ('em_release' in pickleData) and pickleData['em_release']:
+            if ('em_obsolete' in pickleData) and pickleData['em_obsolete']:
+                emdObsList.append(entryData['entry'])
+            elif ('obsolete' in pickleData) and pickleData['obsolete']:
+                pdbObsList.append(entryData['entry'])
+            elif ('em_release' in pickleData) and pickleData['em_release']:
                 emdList.append(entryData['entry'])
             elif ('release' in pickleData) and pickleData['release']:
                 pdbList.append(entryData['entry'])
@@ -269,12 +275,18 @@ class MultiUpdateProcess(UpdateBase):
                 #
             #
         #
-        if emdList or pdbList:
+        if emdObsList or pdbObsList or emdList or pdbList:
             msgOption = 'release-nopubl'
             if str(self._reqObj.getValue('option')) == 'citation_update':
                 msgOption = 'release-publ'
             #
             msgIo = MessagingIo(self._reqObj, self._verbose, self._lfh)
+            if emdObsList:
+                msgIo.autoMsg(emdObsList, 'obsolete', p_isEmdbEntry=True)
+            #
+            if pdbObsList:
+                msgIo.autoMsg(pdbObsList, 'obsolete')
+            #
             if emdList:
                 msgIo.autoMsg(emdList, msgOption, p_isEmdbEntry=True)
             #

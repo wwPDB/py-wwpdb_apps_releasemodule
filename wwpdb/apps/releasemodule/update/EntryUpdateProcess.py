@@ -37,7 +37,9 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         self.__startFiles = {}
         self.__newPdbReleaseFlag = False
+        self.__newPdbObsoleteFlag = False
         self.__newEmReleaseFlag = False
+        self.__newEmObsoleteFlag = False
         self.__updateFlag = False
         self.__releaseFlag = False
         self.__EmEntryFlag = False
@@ -122,8 +124,14 @@ class EntryUpdateProcess(EntryUpdateBase):
             if (not self._blockErrorFlag) and self.__newPdbReleaseFlag and (not self.__isLegacyEntry()):
                 self._pickleData['release'] = True
             #   
+            if (not self._blockErrorFlag) and self.__newPdbObsoleteFlag and (not self.__isLegacyEntry()):
+                self._pickleData['obsolete'] = True
+            #   
             if (not self._blockErrorFlag) and (not self._blockEmErrorFlag) and self.__newEmReleaseFlag and (not self.__isLegacyEntry()):
                 self._pickleData['em_release'] = True
+            #
+            if (not self._blockErrorFlag) and (not self._blockEmErrorFlag) and self.__newEmObsoleteFlag and (not self.__isLegacyEntry()):
+                self._pickleData['em_obsolete'] = True
             #
         else:
             self.__startFiles = {}
@@ -143,12 +151,18 @@ class EntryUpdateProcess(EntryUpdateBase):
             if (('directory' + typeList[1]) in self._entryDir) and self._entryDir['directory' + typeList[1]]:
                 self._pickleData['directory' + typeList[1]] = self._entryDir['directory' + typeList[1]]
                 dataDict['for_release_dir'] = self._entryDir['directory' + typeList[1]]
-                if self._entryDir['status_code' + typeList[1]] == 'REL' and self._entryDir['directory' + typeList[1]] == 'added':
-                   if typeList[3] == 'model':
-                       self.__newPdbReleaseFlag = True
-                   elif typeList[3] == 'em-volume':
-                       self.__newEmReleaseFlag = True
-                   #
+                if (self._entryDir['status_code' + typeList[1]] == 'REL') and (self._entryDir['directory' + typeList[1]] == 'added'):
+                    if typeList[3] == 'model':
+                        self.__newPdbReleaseFlag = True
+                    elif typeList[3] == 'em-volume':
+                        self.__newEmReleaseFlag = True
+                    #
+                elif (self._entryDir['status_code' + typeList[1]] == 'OBS') and (self._entryDir['directory' + typeList[1]] == 'obsolete'):
+                    if (typeList[3] == 'model') and (self._entryDir['da_status_code' + typeList[1]] == 'REL'):
+                        self.__newPdbObsoleteFlag = True
+                    elif (typeList[3] == 'em-volume') and (self._entryDir['da_status_code' + typeList[1]] == 'REL'):
+                        self.__newEmObsoleteFlag = True
+                    #
                 #
             #
             if typeList[3] == 'em-volume':
