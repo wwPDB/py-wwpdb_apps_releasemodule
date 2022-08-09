@@ -339,8 +339,8 @@ class ReleaseUtil(EntryUpdateBase):
             self._removeFile(os.path.join(self._sessionPath, fileName))
         #
         generator = NmrDataGenerator(siteId=self._siteId, workingDirPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
-        generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile),
-                                  os.path.join(self._sessionPath, internalNefFile))
+        errMsg = generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile), \
+                                           os.path.join(self._sessionPath, internalNefFile))
         #
         if not self.__verifyGeneratingFile('nmr_data', internalStrFile):
             return
@@ -348,7 +348,7 @@ class ReleaseUtil(EntryUpdateBase):
         self._copyFileUtil(os.path.join(self._sessionPath, internalStrFile), os.path.join(self._sessionPath, externalStrFile))
         self._insertReleseFile('nmr-data-str', os.path.join(self._sessionPath, externalStrFile), externalStrFile, '', True)
         #
-        if not self.__verifyGeneratingFile('nmr_data', internalNefFile):
+        if not self.__verifyGeneratingFile('nmr_data', internalNefFile, errMsg=errMsg):
             return
         #
         self._copyFileUtil(os.path.join(self._sessionPath, internalNefFile), os.path.join(self._sessionPath, externalNefFile))
@@ -362,12 +362,16 @@ class ReleaseUtil(EntryUpdateBase):
         #
         return True
 
-    def __verifyGeneratingFile(self, fileType, fileName):
+    def __verifyGeneratingFile(self, fileType, fileName, errMsg=""):
         filePath = os.path.join(self._sessionPath, fileName)
         if os.access(filePath, os.F_OK):
             return True
         #
-        self._insertEntryMessage(errType=fileType, errMessage='Generating ' + fileName + ' failed.', uniqueFlag=True)
+        msg = 'Generating ' + fileName + ' failed.'
+        if errMsg:
+            msg = 'Generating ' + fileName + ' failed:\n' + errMsg
+        #
+        self._insertEntryMessage(errType=fileType, errMessage=msg, uniqueFlag=True)
         return False
 
     def __checkCIFFile(self, fileType, fileName, dictionary, ext, warningOnlyFlag):

@@ -345,7 +345,7 @@ class CombineDbApi(object):
                 emVolumeFile = pI.getFilePath(dataSetId=myD['structure_id'], wfInstanceId=None, contentType='em-volume', formatType='map', \
                                               fileSource='archive', versionId='latest', partNumber=1)
                 if (not emVolumeFile) or (not os.access(emVolumeFile, os.F_OK)):
-                    assoicatedEmdIdList = self.__ContentDB.getAssoicatedEmdId(myD['structure_id'])
+                    assoicatedEmdIdList = self.__ContentDB.getNotReleasedAssoicatedEmdId(myD['structure_id'])
                     if len(assoicatedEmdIdList) > 0:
                         warning_message = 'The entry does not have the associated map. The associated EMDB ID'
                         if len(assoicatedEmdIdList) > 1:

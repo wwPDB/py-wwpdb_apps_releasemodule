@@ -44,10 +44,12 @@ class NmrDataGenerator(object):
         #
         self.getNmrDataStrFile(pdb_id, inputCifFile, outputNmrDataStrFile)
         #
+        errMsg = ""
         if os.access(outputNmrDataStrFile, os.R_OK):
-            self.getNmrDataNefFile(pdb_id, outputNmrDataStrFile, outputNmrDataNetFile)
+            errMsg = self.getNmrDataNefFile(pdb_id, outputNmrDataStrFile, outputNmrDataNetFile)
         #
         self.__lfh.write("Finish %s to (%s, %s) conversion.\n" % (inputCifFile,  outputNmrDataStrFile, outputNmrDataNetFile))
+        return errMsg
 
     def getNmrDataStrFile(self, pdb_id, inputCifFile, outputNmrDataStrFile):
         """ Get nmr-data-str file
@@ -96,7 +98,9 @@ class NmrDataGenerator(object):
             self.__lfh.write("Finish %s to %s conversion.\n" % (inputNmrDataStrFile, outputNmrDataNetFile))
         except:
             traceback.print_exc(file=self.__lfh)
+            return traceback.format_exc()
         #
+        return ""
 
     def testNEFTranslator(self, inputFile, outputFile):
         """

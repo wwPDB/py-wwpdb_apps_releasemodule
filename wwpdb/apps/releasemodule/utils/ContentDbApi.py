@@ -95,6 +95,7 @@ class ContentDbApi(object):
                                                "(e.current_status in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( e.map_hold_date is null ) or " +
                                                " ( e.map_hold_date < curdate() ) ) order by r.structure_id",
       "SELECT_EMDB_ID_FROM_DATABASE_2" : "select database_code from database_2 where Structure_ID = '%s' and database_id = 'EMDB'",
+      "SELECT_ENTRY_ID_FROM_DATABASE_2" : "select Structure_ID from database_2 where database_code = '%s' and database_id = 'EMDB'",
       "SELECT_EMDB_ID_FROM_DATABASE_RELATED" : "select db_id from pdbx_database_related where Structure_ID = '%s' and db_name = 'EMDB' and content_type = 'associated EM volume'",
     }
     #
@@ -279,15 +280,39 @@ class ContentDbApi(object):
 
     def getAssoicatedEmdId(self, entryid):
         emdIdList = self.__getSelectedIDList('SELECT_EMDB_ID_FROM_DATABASE_2', (entryid), item='database_code')
-        print(emdIdList)
         emdIdList1 = self.__getSelectedIDList('SELECT_EMDB_ID_FROM_DATABASE_RELATED', (entryid), item='db_id')
-        print(emdIdList1)
         for emdId in emdIdList1:
             if emdId not in emdIdList:
                 emdIdList.append(emdId)
             #
         #
-        print(emdIdList)
+        return emdIdList
+
+    def getNotReleasedAssoicatedEmdId(self, entryid):
+        emdIdList = []
+        possibleEmdIdList = self.getAssoicatedEmdId(entryid)
+        if not possibleEmdIdList:
+            return emdIdList
+        #
+        for emdId in possibleEmdIdList:
+            isReleased = False
+            structureIdList = self.__getSelectedIDList('SELECT_ENTRY_ID_FROM_DATABASE_2', (emdId), item='Structure_ID')
+            for structureId in structureIdList:
+                if structureId == entryid:
+                    continue
+                #
+                em_rows = self.getEMInfo(structureId)
+                if (len(em_rows) == 1) and ('structure_id' in em_rows[0]) and (em_rows[0]['structure_id'] == structureId) and \
+                   ('status_code_em' in em_rows[0]) and (em_rows[0]['status_code_em'] == 'REL'):
+                    isReleased = True
+                    break
+                #
+            #
+            if isReleased:
+                continue
+            #
+            emdIdList.append(emdId)
+        #
         return emdIdList
 
     def __getSelectedIDList(self, key, parameter, item='structure_id'):
@@ -367,4 +392,4 @@ if __name__ == '__main__':
     print((c.getLastPdbxAuditRevisionHistory(sys.argv[1])))
     print((c.getLastReleaseDate(sys.argv[1])))
     """
-    c.getAssoicatedEmdId(sys.argv[1])
+    print(c.getNotReleasedAssoicatedEmdId(sys.argv[1]))
