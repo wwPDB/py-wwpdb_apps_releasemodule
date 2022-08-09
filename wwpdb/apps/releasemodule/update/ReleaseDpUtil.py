@@ -352,7 +352,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         #
         return True
 
-    def __verifyGeneratingFile(self, fileType, fileName, =""):
+    def __verifyGeneratingFile(self, fileType, fileName, errMsg=""):
         filePath = os.path.join(self._sessionPath, fileName)
         if os.access(filePath, os.F_OK):
             return True
