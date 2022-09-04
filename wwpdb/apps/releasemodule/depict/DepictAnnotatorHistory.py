@@ -16,14 +16,16 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, time
+import sys
+import time
 
-from wwpdb.apps.releasemodule.utils.ModuleBaseClass  import ModuleBaseClass
+from wwpdb.apps.releasemodule.utils.ModuleBaseClass import ModuleBaseClass
+
 
 class DepictAnnotatorHistory(ModuleBaseClass):
     """ Class responsible for generating Annotator's release history HTML depiction.
@@ -37,7 +39,7 @@ class DepictAnnotatorHistory(ModuleBaseClass):
         if not self.__pickleData:
             return ''
         #
-        if (not 'eventList' in self.__pickleData) or (not self.__pickleData['eventList']):
+        if ('eventList' not in self.__pickleData) or (not self.__pickleData['eventList']):
             return ''
         #
         myD = {}
@@ -53,16 +55,16 @@ class DepictAnnotatorHistory(ModuleBaseClass):
         for enevtDict in eventList:
             myD = {}
             myD['bg_class'] = bg_class
-            for item in ( 'task', 'details', 'time', 'entry_ids' ):
+            for item in ('task', 'details', 'time', 'entry_ids'):
                 myD[item] = ''
-                if (not item in enevtDict) or (not enevtDict[item]):
+                if (item not in enevtDict) or (not enevtDict[item]):
                     continue
                 #
                 if item == 'time':
                     myD[item] = time.strftime('%Y-%b-%d %H:%M:%S', time.localtime(enevtDict[item]))
                 elif item == 'entry_ids':
                     for entryId in enevtDict[item]:
-                        myD[item] += '&nbsp;' + self._processTemplate('entry_header_tmplt.html', { 'sessionid' : self._sessionId, 'structure_id' : entryId })
+                        myD[item] += '&nbsp;' + self._processTemplate('entry_header_tmplt.html', {'sessionid': self._sessionId, 'structure_id': entryId})
                     #
                 else:
                     myD[item] = enevtDict[item]

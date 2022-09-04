@@ -16,14 +16,15 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, time
+import sys
 
-from wwpdb.apps.releasemodule.utils.MessageBaseClass  import MessageBaseClass
+from wwpdb.apps.releasemodule.utils.MessageBaseClass import MessageBaseClass
+
 
 class DepictReleaseInfo(MessageBaseClass):
     """ Class responsible for generating entry message HTML depiction.
@@ -34,7 +35,7 @@ class DepictReleaseInfo(MessageBaseClass):
         self.__annPickleData = self._loadAnnotatorPickle(self._getSelectedAnnotator())
 
     def DoRender(self):
-        if (not self.__annPickleData) or (not 'entryDir' in self.__annPickleData) or (not self.__annPickleData['entryDir']):
+        if (not self.__annPickleData) or ('entryDir' not in self.__annPickleData) or (not self.__annPickleData['entryDir']):
             return ''
         #
         entryList = []
@@ -65,7 +66,7 @@ class DepictReleaseInfo(MessageBaseClass):
         text = ''
         for entryId in entryList:
             entryPickle = self._loadEntryPickle(entryId)
-            if (not entryPickle) or (not 'history' in entryPickle) or (not entryPickle['history']):
+            if (not entryPickle) or ('history' not in entryPickle) or (not entryPickle['history']):
                 continue
             #
             pickleData = entryPickle['history'][-1]
@@ -81,7 +82,7 @@ class DepictReleaseInfo(MessageBaseClass):
             #
             text += '</b>: '
             #
-            entryContent,entrySysError,status = self._generateReturnContent(pickleData, pickleData['messages'], pickleData['file_status'])
+            entryContent, entrySysError, status = self._generateReturnContent(pickleData, pickleData['messages'], pickleData['file_status'])
             if status == 'OK':
                 text += '<span style="color:green">OK</span>'
             if status == 'EM-BLOCKED':
@@ -92,12 +93,12 @@ class DepictReleaseInfo(MessageBaseClass):
             if ('task' in pickleData) and pickleData['task']:
                 text += '\n\nTask: ' + pickleData['task']
                 if ('option' in pickleData) and (pickleData['option'] != 'pull_release'):
-                    selectText,selectMap = self._getReleaseOptionFromPickle(pickleData)
+                    selectText, _selectMap = self._getReleaseOptionFromPickle(pickleData)
                     text += '\n\nRelease Option: ' + selectText
                 #
             #
             if entrySysError:
-                msgType,msgText = self._getConcatMessageContent(entrySysError)
+                _msgType, msgText = self._getConcatMessageContent(entrySysError)
                 text += '\n\nSystem related error:\n' + msgText
             #
             text += entryContent

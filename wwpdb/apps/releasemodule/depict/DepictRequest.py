@@ -16,15 +16,17 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys
+import os
+import sys
 
-from wwpdb.apps.releasemodule.depict.DepictBase    import DepictBase
-from wwpdb.apps.releasemodule.utils.Utility        import FindReleaseFiles
+from wwpdb.apps.releasemodule.depict.DepictBase import DepictBase
+from wwpdb.apps.releasemodule.utils.Utility import FindReleaseFiles
+
 
 class DepictRequest(DepictBase):
     """ Class responsible for generating HTML depiction.
@@ -62,7 +64,7 @@ class DepictRequest(DepictBase):
                     dataDict['new_status_code'] = 'HOLD'
                 #
             #
-            myD,selectedData = self._initialEntryDict(dataDict, self.__items, False, True, '&nbsp;')
+            myD, selectedData = self._initialEntryDict(dataDict, self.__items, False, True, '&nbsp;')
             if autoSelectionFlag:
                 myD['check_option'] = 'checked'
             #
@@ -75,11 +77,11 @@ class DepictRequest(DepictBase):
             text += self._processTemplate(self.__rowTemplate, myD)
             if ('warning_message' in dataDict) and dataDict['warning_message']:
                 text += '<tr><td style="text-align:left;" colspan="' + self.__cols + '"><font color="#FF0000">Warning: &nbsp; &nbsp; ' \
-                      + dataDict['warning_message'] + ' </font></td></tr>\n'
+                    + dataDict['warning_message'] + ' </font></td></tr>\n'
             #
             if (self.__option != 'pull_release') and (not self._skipReleaseOptionFlag):
                 text += '<tr><td style="text-align:left;" colspan="' + self.__cols + '">Release Option: &nbsp; &nbsp; ' \
-                      + self._getReleaseOption(dataDict, selectedData, False) + '</td></tr>\n'
+                    + self._getReleaseOption(dataDict, selectedData, False) + '</td></tr>\n'
             #
             text += self.__processAuthorTitle(dataDict, count)
             if self.__option == 'pull_release':
@@ -101,7 +103,7 @@ class DepictRequest(DepictBase):
         myD['id'] = str(count)
         myD['cols'] = self.__cols
         #
-        for item in ( 'author_list', 'title'):
+        for item in ('author_list', 'title'):
             val = ''
             if item in dataDict:
                 val = dataDict[item]
@@ -114,7 +116,7 @@ class DepictRequest(DepictBase):
         return self._processTemplate('author_title_tmplt.html', myD)
 
     def __getReleaseInfo(self, dataDict, count):
-        siteId  = str(self._reqObj.getValue('WWPDB_SITE_ID'))
+        siteId = str(self._reqObj.getValue('WWPDB_SITE_ID'))
         FileInfo = FindReleaseFiles(siteId, dataDict)
         #
         myD = {}
@@ -137,29 +139,29 @@ class DepictRequest(DepictBase):
 
     def __getReleasedFilesLink(self, FileInfo):
         rows = ''
-        if not 'releasedFiles' in FileInfo:
+        if 'releasedFiles' not in FileInfo:
             return rows
         #
         num = len(FileInfo['releasedFiles'])
         num_per_line = 5
-        l = int(num / num_per_line)
+        lines = int(num / num_per_line)
         x = num % num_per_line
-        m = l
+        m = lines
         if x == 0:
-            m = l - 1
+            m = lines - 1
         #
         for i in range(m + 1):
             n = num_per_line
-            if i == l:
+            if i == lines:
                 n = x
             #
             rows += '<tr>\n'
             for j in range(n):
                 filepath = FileInfo['releasedFiles'][i * num_per_line + j]
-                (path,filename) = os.path.split(filepath)
+                (path, filename) = os.path.split(filepath)
                 rows += '<td style="text-align:left;border-style:none">' \
-                      + '<a href="/service/entity/download_file?filepath=' \
-                      + filepath + '" target="_blank"> ' + filename + ' </a></td>\n'
+                    + '<a href="/service/entity/download_file?filepath=' \
+                    + filepath + '" target="_blank"> ' + filename + ' </a></td>\n'
             #
             rows += '</tr>\n'
         #
