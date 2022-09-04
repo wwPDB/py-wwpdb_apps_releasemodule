@@ -15,17 +15,16 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, string, traceback
 
 def getReleaseManu(name, value, val_list, js_class, include_empty_selection):
     display_list = []
     if include_empty_selection:
-        display_list = [ [ '', ''] ]
+        display_list = [['', '']]
     #
     for tup_list in val_list:
         display_list.append(tup_list)
@@ -40,15 +39,17 @@ def getReleaseManu(name, value, val_list, js_class, include_empty_selection):
         #
         text += '>' + tup_list[1] + '</option>\n'
     text += '</select> &nbsp; &nbsp; &nbsp;\n'
-    return text,label
+    return text, label
+
 
 def getCheckBox(name, value, label):
     text = '<input type="checkbox" id="' + name + '" name="' + name + '" value="' \
-         + value + '" checked /> ' + label + ' &nbsp; &nbsp; &nbsp; \n'
+        + value + '" checked /> ' + label + ' &nbsp; &nbsp; &nbsp; \n'
     return text
 
+
 def processAuthorApprovalType(existing_value, structure_id):
-    val_list = [ '', 'implicit', 'explicit' ]
+    val_list = ['', 'implicit', 'explicit']
     val = ''
     if existing_value:
         val = existing_value.lower()
@@ -63,21 +64,25 @@ def processAuthorApprovalType(existing_value, structure_id):
     text += '</select> &nbsp; &nbsp; &nbsp;\n'
     return text
 
+
 def getTextBox(name_prefix, structure_id, value, size="20"):
     text = '<input type="text" name="' + name_prefix + '_' + structure_id \
-         + '" id="' + name_prefix + '_' + structure_id + '" value="' + value + '" size="' + size + '" /> '
+        + '" id="' + name_prefix + '_' + structure_id + '" value="' + value + '" size="' + size + '" /> '
     return text
 
-def getSupersedeIDBox(structure_id, spr_entry, obs_details, display): 
+
+def getSupersedeIDBox(structure_id, spr_entry, obs_details, display):
     text = '<span id="span_supersede_' + structure_id + '" style="display:' + display + '">Supersede PDB ID: &nbsp; ' \
-         + getTextBox('supersede', structure_id, spr_entry, size="20") + ' <br/> &nbsp; Obsolete Details: &nbsp; ' \
-         + getTextBox('obspr_details', structure_id, obs_details, size="160") + ' </span> &nbsp; &nbsp; &nbsp; \n'
+        + getTextBox('supersede', structure_id, spr_entry, size="20") + ' <br/> &nbsp; Obsolete Details: &nbsp; ' \
+        + getTextBox('obspr_details', structure_id, obs_details, size="160") + ' </span> &nbsp; &nbsp; &nbsp; \n'
     return text
+
 
 def getObsoleteIDBox(structure_id, obs_entry, display):
     text = '<span id="span_obsolete_' + structure_id + '" style="display:' + display + '">Obsolete PDB IDs: &nbsp; ' \
-         + getTextBox('obsolete', structure_id, obs_entry) + '</span> &nbsp; &nbsp; &nbsp; \n'
+        + getTextBox('obsolete', structure_id, obs_entry) + '</span> &nbsp; &nbsp; &nbsp; \n'
     return text
+
 
 def getObsSprInfo(pdb_id, obspr_list):
     text = ''
@@ -93,15 +98,17 @@ def getObsSprInfo(pdb_id, obspr_list):
     #
     return '<br /><span style="color:red;">Warning: ' + text + '</span>\n'
 
+
 def addHiddenInput(name, value):
     text = '<input type="hidden" name="' + name + '" id="' + name + '" value="' + value + '" />\n'
     return text
+
 
 def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, reObsoleteFlag):
     model_list = [ [ 'REL_added',       'Release Coord.'              ],
                    [ 'EMHEADERUpdate',  'EM XML header'               ],
                    [ 'REREL_modified',  'Re-release Coord.'           ],
-#                  [ 'RELOAD_reloaded', 'Re-release CIF w/o PDB'      ],
+                   # [ 'RELOAD_reloaded', 'Re-release CIF w/o PDB'     ],
                    [ 'OBS_obsolete',    'Obsolete Coord.'             ],
                    [ 'CITATIONUpdate',  'Update citation w/o release' ] ]
     #
@@ -148,7 +155,7 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
         #
     #
     if not val_list:
-        '',False,''
+        '', False, ''
     #
     if selectedOptions:
         value = ''
@@ -160,13 +167,14 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
     if ('emdb_release' in dataDict) and dataDict['emdb_release']:
         include_empty_selection = False
     #
-    text,label = getReleaseManu('status_' + dataDict['structure_id'], value, val_list, 'class="release_status"', include_empty_selection)
+    text, label = getReleaseManu('status_' + dataDict['structure_id'], value, val_list, 'class="release_status"', include_empty_selection)
     pre_select_flag = False
     if newReleaseFlag or (selectedOptions and value and label):
         text += addHiddenInput('pre_select_status_' + dataDict['structure_id'], value + ':' + label)
         pre_select_flag = True
     #
-    return text,pre_select_flag,value
+    return text, pre_select_flag, value
+
 
 def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag):
     exp_list = [ [ 'recvd_struct_fact',     'status_sf_', 'SF', 'status_code_sf',
@@ -226,25 +234,26 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
         elif ('pdb_id' not in dataDict) or (not dataDict['pdb_id']):
             value = t_list[4][1][0]
         #
-        select_text,label = getReleaseManu(t_list[1] + dataDict['structure_id'], value, display_list, '', True)
+        select_text, label = getReleaseManu(t_list[1] + dataDict['structure_id'], value, display_list, '', True)
         text += t_list[2] + ': &nbsp; ' + select_text
         if newReleaseFlag or (selectedOptions and value and label):
             text += addHiddenInput('pre_select_' + t_list[1] + dataDict['structure_id'], value + ':' + label)
             pre_select_flag = True
         #
     #
-    return text,pre_select_flag
+    return text, pre_select_flag
+
 
 def ReleaseOption(dataDict, selectedData, citationFlag, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag, releaseDate):
     selectedOptions = {}
     if (not newReleaseFlag) and ('pre_select' in selectedData) and selectedData['pre_select']:
         selectedOptions = selectedData['pre_select']
     #
-    model_text,model_pre_select_flag,value = ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, reObsoleteFlag)
-    exp_text,exp_pre_select_flag = ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag)
+    model_text, model_pre_select_flag, value = ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, reObsoleteFlag)
+    exp_text, exp_pre_select_flag = ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag)
     if selectedOptions and (not model_pre_select_flag) and (not exp_pre_select_flag):
-        model_text,model_pre_select_flag,value = ModelReleaseOption(dataDict, {}, citationFlag, newReleaseFlag, reObsoleteFlag)
-        exp_text,exp_pre_select_flag = ExpReleaseOption(dataDict, {}, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag)
+        model_text, model_pre_select_flag, value = ModelReleaseOption(dataDict, {}, citationFlag, newReleaseFlag, reObsoleteFlag)
+        exp_text, exp_pre_select_flag = ExpReleaseOption(dataDict, {}, newReleaseFlag, reObsoleteFlag, newReleaseEmFlag, reObsoleteEmFlag)
     #
     text = ''
     if newReleaseFlag:
@@ -273,24 +282,24 @@ def ReleaseOption(dataDict, selectedData, citationFlag, newReleaseFlag, reObsole
         obs_details = ''
         if 'obspr' in dataDict:
             for obsprDict in dataDict['obspr']:
-#               if ('date' not in obsprDict) or (obsprDict['date'] != releaseDate) or ('id' not in obsprDict):
+                # if ('date' not in obsprDict) or (obsprDict['date'] != releaseDate) or ('id' not in obsprDict):
                 if ('id' not in obsprDict) or (('date' in obsprDict) and (obsprDict['date'] != releaseDate)):
                     continue
                 #
                 if obsprDict['id'].upper() == 'OBSLTE':
                     if ('replace_pdb_id' in obsprDict) and (obsprDict['replace_pdb_id'].upper() == dataDict['pdb_id'].upper()) and \
                        ('pdb_id' in obsprDict) and (obsprDict['pdb_id'].upper() != 'NONE'):
-                         spr_entry = obsprDict['pdb_id'].upper()
-                         obspr_text += 'Entry ' + dataDict['pdb_id'].upper() + ' is obsoleted by entry ' + spr_entry + '. '
+                        spr_entry = obsprDict['pdb_id'].upper()
+                        obspr_text += 'Entry ' + dataDict['pdb_id'].upper() + ' is obsoleted by entry ' + spr_entry + '. '
                     #
                     if ('details' in obsprDict) and obsprDict['details']:
-                         obs_details = obsprDict['details']
+                        obs_details = obsprDict['details']
                     #
                 elif obsprDict['id'].upper() == 'SPRSDE':
                     if ('pdb_id' in obsprDict) and (obsprDict['pdb_id'].upper() == dataDict['pdb_id'].upper()) and \
                        ('replace_pdb_id' in obsprDict) and obsprDict['replace_pdb_id']:
                         obs_entry = obsprDict['replace_pdb_id'].upper()
-                        obspr_text += 'Entry ' + dataDict ['pdb_id'].upper() + ' is to supersede entry ' + obs_entry + '. '
+                        obspr_text += 'Entry ' + dataDict['pdb_id'].upper() + ' is to supersede entry ' + obs_entry + '. '
                     #
                 #
             #

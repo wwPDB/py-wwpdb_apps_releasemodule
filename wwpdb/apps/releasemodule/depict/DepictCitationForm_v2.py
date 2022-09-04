@@ -16,18 +16,19 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, string, traceback
+import os
+import sys
 
 from wwpdb.apps.releasemodule.citation.RisCitationParser import RisCitationParser
-from wwpdb.apps.releasemodule.citation.StringUtil  import calStringSimilarity
-from wwpdb.apps.releasemodule.depict.DepictBase    import DepictBase
-from wwpdb.apps.releasemodule.utils.JournalAbbrev  import JournalAbbrev
-from wwpdb.utils.session.WebUploadUtils            import WebUploadUtils
+from wwpdb.apps.releasemodule.depict.DepictBase import DepictBase
+from wwpdb.apps.releasemodule.utils.JournalAbbrev import JournalAbbrev
+from wwpdb.utils.session.WebUploadUtils import WebUploadUtils
+
 
 class DepictCitationForm(DepictBase):
     """ Class responsible for generating citation input form depiction.
@@ -86,7 +87,7 @@ class DepictCitationForm(DepictBase):
                 self.__risCitation["journal_abbrev"] = abbrev
             else:
                 self.__risCitation["citation_id_text"] = str(self._reqObj.getValue("citation_id")) + ' &nbsp; &nbsp; &nbsp; &nbsp; <span style="color:red">' + \
-                   'Please select the proper "Journal Abbrev." for journal "' + self.__risCitation["journal_abbrev"] + '" using auto suggestion.</span>'
+                    'Please select the proper "Journal Abbrev." for journal "' + self.__risCitation["journal_abbrev"] + '" using auto suggestion.</span>'
             #
         #
 
@@ -97,7 +98,7 @@ class DepictCitationForm(DepictBase):
         count = 0
         flag = True
         for dataDict in self._resultList:
-            myD,selectedData = self._initialEntryDict(dataDict, items, True, False, 'None')
+            myD, selectedData = self._initialEntryDict(dataDict, items, True, False, 'None')
             selectedData['JRNL'] = 'checked'
             selectedData['Citation'] = 'checked'
             myD['comment_start'] = ''
@@ -153,7 +154,7 @@ class DepictCitationForm(DepictBase):
             #
             if (val == '') and (item == 'citation_id_text') and ('citation_id' in dataDict):
                 val = dataDict['citation_id']
-            # 
+            #
             myD[item] = val
         #
         myD['max_author_num'] = str(max_author_num)
