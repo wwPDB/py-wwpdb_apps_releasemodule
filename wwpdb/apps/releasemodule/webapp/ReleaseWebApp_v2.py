@@ -931,6 +931,8 @@ class ReleaseWebAppWorker(object):
             site = 'PDBe'
         elif self.__cI.get('WWPDB_SITE_LOC').lower() == 'pdbj':
             site = 'PDBj'
+        elif self.__cI.get('WWPDB_SITE_LOC').lower() == 'pdbc':
+            site = 'PDBc'
         #
         anno_list = self.__getAnnotatorList(dbUtil, site)
         if not anno_list:
@@ -938,7 +940,7 @@ class ReleaseWebAppWorker(object):
         #
         anno_list.insert(0, '')
         if name_id == 'owner':
-            if (site == 'RCSB') or (site == 'PDBj'):
+            if site in ['RCSB', 'PDBj', 'PDBc']:
                 anno_list.append('OTHER')
             #
             anno_list.append('ALL')

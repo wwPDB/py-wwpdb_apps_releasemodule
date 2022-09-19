@@ -177,6 +177,8 @@ class CitationFinder(object):
             site = 'PDBe'
         elif self.__cI.get('WWPDB_SITE_LOC').lower() == 'pdbj':
             site = 'PDBj'
+        elif self.__cI.get('WWPDB_SITE_LOC').lower() == 'pdbc':
+            site = 'PDBc'
         #
         connect = StatusDbApi(siteId=self.__siteId, verbose=True, log=self.__lfh)
         self.__annotatorList = connect.getAnnoList(siteId=site)
