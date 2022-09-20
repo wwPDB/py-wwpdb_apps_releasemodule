@@ -16,15 +16,17 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys
+import os
+import sys
 #
-from wwpdb.utils.config.ConfigInfo                 import ConfigInfo
-from wwpdb.io.file.mmCIFUtil                       import mmCIFUtil
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+
 
 class JournalAbbrev(object):
     """
@@ -32,10 +34,10 @@ class JournalAbbrev(object):
     def __init__(self, reqObj=None, ciffile=None, verbose=False, log=sys.stderr):
         """
         """
-        self.__reqObj    = reqObj
-        self.__ciffile   = ciffile
-        self.__lfh       = log
-        self.__verbose   = verbose
+        self.__reqObj = reqObj
+        self.__ciffile = ciffile
+        self.__lfh = log
+        self.__verbose = verbose
         self.__jalist = []
         self.__jamaps = {}
         self.__issnmaps = {}
@@ -46,8 +48,8 @@ class JournalAbbrev(object):
         if not self.__reqObj:
             return
         #
-        self.__siteId  = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
-        self.__cI=ConfigInfo(self.__siteId)
+        self.__siteId = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
+        self.__cI = ConfigInfo(self.__siteId)
         self.__ciffile = os.path.join(self.__cI.get('SITE_ANNOT_TOOLS_PATH'), 'data', 'ascii', 'ndb_refn.cif')
 
     def __getJAList(self):
@@ -55,7 +57,7 @@ class JournalAbbrev(object):
         cifObj = mmCIFUtil(filePath=self.__ciffile)
         nlist = cifObj.GetValue('ndb_refn')
         for Dir in nlist:
-            if not 'issn' in Dir:
+            if 'issn' not in Dir:
                 if Dir['publication'] != 'TO BE PUBLISHED':
                     continue
                 #
@@ -73,7 +75,7 @@ class JournalAbbrev(object):
                 #
                 continue
             #
-            pcs  = self.__processJournalAbbrev(cs)
+            pcs = self.__processJournalAbbrev(cs)
             Map[cs] = pcs
             self.__jalist.append(pcs)
             cs1 = self.__standardJournalAbbrev(pcs)
@@ -142,6 +144,7 @@ class JournalAbbrev(object):
         #
         return ''
 
+
 if __name__ == '__main__':
-    c=JournalAbbrev(ciffile='/net/wwpdb_da/da_top/tools-centos-6/packages/annotation/data/ascii/ndb_refn.cif', verbose=True, log=sys.stderr)
+    c = JournalAbbrev(ciffile='/net/wwpdb_da/da_top/tools-centos-6/packages/annotation/data/ascii/ndb_refn.cif', verbose=True, log=sys.stderr)
     print((c.GetJoinQuoterList(',\n')))

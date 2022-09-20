@@ -16,14 +16,15 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys
+import sys
 
 from wwpdb.apps.releasemodule.utils.ModuleBaseClass import ModuleBaseClass
+
 
 class MessageBaseClass(ModuleBaseClass):
     """ Base Class responsible for process entry messages
@@ -31,7 +32,7 @@ class MessageBaseClass(ModuleBaseClass):
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(MessageBaseClass, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
-        self.__coorTypeList = [ [ 'cif', 'PDBx CIF' ], [ 'pdb', 'PDB' ], [ 'xml', 'XML' ] ]
+        self.__coorTypeList = [['cif', 'PDBx CIF'], ['pdb', 'PDB'], ['xml', 'XML']]
 
     def _generateReturnContent(self, entryDir, entryMessageContent, fileStatus):
         returnContent = ''
@@ -40,9 +41,9 @@ class MessageBaseClass(ModuleBaseClass):
             sysErrorContent = entryMessageContent['sys']
         #
         entryStatus = 'OK'
-        for errType in ( 'all', 'db' ):
+        for errType in ('all', 'db'):
             if (errType in entryMessageContent) and entryMessageContent[errType]:
-                msgType,msgText = self._getConcatMessageContent(entryMessageContent[errType])
+                msgType, msgText = self._getConcatMessageContent(entryMessageContent[errType])
                 span_start = ''
                 span_end = ''
                 if msgType == 'error':
@@ -53,13 +54,13 @@ class MessageBaseClass(ModuleBaseClass):
                 returnContent += '\n\n' + span_start + msgText + span_end
             #
         #
-        hasPdbRelease = False
+        # hasPdbRelease = False
         for typeList in self._fileTypeList:
             if (not ('status_code' + typeList[1]) in entryDir) or (not entryDir['status_code' + typeList[1]]) or \
                (entryDir['status_code' + typeList[1]] == 'EMHEADERUpdate') or (typeList[5] == 'em'):
                 continue
             #
-            hasPdbRelease = True
+            # hasPdbRelease = True
             break
         #
         for typeList in self._fileTypeList:
@@ -67,7 +68,7 @@ class MessageBaseClass(ModuleBaseClass):
             if (not ('status_code' + typeList[1]) in entryDir) or entryDir['status_code' + typeList[1]] == 'CITATIONUpdate':
                 skip = True
                 if (typeList[3] == 'em-volume') and ('emdb_release' in entryDir) and entryDir['emdb_release'] and ('status_code' in entryDir) and \
-                  (entryDir['status_code'] == 'REREL' or entryDir['status_code'] == 'RELOAD' or entryDir['status_code'] == 'EMHEADERUpdate'):
+                   (entryDir['status_code'] == 'REREL' or entryDir['status_code'] == 'RELOAD' or entryDir['status_code'] == 'EMHEADERUpdate'):
                     legend = 'EM Header'
                     skip = False
                 #
@@ -75,7 +76,7 @@ class MessageBaseClass(ModuleBaseClass):
                     continue
                 #
             #
-            blockFlag,returnText = self.__getReturnContent(entryMessageContent, fileStatus, typeList[5])
+            blockFlag, returnText = self.__getReturnContent(entryMessageContent, fileStatus, typeList[5])
             if blockFlag:
                 """
                 if (typeList[5] == 'em') and hasPdbRelease:
@@ -93,7 +94,7 @@ class MessageBaseClass(ModuleBaseClass):
                     continue
                 #
                 for coorTypeList in self.__coorTypeList:
-                    blockFlag,msg = self.__getReturnContent(entryMessageContent, fileStatus, coorTypeList[0])
+                    blockFlag, msg = self.__getReturnContent(entryMessageContent, fileStatus, coorTypeList[0])
                     if msg:
                         returnText += '\n' + coorTypeList[1] + ':' + msg
                         if blockFlag:
@@ -107,13 +108,13 @@ class MessageBaseClass(ModuleBaseClass):
             #
         #
         if ('MiscChecking' in entryMessageContent) and entryMessageContent['MiscChecking']:
-            messageType,messageText = self._getConcatMessageContent(entryMessageContent['MiscChecking'])
+            messageType, messageText = self._getConcatMessageContent(entryMessageContent['MiscChecking'])
             returnContent += '\n\nMiscChecking report:\n\n' + messageText
         #
         if returnContent:
-            return returnContent,sysErrorContent,entryStatus
+            return returnContent, sysErrorContent, entryStatus
         #
-        return '',sysErrorContent,''
+        return '', sysErrorContent, ''
 
     def _getConcatMessageContent(self, messageContent):
         """
@@ -134,13 +135,13 @@ class MessageBaseClass(ModuleBaseClass):
                 messageType = messageList[1]
             #
         #
-        return messageType,messageText
+        return messageType, messageText
 
     def __getReturnContent(self, entryMessageContent, fileStatus, typeKey):
         blockFlag = False
         returnText = ''
         if (typeKey in entryMessageContent) and entryMessageContent[typeKey]:
-            msgType,msgText = self._getConcatMessageContent(entryMessageContent[typeKey])
+            msgType, msgText = self._getConcatMessageContent(entryMessageContent[typeKey])
             span_start = ''
             span_end = ''
             blockMsg = ''
@@ -155,10 +156,9 @@ class MessageBaseClass(ModuleBaseClass):
             if (msgType == 'info') and (typeKey in fileStatus) and fileStatus[typeKey]:
                 returnText = ' OK\n' + msgText
             else:
-                
                 returnText = blockMsg + '\n' + span_start + msgText + span_end
             #
         elif (typeKey in fileStatus) and fileStatus[typeKey]:
             returnText = ' OK'
         #
-        return blockFlag,returnText
+        return blockFlag, returnText

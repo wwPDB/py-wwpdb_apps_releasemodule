@@ -16,19 +16,23 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, string, traceback
+import os
+import sys
+import string
+import traceback
 
 from wwpdb.apps.releasemodule.citation.FetchResultParser import UniCodeHandler
-from wwpdb.apps.releasemodule.utils.CombineDbApi         import CombineDbApi
-from wwpdb.apps.releasemodule.utils.TimeUtil             import TimeUtil
-from wwpdb.io.file.mmCIFUtil                             import mmCIFUtil
-from wwpdb.io.locator.PathInfo                           import PathInfo
+from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
+from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.io.locator.PathInfo import PathInfo
 #
+
 
 class UpdateFormParser(object):
     """ Class responsible for parsing submitted form
@@ -342,11 +346,11 @@ class UpdateFormParser(object):
                 #
             else:
                 self.__errorContent += 'Entry ' + dataDict['entry'] + ' has inconsist release status:'
-#               for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'EM', 'status_code_em' ], \
-#                               [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
-#               removed checking EM consistency because of rare release/obsolete policy
-                for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'MR', 'status_code_mr' ], \
-                                [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
+                # for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'EM', 'status_code_em' ], \
+                #     [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
+                # removed checking EM consistency because of rare release/obsolete policy
+                for t_list in (['Coord.', 'status_code'], ['SF', 'status_code_sf'], ['MR', 'status_code_mr'],
+                               ['CS', 'status_code_cs'], ['NMR DATA', 'status_code_nmr_data']):
                     if not t_list[1] in dataDict:
                         continue
                     #
@@ -363,8 +367,8 @@ class UpdateFormParser(object):
         """ Parse manually input citation information
         """
         citation = {}
-        items = [ 'citation_id', 'title', 'journal_abbrev', 'journal_volume', 'year', 'page_first',
-                  'page_last', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI' ]
+        items = ['citation_id', 'title', 'journal_abbrev', 'journal_volume', 'year', 'page_first',
+                 'page_last', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI']
         for item in items:
             angstromFlag = False
             if item == 'title':
@@ -385,8 +389,8 @@ class UpdateFormParser(object):
             max_author_num = int(val)
             t_list = []
             author_list = []
-            for i in range (0, max_author_num):
-                #name = str(self.__reqObj.getValue('name_' + str(i + 1)))
+            for i in range(0, max_author_num):
+                # name = str(self.__reqObj.getValue('name_' + str(i + 1)))
                 name = self.__codeHandler.process(self.__reqObj.getRawValue('name_' + str(i + 1)), False)
                 if not name:
                     continue
@@ -430,7 +434,7 @@ class UpdateFormParser(object):
             if t_list[0] in keepCitationMap:
                 keepCitationMap[t_list[0]].append(t_list[1])
             else:
-                keepCitationMap[t_list[0]] = [ t_list[1] ]
+                keepCitationMap[t_list[0]] = [t_list[1]]
             #
         #
         return keepCitationMap
@@ -442,7 +446,7 @@ class UpdateFormParser(object):
             return
         #
         hasExperimentalDataRelease = False
-        for status_item in ( "status_code_cs", "status_code_em", "status_code_mr", "status_code_nmr_data", "status_code_sf"):
+        for status_item in ("status_code_cs", "status_code_em", "status_code_mr", "status_code_nmr_data", "status_code_sf"):
             if (status_item in dataDict) and ((dataDict[status_item] == "REL") or (dataDict[status_item] == "REREL")):
                 hasExperimentalDataRelease = True
                 break
@@ -455,7 +459,7 @@ class UpdateFormParser(object):
             return
         #
         try:
-            latestArchiveFilePath = self.__pI.getFilePath(dataSetId=entry, wfInstanceId=None, contentType="model", formatType="pdbx", \
+            latestArchiveFilePath = self.__pI.getFilePath(dataSetId=entry, wfInstanceId=None, contentType="model", formatType="pdbx",
                                                           fileSource='archive', versionId="latest", partNumber="1")
             if not os.access(latestArchiveFilePath, os.F_OK):
                 return
@@ -468,6 +472,6 @@ class UpdateFormParser(object):
                     return
                 #
             #
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             traceback.print_exc(file=self.__lfh)
         #

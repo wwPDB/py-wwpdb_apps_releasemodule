@@ -15,13 +15,13 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys
 import time
+
 
 class TimeUtil(object):
     """
@@ -120,6 +120,7 @@ class TimeUtil(object):
             return futuretime
         #
 
+
 if __name__ == '__main__':
-    t =TimeUtil()
+    t = TimeUtil()
     print((t.NextWednesday()))
