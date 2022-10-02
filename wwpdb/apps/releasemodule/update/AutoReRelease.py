@@ -150,7 +150,7 @@ class AutoReRelease(object):
         pubmedInfoMap = {}
         for ann, dataList in annotEntryMap.items():
             for dataDict in dataList:
-                if (not "status_code" in dataDict) or (dataDict["status_code"] != "REL"):
+                if ("status_code" not in dataDict) or (dataDict["status_code"] != "REL"):
                     continue
                 #
                 if dataDict["structure_id"] in entryIdMap:
@@ -158,7 +158,7 @@ class AutoReRelease(object):
                 #
                 entryIdMap[dataDict["structure_id"]] = "include"
                 #
-                if (not "pubmed" in dataDict) or (not dataDict["pubmed"]):
+                if ("pubmed" not in dataDict) or (not dataDict["pubmed"]):
                     continue
                 #
                 pubmedInfo = self.__getMatchPubmedInfo(dataDict)
@@ -166,7 +166,7 @@ class AutoReRelease(object):
                     continue
                 #
                 EntryInfo = dbUtil.getEntryInfo([dataDict["structure_id"]])
-                if (not EntryInfo) or (not "status_code" in EntryInfo[0]) or (EntryInfo[0]["status_code"] != "REL"):
+                if (not EntryInfo) or ("status_code" not in EntryInfo[0]) or (EntryInfo[0]["status_code"] != "REL"):
                     continue
                 #
                 if ("post_rel_recvd_coord" in EntryInfo[0]) and (EntryInfo[0]["post_rel_recvd_coord"].upper() == "Y"):
@@ -227,7 +227,7 @@ class AutoReRelease(object):
         for pdir in dataDict["pubmed"]:
             foundMatch = False
             for item in ("pdbx_database_id_PubMed", "pdbx_database_id_DOI"):
-                if (not item in dataDict) or (not dataDict[item]) or (not item in pdir) or (not pdir[item]):
+                if (item not in dataDict) or (not dataDict[item]) or (item not in pdir) or (not pdir[item]):
                     continue
                 #
                 if str(dataDict[item]).strip() == str(pdir[item]).strip():
@@ -248,7 +248,7 @@ class AutoReRelease(object):
                 continue
             #
             for item in ("page_first", "page_last"):
-                if (not item in pdir) or (not pdir[item]):
+                if (item not in pdir) or (not pdir[item]):
                     continue
                 #
                 if not pdir[item].isdigit():
@@ -257,11 +257,11 @@ class AutoReRelease(object):
             #
             hasDifference = False
             for item in (
-            "pdbx_database_id_PubMed", "pdbx_database_id_DOI", "page_first", "page_last", "journal_volume", "year"):
-                if (not item in pdir) or (not pdir[item]):
+                    "pdbx_database_id_PubMed", "pdbx_database_id_DOI", "page_first", "page_last", "journal_volume", "year"):
+                if (item not in pdir) or (not pdir[item]):
                     continue
                 #
-                if (not item in dataDict) or (not dataDict[item]) or (
+                if (item not in dataDict) or (not dataDict[item]) or (
                         str(dataDict[item]).strip() != str(pdir[item]).strip()):
                     hasDifference = True
                     break
@@ -293,7 +293,7 @@ class AutoReRelease(object):
             pubmed_id_list = pickle.load(fb)
             fb.close()
             return pubmed_id_list
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             return []
         #
 

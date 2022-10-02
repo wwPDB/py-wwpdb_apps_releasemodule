@@ -16,30 +16,33 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import copy, operator, os, string, sys, traceback
+import copy
+import operator
+import sys
 
 from wwpdb.apps.releasemodule.citation.FetchUtil import FetchUtil
 from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
 from wwpdb.apps.releasemodule.update.InputFormParser_v2 import InputFormParser
 #
 
+
 class CitationFormParser(InputFormParser):
     """ Class responsible for parsing submitted form
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(CitationFormParser, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
-        self.__sObj        = None
-        self.__sessionId   = None
+        self.__sObj = None
+        self.__sessionId = None
         self.__sessionPath = None
-        self.__manualFlag  = str(self._reqObj.getValue('citationformflag'))
+        self.__manualFlag = str(self._reqObj.getValue('citationformflag'))
         self.__citation_id = str(self._reqObj.getValue('citation_id'))
         #
-        self.__pubmedList  = []
+        self.__pubmedList = []
         self.__selected_citation_id_list = []
         #
         self.__getSession()
@@ -52,9 +55,9 @@ class CitationFormParser(InputFormParser):
         """ Join existing session or create new session as required.
         """
         #
-        self.__sObj=self._reqObj.newSessionObj()
-        self.__sessionId=self.__sObj.getId()
-        self.__sessionPath=self.__sObj.getPath()
+        self.__sObj = self._reqObj.newSessionObj()
+        self.__sessionId = self.__sObj.getId()
+        self.__sessionPath = self.__sObj.getPath()
         if (self._verbose):
             self._lfh.write("------------------------------------------------------\n")
             self._lfh.write("+UpdateRcsbFile.__getSession() - creating/joining session %s\n" % self.__sessionId)
@@ -98,10 +101,10 @@ class CitationFormParser(InputFormParser):
                 self._errorContent = 'Syntax error for Pubmed or DOI ID.\n'
                 return []
             #
-            foundError = False
+            # foundError = False
             if (not split_id_list[0].isdigit()) and (split_id_list[0].find('/') == -1):
                 self._errorContent += 'Invalid Pubmed or DOI ID: ' + split_id_list[0] + '.\n'
-                foundError = True
+                # foundError = True
             #
             if split_id_list[0].find('/') != -1:
                 doi_id_list.append(split_id_list[0])
@@ -158,9 +161,9 @@ class CitationFormParser(InputFormParser):
         return updatedList
 
     def __getAllowCitationIDs(self):
-        a_c_ids = [ 'primary', 'original_data_1', 'original_data_2', 'original_data_3',
-                    'original_data_4', 'original_data_5', 'original_data_6', 'original_data_7',
-                    'original_data_8', 'original_data_9', 'original_data_10' ]
+        a_c_ids = ['primary', 'original_data_1', 'original_data_2', 'original_data_3',
+                   'original_data_4', 'original_data_5', 'original_data_6', 'original_data_7',
+                   'original_data_8', 'original_data_9', 'original_data_10']
         allow_citation_ids = {}
         order = 0
         for a_c_id in a_c_ids:
@@ -190,12 +193,12 @@ class CitationFormParser(InputFormParser):
             self.__pubmedList.append(dir)
         #
 
-    def __getCitationInfo(self): 
+    def __getCitationInfo(self):
         for entry in self._entryList:
             clist = self._dbUtil.getFunctionCall(False, 'getCitationInfo', [entry['structure_id']])
             if not clist:
-                #continue
-                # insert empty primary citation so that it wouldn't crash the UI
+                # continue
+                #  insert empty primary citation so that it wouldn't crash the UI
                 #
                 myD = {}
                 myD['jrnl_serial_no'] = 1
@@ -210,7 +213,7 @@ class CitationFormParser(InputFormParser):
             if self.__manualFlag == 'yes':
                 entry['citation'] = self.__getSelectedCitation(clist, alist)
             else:
-                list,map = self.__mergeCitationInfo(clist, alist)
+                list, map = self.__mergeCitationInfo(clist, alist)
                 entry['citation_id'] = list
                 entry['auth_citation'] = map
             #
@@ -231,12 +234,12 @@ class CitationFormParser(InputFormParser):
         if c_map:
             list = []
             for dir in alist:
-                if (not 'citation_id' in dir) or (not 'name' in dir) or (not dir['name']):
+                if ('citation_id' not in dir) or ('name' not in dir) or (not dir['name']):
                     continue
                 #
                 if dir['citation_id'] == self.__citation_id:
                     myD = {}
-                    for item in ( 'name', 'orcid' ):
+                    for item in ('name', 'orcid'):
                         myD[item] = ''
                         if (item in dir) and dir[item]:
                             myD[item] = dir[item]
@@ -272,13 +275,13 @@ class CitationFormParser(InputFormParser):
             if citation_id not in self.__selected_citation_id_list:
                 continue
             #
-            if citation_id in  map:
+            if citation_id in map:
                 dir['author'] = map[citation_id]
             #
             list.append(citation_id)
             c_map[citation_id] = dir
         #
-        return list,c_map
+        return list, c_map
 
     def __mergePubmedwithEntry(self):
         if self.__manualFlag == 'yes':
@@ -287,7 +290,7 @@ class CitationFormParser(InputFormParser):
         allow_citation_ids = self.__getAllowCitationIDs()
         #
         for entry in self._entryList:
-            list,cid_map = self.__getSortCitationID(entry['citation_id'], allow_citation_ids)
+            list, cid_map = self.__getSortCitationID(entry['citation_id'], allow_citation_ids)
             p_map = {}
             for dir in self.__pubmedList:
                 if dir['citation_id'] in cid_map:
@@ -299,7 +302,7 @@ class CitationFormParser(InputFormParser):
                     list1.append(dir['ordinal'])
                     list.append(list1)
                 else:
-                    p_dir,list1 = self.__getPubmedInfoCopy(dir, list)
+                    p_dir, list1 = self.__getPubmedInfoCopy(dir, list)
                     p_map[p_dir['citation_id']] = p_dir
                     list.append(list1)
                 #
@@ -319,7 +322,7 @@ class CitationFormParser(InputFormParser):
         sort_cid_list = []
         cid_map = {}
         if not list:
-            return sort_cid_list,cid_map
+            return sort_cid_list, cid_map
         #
         for id in list:
             if id in allow_citation_ids:
@@ -335,7 +338,7 @@ class CitationFormParser(InputFormParser):
         if len(sort_cid_list) > 1:
             sort_cid_list.sort(key=operator.itemgetter(1))
         #
-        return sort_cid_list,cid_map
+        return sort_cid_list, cid_map
 
     def __getPubmedInfoCopy(self, dir, sort_cid_list):
         p_dir = copy.deepcopy(dir)
@@ -346,10 +349,10 @@ class CitationFormParser(InputFormParser):
         if order < 11:
             order = 11
         #
-        citation_id = str(order - 10)
+        # citation_id = str(order - 10)
         p_dir['citation_id'] = str(order - 10)
         p_dir['ordinal'] = order
         list = []
         list.append(p_dir['citation_id'])
         list.append(order)
-        return p_dir,list
+        return p_dir, list

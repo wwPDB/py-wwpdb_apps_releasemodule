@@ -831,7 +831,7 @@ class FetchResultParser(object):
         try:
             __doc = minidom.parse(self.__xmlfile)
             self.__pubmedInfoList = self._parseDoc(__doc)
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             pass
 
     def _parseDoc(self, doc):
@@ -853,12 +853,12 @@ class FetchResultParser(object):
                         #
                     #
                     if info:
-                        if doi and (not 'pdbx_database_id_DOI' in info):
+                        if doi and ('pdbx_database_id_DOI' not in info):
                             info['pdbx_database_id_DOI'] = doi
                         #
                         infolist.append(info)
                     #
-                except:
+                except:  # noqa: E722 pylint: disable=bare-except
                     continue
             #
         #
@@ -883,7 +883,7 @@ class FetchResultParser(object):
                         self._parseJournalInfo(childnode.childNodes, info)
                     #
                     elif childnode.tagName == 'ArticleDate':
-                        if (not 'year' in info) or (not info['year']):
+                        if ('year' not in info) or (not info['year']):
                             for grandchildnode in childnode.childNodes:
                                 if grandchildnode.nodeType != grandchildnode.ELEMENT_NODE:
                                     continue
@@ -1006,7 +1006,7 @@ class FetchResultParser(object):
                     continue
                 #
                 first = pages
-                last = pages;
+                last = pages
                 list = pages.split('-')
                 if len(list) == 2:
                     first = list[0].strip()

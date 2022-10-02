@@ -16,21 +16,22 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 import os
 import sys
-from wwpdb.utils.config.ConfigInfo  import ConfigInfo
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.apps.releasemodule.citation.FetchResultParser import FetchResultParser
-from wwpdb.apps.releasemodule.utils.Utility              import *
+from wwpdb.apps.releasemodule.utils.Utility import getFileName, RunScript
+
 
 class FetchUtil(object):
     """
     """
-    def __init__(self, path='.', processLabel='', idList=None, siteId = None, mpl = None, log=sys.stderr, verbose=False):
+    def __init__(self, path='.', processLabel='', idList=None, siteId=None, mpl=None, log=sys.stderr, verbose=False):
         """
         """
         self.__sessionPath = path
@@ -39,7 +40,7 @@ class FetchUtil(object):
         self.__lfh = log
         self.__verbose = verbose
         self.__pubmedInfoList = []
-        #self.__pubmedInfoMap = {}
+        # self.__pubmedInfoMap = {}
         self.__cI = ConfigInfo(siteId)
         self.__apikey = self.__cI.get('NCBI_API_KEY')
         self.__mpl = mpl
@@ -72,7 +73,7 @@ class FetchUtil(object):
         return self.__pubmedInfoList
 
     def getPubmedInfoMap(self):
-        #return self.__pubmedInfoMap
+        # return self.__pubmedInfoMap
         pubmedInfoMap = {}
         if self.__pubmedInfoList:
             for info in self.__pubmedInfoList:
@@ -87,19 +88,19 @@ class FetchUtil(object):
         if self.__apikey:
             api = "&api_key=" + self.__apikey
         else:
-            api =""
+            api = ""
         # NCBI fetch URL
         query = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=" \
-              + ids + "&retmode=xml&rettype=abstract" + api
+            + ids + "&retmode=xml&rettype=abstract" + api
         #
         if self.__processLabel:
             scriptfile = 'fetch_' + self.__processLabel + '.csh'
-            xmlfile    = 'fetch_' + self.__processLabel + '.xml'
-            logfile    = 'fetch_command_' + self.__processLabel + '.log'
+            xmlfile = 'fetch_' + self.__processLabel + '.xml'
+            logfile = 'fetch_command_' + self.__processLabel + '.log'
         else:
             scriptfile = getFileName(self.__sessionPath, 'fetch', 'csh')
-            xmlfile    = getFileName(self.__sessionPath, 'fetch', 'xml')
-            logfile    = getFileName(self.__sessionPath, 'fetch_command', 'log')
+            xmlfile = getFileName(self.__sessionPath, 'fetch', 'xml')
+            logfile = getFileName(self.__sessionPath, 'fetch_command', 'log')
         #
         script = os.path.join(self.__sessionPath, scriptfile)
         f = open(script, 'w')
@@ -127,12 +128,13 @@ class FetchUtil(object):
         #
         self.__pubmedInfoList.extend(pubmedInfo)
         #
-        #for info in pubmedInfo:
-        #   self.__pubmedInfoMap[info['pdbx_database_id_PubMed']] = info
+        # for info in pubmedInfo:
+        #    self.__pubmedInfoMap[info['pdbx_database_id_PubMed']] = info
         #
 
+
 if __name__ == '__main__':
-    cf = FetchUtil(idList=['23542341','23326635'],log=sys.stderr, verbose=False)
+    cf = FetchUtil(idList=['23542341', '23326635'], log=sys.stderr, verbose=False)
     cf.doFetch()
     list = cf.getPubmedInfoList()
     print(list)

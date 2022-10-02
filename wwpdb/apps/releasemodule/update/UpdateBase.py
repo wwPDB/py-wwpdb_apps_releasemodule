@@ -16,15 +16,17 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys
+import os
+import sys
 
 from wwpdb.apps.releasemodule.utils.MessageBaseClass import MessageBaseClass
-from wwpdb.apps.releasemodule.utils.Utility          import getFileName
+from wwpdb.apps.releasemodule.utils.Utility import getFileName
+
 
 class UpdateBase(MessageBaseClass):
     """ Base Class responsible for all release-related activities
@@ -34,12 +36,12 @@ class UpdateBase(MessageBaseClass):
         #
         self._fileTypeMap = {}
         for typeList in self._fileTypeList:
-            self._fileTypeMap[typeList[3]] = [ typeList[2], typeList[5] ]
+            self._fileTypeMap[typeList[3]] = [typeList[2], typeList[5]]
         #
 
     def _getAuxiliaryFileNames(self, prefix):
-        return getFileName(self._sessionPath, prefix, 'csh'),getFileName(self._sessionPath, prefix, 'log'),\
-               getFileName(self._sessionPath, prefix + '_command', 'log')
+        return getFileName(self._sessionPath, prefix, 'csh'), getFileName(self._sessionPath, prefix, 'log'),\
+            getFileName(self._sessionPath, prefix + '_command', 'log')
 
     def _openScriptFile(self, scriptfile):
         """
@@ -58,10 +60,10 @@ class UpdateBase(MessageBaseClass):
 
     def _bashSetting(self):
         setting = " RCSBROOT=" + self._cICommon.get_site_annot_tools_path() + "; export RCSBROOT; " \
-                + " COMP_PATH=" + self._cICommon.get_site_cc_cvs_path() + "; export COMP_PATH; " \
-                + " BINPATH=${RCSBROOT}/bin; export BINPATH; " \
-                + " LOCALBINPATH=" + os.path.join(self._cICommon.get_site_local_apps_path(), 'bin') + "; export LOCALBINPATH; " \
-                + " DICTBINPATH=" + os.path.join(self._cICommon.get_site_packages_path(), 'dict', 'bin') + "; export DICTBINPATH; "
+            + " COMP_PATH=" + self._cICommon.get_site_cc_cvs_path() + "; export COMP_PATH; " \
+            + " BINPATH=${RCSBROOT}/bin; export BINPATH; " \
+            + " LOCALBINPATH=" + os.path.join(self._cICommon.get_site_local_apps_path(), 'bin') + "; export LOCALBINPATH; " \
+            + " DICTBINPATH=" + os.path.join(self._cICommon.get_site_packages_path(), 'dict', 'bin') + "; export DICTBINPATH; "
         return setting
 
     def _getCmd(self, command, inputFile, outputFile, logFile, clogFile, extraOptions):
@@ -84,13 +86,13 @@ class UpdateBase(MessageBaseClass):
         #
         if clogFile:
             self._removeFile(os.path.join(self._sessionPath, clogFile))
-            cmd  += " > " + clogFile + " 2>&1"
+            cmd += " > " + clogFile + " 2>&1"
         #
         cmd += " ; "
         return cmd
 
     def _runCmd(self, cmd):
-        #self._lfh.write('running cmd=%s\n' % cmd)
+        # self._lfh.write('running cmd=%s\n' % cmd)
         os.system(cmd)
 
     def _removeFile(self, filePath):

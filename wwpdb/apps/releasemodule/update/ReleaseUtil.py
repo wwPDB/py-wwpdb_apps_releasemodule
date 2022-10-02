@@ -16,15 +16,18 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, tarfile
+import os
+import sys
+import tarfile
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
+
 
 class ReleaseUtil(EntryUpdateBase):
     """ Class responsible for generating and checking release files
@@ -45,12 +48,12 @@ class ReleaseUtil(EntryUpdateBase):
                 'pdbx-v42', 'pdbx-v42.xsd', [ [ '.cif.xml', '.xml' ], [ '.cif.xml-noatom', '-noatom.xml' ], [ '.cif.xml-extatom', '-extatom.xml' ] ] ],
               [ 'v5', '.v5.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd', \
                 [ [ '.v5.cif.xml', '.v5.xml' ], [ '.v5.cif.xml-noatom', '-noatom.v5.xml' ], [ '.v5.cif.xml-extatom', '-extatom.v5.xml' ] ] ]
-            ]          
+            ]
             """
             self.__CifXmlInfo = [
-              [ 'v5', '.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd',
-                [ [ '.cif.xml', '.xml' ], [ '.cif.xml-noatom', '-noatom.xml' ], [ '.cif.xml-extatom', '-extatom.xml' ] ] ]
-            ]          
+                ['v5', '.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd',
+                 [['.cif.xml', '.xml'], ['.cif.xml-noatom', '-noatom.xml'], ['.cif.xml-extatom', '-extatom.xml']]]
+            ]
         #
         self.__errorKeyWordList = []
         self.__readErrorKeyWordList()
@@ -98,7 +101,7 @@ class ReleaseUtil(EntryUpdateBase):
         return data
 
     def __readDictionaryInfo(self):
-        """ Read dictionary information for converting public mmCIF and XML files 
+        """ Read dictionary information for converting public mmCIF and XML files
         """
         fPath = os.path.join(self._reqObj.getValue("TemplatePath"), 'dictionary_info_list')
         if not os.access(fPath, os.F_OK):
@@ -142,12 +145,12 @@ class ReleaseUtil(EntryUpdateBase):
 #       for cifxmlInfo in self.__CifXmlInfo:
 #           if (cifxmlInfo[0] == 'v5') and (not self._EMEntryFlag):
 #               continue
-#           # 
+#           #
 #           self.__releasingCIFFile(cifxmlInfo)
 #           self.__releasingXMLFiles(cifxmlInfo)
 #       #
-        cifxmlInfo = ( 'v5', '.cif', self.__dictBase + '.sdb', self.__dictBase + '.sdb', self.__dictBase + '.odb', 'pdbx-v50', 'pdbx-v50.xsd', \
-                     ( ( '.cif.xml', '.xml' ), ( '.cif.xml-noatom', '-noatom.xml' ), ( '.cif.xml-extatom', '-extatom.xml' ) ) )
+        cifxmlInfo = ('v5', '.cif', self.__dictBase + '.sdb', self.__dictBase + '.sdb', self.__dictBase + '.odb', 'pdbx-v50', 'pdbx-v50.xsd',
+                      (('.cif.xml', '.xml'), ('.cif.xml-noatom', '-noatom.xml'), ('.cif.xml-extatom', '-extatom.xml')))
         #
         self.__releasingCIFFile(cifxmlInfo)
         self.__releasingXMLFiles(cifxmlInfo)
@@ -167,16 +170,16 @@ class ReleaseUtil(EntryUpdateBase):
 
     def __releasingCIFFile(self, cifxmlInfo):
         cifFile = self.__pdbId + cifxmlInfo[1]
-        #self._removeFile(os.path.join(self._sessionPath, cifFile))
+        # self._removeFile(os.path.join(self._sessionPath, cifFile))
         logFile = 'generate_cif_' + cifxmlInfo[0] + '_' + self._entryId + '.log'
-        #self._removeFile(os.path.join(self._sessionPath, logFile))
+        # self._removeFile(os.path.join(self._sessionPath, logFile))
         clogFile = 'generate_cif_command_' + cifxmlInfo[0] + '_' + self._entryId + '.log'
-        #self._removeFile(os.path.join(self._sessionPath, clogFile))
+        # self._removeFile(os.path.join(self._sessionPath, clogFile))
         options = ' -dicSdb ' + os.path.join(self.__dictRoot, cifxmlInfo[2]) + ' -pdbxDicSdb ' \
-                + os.path.join(self.__dictRoot, cifxmlInfo[3]) + ' -reorder -strip -op in -pdbids 2> ' \
-                + clogFile + ' 1> ' + logFile 
+            + os.path.join(self.__dictRoot, cifxmlInfo[3]) + ' -reorder -strip -op in -pdbids 2> ' \
+            + clogFile + ' 1> ' + logFile
         self._GetAndRunCmd('cif', '${DICTBINPATH}', 'cifexch2', self._pickleData['model']['session_file'], cifFile, '', '', options)
-        #self._processLogError('cif', 'cifexch2', os.path.join(self._sessionPath, clogFile))
+        # self._processLogError('cif', 'cifexch2', os.path.join(self._sessionPath, clogFile))
         if not self.__verifyGeneratingFile('cif', cifFile):
             return
         #
@@ -192,12 +195,12 @@ class ReleaseUtil(EntryUpdateBase):
         for xmlType in cifxmlInfo[7]:
             self._removeFile(os.path.join(self._sessionPath, self.__pdbId + xmlType[0]))
         #
-        logFile = 'generate_xml_' +  cifxmlInfo[0] + '_' +  self._entryId + '.log'
+        logFile = 'generate_xml_' + cifxmlInfo[0] + '_' + self._entryId + '.log'
         self._removeFile(os.path.join(self._sessionPath, logFile))
-        clogFile = 'generate_xml_command_' +  cifxmlInfo[0] + '_' + self._entryId + '.log'
+        clogFile = 'generate_xml_command_' + cifxmlInfo[0] + '_' + self._entryId + '.log'
         self._removeFile(os.path.join(self._sessionPath, clogFile))
         options = ' -dictName mmcif_pdbx.dic -df ' + os.path.join(self.__dictRoot, cifxmlInfo[4]) \
-                + ' -prefix ' + cifxmlInfo[5] + ' -ns PDBx -funct mmcif2xmlall -f ' + cifFile + ' 2> ' + clogFile + ' 1> ' + logFile
+            + ' -prefix ' + cifxmlInfo[5] + ' -ns PDBx -funct mmcif2xmlall -f ' + cifFile + ' 2> ' + clogFile + ' 1> ' + logFile
         self._GetAndRunCmd('xml', '${DICTBINPATH}', 'mmcif2XML', '', '', '', '', options)
         self._processLogError('xml', '', os.path.join(self._sessionPath, logFile))
         self._processLogError('xml', '', os.path.join(self._sessionPath, clogFile))
@@ -218,19 +221,19 @@ class ReleaseUtil(EntryUpdateBase):
         outputFile = self._entryId + '_MiscChecking.txt'
         logFile = self._entryId + '_MiscChecking.log'
         clogFile = self._entryId + '_MiscChecking_command.log'
-        self._GetAndRunCmd('', '${BINPATH}', 'MiscChecking',  self._pickleData['model']['session_file'], outputFile, logFile, clogFile, ' -released ')
+        self._GetAndRunCmd('', '${BINPATH}', 'MiscChecking', self._pickleData['model']['session_file'], outputFile, logFile, clogFile, ' -released ')
         #
         if not os.access(os.path.join(self._sessionPath, outputFile), os.F_OK):
             return
         #
         data = self.__readFile(os.path.join(self._sessionPath, outputFile))
         if data:
-            self._insertEntryMessage(errType="MiscChecking", errMessage=data, messageType='warning', uniqueFlag=True) 
+            self._insertEntryMessage(errType="MiscChecking", errMessage=data, messageType='warning', uniqueFlag=True)
         #
 
     def __releasingPDBFile(self):
         pdbFile = self._entryId + '_model_P1.pdb'
-        #self._removeFile(os.path.join(self._sessionPath, pdbFile))
+        # self._removeFile(os.path.join(self._sessionPath, pdbFile))
         logFile = 'generate_pdb_' + self._entryId + '.log'
         clogFile = 'generate_pdb_command_' + self._entryId + '.log'
         self._GetAndRunCmd('pdb', '${BINPATH}', 'maxit', self._pickleData['model']['session_file'], pdbFile, logFile, clogFile, ' -o 2 ')
@@ -249,7 +252,7 @@ class ReleaseUtil(EntryUpdateBase):
         mappingFile = self.__pdbId + '-chain-id-mapping.txt'
         self._removeFile(os.path.join(self._sessionPath, outputFile))
         self._removeFile(os.path.join(self._sessionPath, mappingFile))
-        self._GetAndRunCmd('pdb', '${BINPATH}', 'GetPdbBundle', self._pickleData['model']['session_file'], outputFile, logFile, clogFile, \
+        self._GetAndRunCmd('pdb', '${BINPATH}', 'GetPdbBundle', self._pickleData['model']['session_file'], outputFile, logFile, clogFile,
                            ' -output_mapping ' + mappingFile, messageType='warning')
         #
         if (not os.access(os.path.join(self._sessionPath, outputFile), os.F_OK)) or \
@@ -267,7 +270,7 @@ class ReleaseUtil(EntryUpdateBase):
             #
             tar.add(os.path.join(self._sessionPath, fileName), arcname=fileName)
         #
-        tar.add(os.path.join(self._sessionPath, mappingFile), arcname=mappingFile) 
+        tar.add(os.path.join(self._sessionPath, mappingFile), arcname=mappingFile)
         tar.close()
         self._insertReleseFile('model', tarFileName, self.__pdbId + '-pdb-bundle.tar.gz', '', False)
 
@@ -282,7 +285,7 @@ class ReleaseUtil(EntryUpdateBase):
         #
         self._GetAndRunCmd(fileType, '${BINPATH}', program, self._pickleData['model']['session_file'], self.__pdbId, logFile, clogFile, option)
         if not os.access(os.path.join(self._sessionPath, indexFile), os.F_OK):
-            self._insertEntryMessage(errType=fileType, errMessage='Generating bio-assembly file(s) failed.', uniqueFlag=True) 
+            self._insertEntryMessage(errType=fileType, errMessage='Generating bio-assembly file(s) failed.', uniqueFlag=True)
             return
         #
         data = self.__readFile(os.path.join(self._sessionPath, indexFile))
@@ -335,11 +338,11 @@ class ReleaseUtil(EntryUpdateBase):
         internalNefFile = self._entryId + '_nmr-data-nef_P1.str'
         externalStrFile = self.__pdbId + '_nmr-data.str'
         externalNefFile = self.__pdbId + '_nmr-data.nef'
-        for fileName in ( internalStrFile, internalNefFile, externalStrFile, externalNefFile ):
+        for fileName in (internalStrFile, internalNefFile, externalStrFile, externalNefFile):
             self._removeFile(os.path.join(self._sessionPath, fileName))
         #
         generator = NmrDataGenerator(siteId=self._siteId, workingDirPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
-        errMsg = generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile), \
+        errMsg = generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile),
                                            os.path.join(self._sessionPath, internalNefFile))
         #
         if not self.__verifyGeneratingFile('nmr_data', internalStrFile):
@@ -355,9 +358,9 @@ class ReleaseUtil(EntryUpdateBase):
         self._insertReleseFile('nmr-data-nef', os.path.join(self._sessionPath, externalNefFile), externalNefFile, '', True)
 
     def __checkReleaseFlag(self, contentType):
-        if (not contentType in self._pickleData) or (not self._pickleData[contentType]) or \
-           (not 'release' in self._pickleData[contentType]) or (not self._pickleData[contentType]['release']) or \
-           (not 'session_file' in self._pickleData[contentType]) or (not self._pickleData[contentType]['session_file']):
+        if (contentType not in self._pickleData) or (not self._pickleData[contentType]) or \
+           ('release' not in self._pickleData[contentType]) or (not self._pickleData[contentType]['release']) or \
+           ('session_file' not in self._pickleData[contentType]) or (not self._pickleData[contentType]['session_file']):
             return False
         #
         return True
@@ -399,7 +402,7 @@ class ReleaseUtil(EntryUpdateBase):
         statinfo = os.stat(xmlPath)
         if statinfo.st_size < 100000000:
             cmd += " ${LOCALBINPATH}/xmllint --noout --schema " + os.path.join(self.__dictRoot, xmlschema) \
-                 + " " + xmlFile + " > " + reportFile + " 2>&1; "
+                + " " + xmlFile + " > " + reportFile + " 2>&1; "
         #
         cmd += " ${LOCALBINPATH}/StdInParse -s -f -n -v=always < " + xmlFile + " >> " + reportFile + " 2>&1; "
         self._insertAction(cmd)
@@ -412,7 +415,7 @@ class ReleaseUtil(EntryUpdateBase):
         clogFile = 'checking_pdb_command_' + self._entryId + '.log'
         self._removeFile(os.path.join(self._sessionPath, reportFile))
         options = ' -status ' + self._entryDir['status_code'] + ' -obslte ' + self.__pdbId + '.obslte' \
-                + ' -sprsde ' + self.__pdbId + '.sprsde' + ' -pdbid ' + self.__pdbId
+            + ' -sprsde ' + self.__pdbId + '.sprsde' + ' -pdbid ' + self.__pdbId
         if ('directory' in self._entryDir) and self._entryDir['directory'] == 'modified':
             options += ' -re_release '
         #
@@ -434,7 +437,7 @@ class ReleaseUtil(EntryUpdateBase):
         self.__processCheckReoprt(errType, outputFile, inputFile, missingFlag, False)
 
     def __processCheckReoprt(self, errType, reportFile, sourceFile, missingFlag, warningOnlyFlag):
-        status,msg = self._getLogMessage('', os.path.join(self._sessionPath, reportFile))
+        status, msg = self._getLogMessage('', os.path.join(self._sessionPath, reportFile))
         if status == 'not found':
             if missingFlag:
                 self._insertEntryMessage(errType=errType, errMessage='Checking releasing ' + errType + ' failed.', messageType='warning', uniqueFlag=True)

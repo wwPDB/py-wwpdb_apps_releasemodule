@@ -16,14 +16,15 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys
+import sys
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
+
 
 class EntryPullProcess(EntryUpdateBase):
     """ Class responsible for pulling off entries
@@ -40,7 +41,7 @@ class EntryPullProcess(EntryUpdateBase):
             if ('start_files' in entryPickle) and entryPickle['start_files']:
                 self.__rollArchivalFileBacktoSartingVersion(entryPickle['start_files'])
             #
-            for item in ( 'em_release', 'release', 'start_files' ):
+            for item in ('em_release', 'release', 'start_files'):
                 if item in entryPickle:
                     del entryPickle[item]
                 #
@@ -60,7 +61,7 @@ class EntryPullProcess(EntryUpdateBase):
             rtn_message = self._copyFileUtil(startFilesMap[typeList[3]], archiveFilePath)
             if rtn_message == 'ok':
                 self._insertAction('Copied ' + startFilesMap[typeList[3]] + ' to ' + archiveFilePath + '.')
-                self._outPutFiles.append([ typeList[2], archiveFilePath ])
+                self._outPutFiles.append([typeList[2], archiveFilePath])
             else:
                 self._processCopyFileError(typeList[5], rtn_message, typeList[2], startFilesMap[typeList[3]], archiveFilePath, self._entryId)
             #

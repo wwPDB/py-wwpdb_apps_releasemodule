@@ -16,18 +16,22 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import gzip, os, shutil, sys
+import gzip
+import os
+import shutil
+import sys
 
-from wwpdb.apps.releasemodule.update.EmReleaseUtil   import EmReleaseUtil
+from wwpdb.apps.releasemodule.update.EmReleaseUtil import EmReleaseUtil
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
-from wwpdb.apps.releasemodule.update.ReleaseUtil     import ReleaseUtil
-from wwpdb.apps.releasemodule.update.ReleaseDpUtil   import ReleaseDpUtil
-from wwpdb.apps.releasemodule.update.UpdateUtil_v2   import UpdateUtil
+from wwpdb.apps.releasemodule.update.ReleaseUtil import ReleaseUtil
+from wwpdb.apps.releasemodule.update.ReleaseDpUtil import ReleaseDpUtil
+from wwpdb.apps.releasemodule.update.UpdateUtil_v2 import UpdateUtil
+
 
 class EntryUpdateProcess(EntryUpdateBase):
     """ Class responsible for updating and/or releasing entries
@@ -54,11 +58,11 @@ class EntryUpdateProcess(EntryUpdateBase):
         # tuple[5]: content Type
         # still need file format convention for pdb bundle tar file
         self.__version_file_name_conversions = \
-               ( ( '',  '.cif.gz',  'xyz',  '.cif.gz', 'no', 'model' ), ( '', '.xml.gz', 'xyz', '.xml.gz', 'no', 'model' ), \
-                 ( '',  '-noatom.xml.gz', 'xyz-no-atom', '.xml.gz', 'no', 'model' ), ( '',  '-extatom.xml.gz', 'xyz-ext-atom', '.xml.gz', 'no', 'model' ), \
-                 ( 'pdb', '.ent', 'xyz', '.pdb.gz', 'yes', 'model' ), ( '', '_cs.str', 'cs', '.str.gz', 'yes', 'nmr-chemical-shifts' ), \
-                 ( '', '.mr', 'mr', '.mr.gz', 'yes', 'nmr-restraints' ), ( '', '_nmr-data.str.gz', 'nmr-data', '.str.gz', 'no', 'nmr-data-str' ), \
-                 ( '', '_nmr-data.nef.gz', 'nmr-data', '.nef.gz', 'no', 'nmr-data-nef' ), ( '', '-sf.cif', 'sf', '.cif.gz', 'yes', 'structure-factors' ) )
+            (('', '.cif.gz', 'xyz', '.cif.gz', 'no', 'model'), ('', '.xml.gz', 'xyz', '.xml.gz', 'no', 'model'),
+             ('', '-noatom.xml.gz', 'xyz-no-atom', '.xml.gz', 'no', 'model'), ('', '-extatom.xml.gz', 'xyz-ext-atom', '.xml.gz', 'no', 'model'),
+             ('pdb', '.ent', 'xyz', '.pdb.gz', 'yes', 'model'), ('', '_cs.str', 'cs', '.str.gz', 'yes', 'nmr-chemical-shifts'),
+             ('', '.mr', 'mr', '.mr.gz', 'yes', 'nmr-restraints'), ('', '_nmr-data.str.gz', 'nmr-data', '.str.gz', 'no', 'nmr-data-str'),
+             ('', '_nmr-data.nef.gz', 'nmr-data', '.nef.gz', 'no', 'nmr-data-nef'), ('', '-sf.cif', 'sf', '.cif.gz', 'yes', 'structure-factors'))
         #
 
     def run(self):
@@ -106,13 +110,13 @@ class EntryUpdateProcess(EntryUpdateBase):
                 self._copyUpdatedFilesFromSessionToArchive()
             #
             if self.__releaseFlag or self.__EmEntryFlag:
-                individualContent,sysErrorContent,status = self._generateReturnContent(self._entryDir, self._entryMessageContent, self._fileStatus)
+                individualContent, sysErrorContent, status = self._generateReturnContent(self._entryDir, self._entryMessageContent, self._fileStatus)
                 returnContent = str(self._reqObj.getValue('task'))
                 if sysErrorContent:
-                    msgType,msgText = self._getConcatMessageContent(sysErrorContent)
+                    msgType, msgText = self._getConcatMessageContent(sysErrorContent)
                     returnContent += '\n\nSystem related error:\n' + msgText
                 #
-                selectText,selectMap = self._getReleaseOptionFromPickle(self._pickleData)
+                selectText, selectMap = self._getReleaseOptionFromPickle(self._pickleData)
                 returnContent += '\n\nRelease Option: ' + selectText + individualContent
                 summaryfile = open(os.path.join(self._sessionPath, self._entryId + '.summary'), 'w')
                 summaryfile.write(returnContent + '\n')
@@ -123,10 +127,10 @@ class EntryUpdateProcess(EntryUpdateBase):
             # Keep tracking for automatic sending new release reminding letter
             if (not self._blockErrorFlag) and self.__newPdbReleaseFlag and (not self.__isLegacyEntry()):
                 self._pickleData['release'] = True
-            #   
+            #
             if (not self._blockErrorFlag) and self.__newPdbObsoleteFlag and (not self.__isLegacyEntry()):
                 self._pickleData['obsolete'] = True
-            #   
+            #
             if (not self._blockErrorFlag) and (not self._blockEmErrorFlag) and self.__newEmReleaseFlag and (not self.__isLegacyEntry()):
                 self._pickleData['em_release'] = True
             #
@@ -167,11 +171,11 @@ class EntryUpdateProcess(EntryUpdateBase):
             #
             if typeList[3] == 'em-volume':
                 self.__updateFlag = True
-                if (not 'emdb_id' in self._entryDir) or (not self._entryDir['emdb_id']):
+                if ('emdb_id' not in self._entryDir) or (not self._entryDir['emdb_id']):
                     self._insertEntryMessage(errType=typeList[5], errMessage='No EMDB ID found for EM entry ' + self._entryId + '.', uniqueFlag=True)
                     continue
                 #
-                if (not 'emdb_release' in self._entryDir) or (not self._entryDir['emdb_release']):
+                if ('emdb_release' not in self._entryDir) or (not self._entryDir['emdb_release']):
                     continue
                 #
                 dataDict['release'] = True
@@ -181,13 +185,13 @@ class EntryUpdateProcess(EntryUpdateBase):
                 continue
             #
             targetPath = os.path.join(self._sessionPath, self._entryId + typeList[0])
-            rtn_message,sourcePath = self._copyFileFromArchiveToSession(targetPath, typeList[3], typeList[4])
+            rtn_message, sourcePath = self._copyFileFromArchiveToSession(targetPath, typeList[3], typeList[4])
             if rtn_message != 'ok':
                 self._processCopyFileError(typeList[5], rtn_message, typeList[2], sourcePath, targetPath, self._entryId)
                 continue
             #
             self._entryDir['input_file' + typeList[1]] = self._entryId + typeList[0]
-            self._entryDir['output_file'+ typeList[1]] = self._entryId + typeList[0]
+            self._entryDir['output_file' + typeList[1]] = self._entryId + typeList[0]
             #
             if self._entryDir['status_code' + typeList[1]] != 'CITATIONUpdate':
                 self.__startFiles[typeList[3]] = sourcePath
@@ -223,7 +227,7 @@ class EntryUpdateProcess(EntryUpdateBase):
             self.__EmEntryFlag = True
             self.__EmXmlHeaderOnlyFlag = True
             self._pickleData['emdb_id'] = self._entryDir['emdb_id']
-            self._pickleData['em-volume'] = { 'release' : True }
+            self._pickleData['em-volume'] = {'release' : True}
             self._insertFileStatus('em', True)
         #
 
@@ -232,8 +236,8 @@ class EntryUpdateProcess(EntryUpdateBase):
         emdbId = ''
         for typeList in self._fileTypeList:
             if (not typeList[3] in self._pickleData) or (not self._pickleData[typeList[3]]) or \
-               (not 'release' in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release']) or \
-               (not 'release_file' in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release_file']):
+               ('release' not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release']) or \
+               ('release_file' not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release_file']):
                 continue
             #
             if typeList[3] == 'em-volume':
@@ -248,8 +252,8 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         for typeList in self._fileTypeList:
             if (not typeList[3] in self._pickleData) or (not self._pickleData[typeList[3]]) or \
-               (not 'release' in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release']) or \
-               (not 'release_file' in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release_file']):
+               ('release' not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release']) or \
+               ('release_file' not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release_file']):
                 continue
             #
             for_release_dir = ''
@@ -265,8 +269,8 @@ class EntryUpdateProcess(EntryUpdateBase):
                 if ('for_release_dir' in self._pickleData[typeList[3]]) and self._pickleData[typeList[3]]['for_release_dir']:
                     for_release_dir = self._pickleData[typeList[3]]['for_release_dir']
                 else:
-                    self._insertEntryMessage(errType=typeList[5], errMessage="No sub-directory ( 'added', 'modified', 'obsolete', 'reloaded' ) defined for entry " + \
-                                             self._entryId + '.', uniqueFlag=True)
+                    self._insertEntryMessage(errType=typeList[5], errMessage="No sub-directory ( 'added', 'modified', 'obsolete', 'reloaded' ) defined for entry "
+                                             + self._entryId + '.', uniqueFlag=True)
                     #
                 #
                 if pdbId:
@@ -275,7 +279,7 @@ class EntryUpdateProcess(EntryUpdateBase):
                     self._insertEntryMessage(errType=typeList[5], errMessage='No PDB ID found for entry ' + self._entryId + '.', uniqueFlag=True)
                 #
             #
-            if (not for_release_dir) or ( not entry_dir):
+            if (not for_release_dir) or (not entry_dir):
                 continue
             #
             for fileList in self._pickleData[typeList[3]]['release_file']:
@@ -299,21 +303,21 @@ class EntryUpdateProcess(EntryUpdateBase):
                     f_out.close()
                     f_in.close()
                     if not os.access(os.path.join(targetPath, fileList[1] + '.gz'), os.F_OK):
-                        self._insertEntryMessage(errType=typeList[5], errMessage="Copy " +  fileList[0] + ".gz file to " + \
-                                                 os.path.join(targetPath, fileList[1] + '.gz') + " file failed for entry " + \
-                                                 self._entryId + ".", uniqueFlag=True)
+                        self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + ".gz file to "
+                                                 + os.path.join(targetPath, fileList[1] + '.gz') + " file failed for entry "
+                                                 + self._entryId + ".", uniqueFlag=True)
                     else:
-                        self._insertAction('Copied ' + fileList[0] + '.gz to ' + os.path.join(targetPath, fileList[1] + '.gz') + '.') 
+                        self._insertAction('Copied ' + fileList[0] + '.gz to ' + os.path.join(targetPath, fileList[1] + '.gz') + '.')
                     #
                 else:
                     rtn_message = self._copyFileUtil(fileList[0], os.path.join(targetPath, fileList[1]))
                     if rtn_message == 'ok':
                         self._insertAction('Copied ' + fileList[0] + ' to ' + os.path.join(targetPath, fileList[1]) + '.')
                     elif rtn_message == 'not found':
-                        self._insertEntryMessage(errType=typeList[5], errMessage="Can't find " + os.path.join(targetPath, fileList[1]) + " file for entry " \
+                        self._insertEntryMessage(errType=typeList[5], errMessage="Can't find " + os.path.join(targetPath, fileList[1]) + " file for entry "
                                                  + self._entryId + ".", uniqueFlag=True)
                     elif rtn_message == 'copy failed':
-                        self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + " file to " + os.path.join(targetPath, fileList[1]) \
+                        self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + " file to " + os.path.join(targetPath, fileList[1])
                                                  + " file failed for entry " + self._entryId + ".", uniqueFlag=True)
                     #
                 #
@@ -325,13 +329,13 @@ class EntryUpdateProcess(EntryUpdateBase):
                 self._insertAction('remove ' + filePath)
                 self._removeFile(filePath)
             #
-            for relPath,dirPath in self.__releaseDirectory.items():
+            for relPath, dirPath in self.__releaseDirectory.items():
                 self._removeDirectory(dirPath)
             #
         else:
             self._removeExistingForReleaseDirectories()
-            for relPath,dirPath in self.__releaseDirectory.items():
-                if pdbId and os.access(os.path.join(dirPath, pdbId + '.cif.gz'),  os.F_OK):
+            for relPath, dirPath in self.__releaseDirectory.items():
+                if pdbId and os.access(os.path.join(dirPath, pdbId + '.cif.gz'), os.F_OK):
                     #
                     # Copying for_release_beta directory
                     #
@@ -370,7 +374,7 @@ class EntryUpdateProcess(EntryUpdateBase):
                             continue
                         #
                         version = ''
-                        major_revision,minor_revision = self._getAuditRevisionInfo(file_conversion[5])
+                        major_revision, minor_revision = self._getAuditRevisionInfo(file_conversion[5])
                         if major_revision and minor_revision:
                             version = '_v' + major_revision + '-' + minor_revision
                         #
@@ -400,11 +404,11 @@ class EntryUpdateProcess(EntryUpdateBase):
                     #
                     for biolCifFile in biolAssemblyList:
                         biolPdbFile = biolCifFile.replace('-assembly', '.pdb').replace('.cif', '')
-#                       if os.access(os.path.join(dirPath, biolPdbFile),  os.F_OK):
-#                           # Removing cif format assembly file in for_release and for_release_beta directories
-#                           self._removeFile(os.path.join(dirPath, biolCifFile))
-#                           self._removeFile(os.path.join(betaDirPath, biolCifFile))
-#                       #
+                        # if os.access(os.path.join(dirPath, biolPdbFile),  os.F_OK):
+                        #     # Removing cif format assembly file in for_release and for_release_beta directories
+                        #     self._removeFile(os.path.join(dirPath, biolCifFile))
+                        #     self._removeFile(os.path.join(betaDirPath, biolCifFile))
+                        #
                         # Removing pdb format assembly file in for_release_version directory
                         self._removeFile(os.path.join(versionDirPath, biolPdbFile))
                         #
@@ -423,13 +427,13 @@ class EntryUpdateProcess(EntryUpdateBase):
 
     def __updateEntryIndexPickle(self):
         entryPickle = self._loadEntryPickle(self._entryId)
-        # Keep tracking of first version files used for release 
+        # Keep tracking of first version files used for release
         if self.__startFiles:
-            if not 'start_files' in entryPickle:
+            if 'start_files' not in entryPickle:
                 entryPickle['start_files'] = self.__startFiles
             else:
-                for fileType,fileName in self.__startFiles.items():
-                    if not fileType in entryPickle['start_files']:
+                for fileType, fileName in self.__startFiles.items():
+                    if fileType not in entryPickle['start_files']:
                         entryPickle['start_files'][fileType] = fileName
                     #
                 #
@@ -437,14 +441,14 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         # update status for automatic sending new release reminding letter
         foundReleaseFlag = False
-        for releaseType in ( 'release', 'em_release' ):
+        for releaseType in ('release', 'em_release'):
             if (releaseType in entryPickle) and entryPickle[releaseType]:
                 foundReleaseFlag = True
             #
         #
-        for releaseType in ( 'release', 'em_release' ):
+        for releaseType in ('release', 'em_release'):
             if foundReleaseFlag:
-                # if already sent, remove automatic sending letter flag 
+                # if already sent, remove automatic sending letter flag
                 if (releaseType in self._pickleData) and self._pickleData[releaseType]:
                     del self._pickleData[releaseType]
                 #
@@ -458,7 +462,7 @@ class EntryUpdateProcess(EntryUpdateBase):
     def __isLegacyEntry(self):
         sList = self._entryId.split('_')
         idNum = int(sList[1])
-        #if (idNum > 1000000001 and idNum < 1000200000) or (idNum > 1290000000 and idNum < 1300000001):
+        # if (idNum > 1000000001 and idNum < 1000200000) or (idNum > 1290000000 and idNum < 1300000001):
         if idNum > 1000000001 and idNum < 1000200000:
             return True
         #

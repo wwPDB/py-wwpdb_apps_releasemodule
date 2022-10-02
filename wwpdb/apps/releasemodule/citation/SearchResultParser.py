@@ -42,7 +42,7 @@ class SearchResultParser(object):
         try:
             __doc = minidom.parse(self.__xmlfile)
             self.__pubmedIdList = self._parseDoc(__doc)
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             pass
 
     def _parseDoc(self, doc):

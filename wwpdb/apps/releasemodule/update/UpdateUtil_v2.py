@@ -16,23 +16,25 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle as pickle
 
-import os, sys
+import os
+import sys
 
-from mmcif.api.DataCategory                     import DataCategory
-from mmcif.api.PdbxContainers                   import DataContainer
-from mmcif.io.PdbxWriter                       import PdbxWriter
+from mmcif.api.DataCategory import DataCategory
+from mmcif.api.PdbxContainers import DataContainer
+from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
-from wwpdb.io.file.mmCIFUtil                      import mmCIFUtil
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+
 
 class UpdateUtil(EntryUpdateBase):
     """ Class responsible for updating model, structure-factors, nmr-restraints, and nmr-chemical-shifts files
@@ -40,8 +42,8 @@ class UpdateUtil(EntryUpdateBase):
     def __init__(self, reqObj=None, entryDir=None, verbose=False, log=sys.stderr):
         super(UpdateUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
         #
-        self.__citation_items = [ 'id', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI', 'title', 'journal_abbrev', 'journal_volume', \
-                                  'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author', 'single_author', 'insert_flag' ]
+        self.__citation_items = ['id', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI', 'title', 'journal_abbrev', 'journal_volume',
+                                 'page_first', 'page_last', 'year', 'journal_id_ISSN', 'author', 'single_author', 'insert_flag']
         #
         self.__pubmedInfo = {}
 
@@ -85,14 +87,14 @@ class UpdateUtil(EntryUpdateBase):
         fb.close()
 
     def __generateInputFile(self):
-        items = [ 'entry', 'pdbid', 'emdb_id', 'annotator', 'option', 'input_file', 'output_file', 'status_code', 'input_file_sf', 'output_file_sf', \
-                  'status_code_sf', 'input_file_mr', 'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', \
-                  'input_file_nmr_data', 'output_file_nmr_data', 'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids', \
-                  'supersede_ids', 'obspr_details', 'da_status_code', 'da_status_code_em', 'wf_status_code', 'wf_status_code_em' ]
+        items = ['entry', 'pdbid', 'emdb_id', 'annotator', 'option', 'input_file', 'output_file', 'status_code', 'input_file_sf', 'output_file_sf',
+                 'status_code_sf', 'input_file_mr', 'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs',
+                 'input_file_nmr_data', 'output_file_nmr_data', 'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',
+                 'supersede_ids', 'obspr_details', 'da_status_code', 'da_status_code_em', 'wf_status_code', 'wf_status_code_em']
         #
-        checking_items = [ 'status_code', 'input_file_sf', 'output_file_sf', 'status_code_sf', 'input_file_mr', 'output_file_mr', \
-                           'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', 'input_file_nmr_data', 'output_file_nmr_data', \
-                           'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',  'supersede_ids', 'obspr_details' ]
+        checking_items = ['status_code', 'input_file_sf', 'output_file_sf', 'status_code_sf', 'input_file_mr', 'output_file_mr',
+                          'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs', 'input_file_nmr_data', 'output_file_nmr_data',
+                          'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids', 'supersede_ids', 'obspr_details']
         #
         self._removeFile(self.__inputFilePath)
         #
@@ -112,8 +114,8 @@ class UpdateUtil(EntryUpdateBase):
             else:
                 item1 = item
             #
-            if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate': 
-                                                                 # and self._entryDir[item1] != 'EMHEADERUpdate':
+            if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate':
+                # and self._entryDir[item1] != 'EMHEADERUpdate':
                 if item1.startswith("input_file") and (self._processing_site == "PDBE"):
                     curCat.setValue(os.path.join(self._sessionPath, self._entryDir[item1]), item, 0)
                 else:
@@ -132,7 +134,7 @@ class UpdateUtil(EntryUpdateBase):
             revCat.appendAttribute('details')
             row = 0
             for dataDict in self._entryDir['revision']:
-                for item1 in ( 'revision_type', 'details' ):
+                for item1 in ('revision_type', 'details'):
                     if item1 in dataDict:
                         revCat.setValue(dataDict[item1], item1, row)
                     #
@@ -143,7 +145,7 @@ class UpdateUtil(EntryUpdateBase):
             hasValueFlag = True
         #
         if 'pubmed' in self._entryDir:
-            pubCat,authCat = self.__genPubmedCategory(self._entryDir['pubmed'])
+            pubCat, authCat = self.__genPubmedCategory(self._entryDir['pubmed'])
             if pubCat:
                 curContainer.append(pubCat)
                 hasValueFlag = True
@@ -153,7 +155,7 @@ class UpdateUtil(EntryUpdateBase):
                 hasValueFlag = True
             #
         elif 'citation' in self._entryDir:
-            pubCat,authCat = self.__genCitationCategory(self._entryDir['citation'])
+            pubCat, authCat = self.__genCitationCategory(self._entryDir['citation'])
             if pubCat:
                 curContainer.append(pubCat)
                 hasValueFlag = True
@@ -180,23 +182,23 @@ class UpdateUtil(EntryUpdateBase):
         if self._processing_site == "PDBE":
             tarFile = self._entryId + "-release-updated.tar.gz"
             outputList = []
-            outputList.append( ( tarFile, True ) )
-            outputList.append( ( self.__logfile, True ) )
-            outputList.append( ( self.__clogfile, True ) )
-            self._dpUtilityApi(operator="annot-release-update", inputFileName=self.__inputFilePath, outputFileNameTupList=outputList, \
-                               option="-archivepath " + os.path.join(self._cI.get("SITE_ARCHIVE_STORAGE_PATH"), "archive"), \
+            outputList.append((tarFile, True))
+            outputList.append((self.__logfile, True))
+            outputList.append((self.__clogfile, True))
+            self._dpUtilityApi(operator="annot-release-update", inputFileName=self.__inputFilePath, outputFileNameTupList=outputList,
+                               option="-archivepath " + os.path.join(self._cI.get("SITE_ARCHIVE_STORAGE_PATH"), "archive"),
                                id_value=self._entryId, id_name="dep_id")
             #
             self._extractTarFile(tarFile)
             self._processLogError("", "", os.path.join(self._sessionPath, self.__logfile))
             self._processLogError("", "ReleaseUpdate", os.path.join(self._sessionPath, self.__clogfile))
         else:
-            self._GetAndRunCmd('', '${BINPATH}', 'ReleaseUpdate', self.__inputfile, self.__outputfile, self.__logfile, self.__clogfile, \
+            self._GetAndRunCmd('', '${BINPATH}', 'ReleaseUpdate', self.__inputfile, self.__outputfile, self.__logfile, self.__clogfile,
                                ' -archivepath ' + os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive') + ' ')
 
     def __genPubmedCategory(self, pubmed_list):
         if not pubmed_list or not self.__pubmedInfo:
-            return None,None
+            return None, None
         #
         infoList = []
         authList = []
@@ -208,7 +210,7 @@ class UpdateUtil(EntryUpdateBase):
                     infoDir[item] = pubmedDir[item]
                     continue
                 #
-                if (not pubmed_id in self.__pubmedInfo) or (not item in self.__pubmedInfo[pubmed_id]):
+                if (pubmed_id not in self.__pubmedInfo) or (item not in self.__pubmedInfo[pubmed_id]):
                     continue
                 #
                 infoDir[item] = self.__pubmedInfo[pubmed_id][item]
@@ -221,17 +223,17 @@ class UpdateUtil(EntryUpdateBase):
                 authList.extend(pubmedDir['author_list'])
             #
         #
-        return self.__genPubmedInfoCategory(infoList),self.__genPubmedAuthorCategory(authList)
+        return self.__genPubmedInfoCategory(infoList), self.__genPubmedAuthorCategory(authList)
 
     def __genCitationCategory(self, citDir):
         if not citDir:
-            return None,None
+            return None, None
         #
         authList = []
         if ('author_list' in citDir) and citDir['author_list']:
             authList = citDir['author_list']
         #
-        return self.__genPubmedInfoCategory([ citDir ]),self.__genPubmedAuthorCategory(authList)
+        return self.__genPubmedInfoCategory([citDir]), self.__genPubmedAuthorCategory(authList)
 
     def __genPubmedInfoCategory(self, infoList):
         if not infoList:
@@ -257,12 +259,12 @@ class UpdateUtil(EntryUpdateBase):
             return None
         #
         cat = DataCategory('pubmed_author_list')
-        for item in ( 'id', 'name', 'orcid' ):
+        for item in ('id', 'name', 'orcid'):
             cat.appendAttribute(item)
         #
         row = 0
         for authDir in authList:
-            for item in ( 'id', 'name', 'orcid' ):
+            for item in ('id', 'name', 'orcid'):
                 if item in authDir:
                     cat.setValue(authDir[item], item, row)
                 #
@@ -278,7 +280,7 @@ class UpdateUtil(EntryUpdateBase):
             return emMapTypeList
         #
         cifObj = mmCIFUtil(filePath=outputfile)
-        for typeList in ( ( 'error', 'error_message' ), ( 'warning', 'warning_message' ) ):
+        for typeList in (('error', 'error_message'), ('warning', 'warning_message')):
             msgList = cifObj.GetValue(typeList[1])
             if not msgList:
                 continue
@@ -320,7 +322,7 @@ class UpdateUtil(EntryUpdateBase):
                 if typeDict['type'] in emMapTypeList:
                     emMapTypeList[typeDict['type']].append(typeDict['partNumber'])
                 else:
-                    emMapTypeList[typeDict['type']] = [ typeDict['partNumber'] ]
+                    emMapTypeList[typeDict['type']] = [typeDict['partNumber']]
                 #
             #
         #

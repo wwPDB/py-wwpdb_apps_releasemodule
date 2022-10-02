@@ -22,6 +22,7 @@ __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.07"
 
 import os
+import sys
 
 try:
     import cPickle as pickle
@@ -36,14 +37,14 @@ from mmcif.api.DataCategory import DataCategory
 from mmcif.api.PdbxContainers import DataContainer
 from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
-from wwpdb.utils.config.ConfigInfo  import ConfigInfo
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
 from wwpdb.apps.releasemodule.citation.FetchMP import FetchMP
 from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
-from wwpdb.apps.releasemodule.utils.Utility import *
+from wwpdb.apps.releasemodule.utils.Utility import RunScript
 
 
 class CitationFinder(object):
@@ -297,10 +298,10 @@ class CitationFinder(object):
             cat.setValue(str(cdt['c_title'].replace('#', '')), 'c_title', row)
             cat.setValue(str(','.join(cdt['pubmed_author'])), 'pubmed_author', row)
             if 'pdbx_database_id_PubMed' in cdt:
-                cat.setValue(str(cdt['pdbx_database_id_PubMed']), 'pdbx_database_id_PubMed', row) 
+                cat.setValue(str(cdt['pdbx_database_id_PubMed']), 'pdbx_database_id_PubMed', row)
             #
             if 'pdbx_database_id_DOI' in cdt:
-                cat.setValue(str(cdt['pdbx_database_id_DOI']), 'pdbx_database_id_DOI', row) 
+                cat.setValue(str(cdt['pdbx_database_id_DOI']), 'pdbx_database_id_DOI', row)
                 cat.setValue(str(cdt['pdbx_database_id_DOI']) + '[aid]', 'DOI_term', row)
             #
             row += 1
@@ -376,9 +377,9 @@ class CitationFinder(object):
             pubmed_id = rdic['pubmed_id']
             similarity_score = rdic['similarity_score']
             if structure_id in self.__matchResultMap:
-                self.__matchResultMap[structure_id].append([rdic['pubmed_id'], rdic['similarity_score']])
+                self.__matchResultMap[structure_id].append([pubmed_id, similarity_score])
             else:
-                self.__matchResultMap[structure_id] = [[rdic['pubmed_id'], rdic['similarity_score']]]
+                self.__matchResultMap[structure_id] = [[pubmed_id, similarity_score]]
             #
         #
 
@@ -403,7 +404,7 @@ class CitationFinder(object):
             return
         #
         for cdt in self.__candidateList:
-            if not 'structure_id' in cdt:
+            if 'structure_id' not in cdt:
                 continue
             #
             entry_id = cdt['structure_id']

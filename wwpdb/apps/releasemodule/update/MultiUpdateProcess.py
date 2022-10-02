@@ -382,7 +382,7 @@ class MultiUpdateProcess(UpdateBase):
                 self.__statusHUtils = StatusHistoryUtils(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
             #
             okShLoad = False
-            okShUpdate = self.__statusHUtils.updateEntryStatusHistory(entryIdList=[entryId], statusCode=status_code, \
+            okShUpdate = self.__statusHUtils.updateEntryStatusHistory(entryIdList=[entryId], statusCode=status_code,
                                                                       annotatorInitials=annotator,
                                                                       details="Update by release module")
             if okShUpdate:
@@ -391,9 +391,9 @@ class MultiUpdateProcess(UpdateBase):
             if (self._verbose):
                 self._lfh.write(
                     "+MultiUpdateProcess.__updateStatusHistory() %s status history database load status %r\n" % (
-                    entryId, okShLoad))
+                        entryId, okShLoad))
             #
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             if (self._verbose):
                 self._lfh.write(
                     "+MultiUpdateProcess.__updateStatusHistory() %s status history update and database load failed with exception\n")
