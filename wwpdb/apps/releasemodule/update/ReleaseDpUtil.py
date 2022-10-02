@@ -16,15 +16,18 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, tarfile
+import os
+import sys
+import tarfile
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
+
 
 class ReleaseDpUtil(EntryUpdateBase):
     """ Class responsible for generating and checking release files
@@ -112,14 +115,14 @@ class ReleaseDpUtil(EntryUpdateBase):
         """
         """
         cifFile = self.__pdbId + ".cif"
-        logFile = "generate_cif_v5_" + self._entryId + ".log" 
+        logFile = "generate_cif_v5_" + self._entryId + ".log"
         clogFile = "generate_cif_command_v5_" + self._entryId + ".log"
         outputList = []
-        outputList.append( ( cifFile, True ) )
-        outputList.append( ( logFile, True ) )
-        outputList.append( ( clogFile, True ) )
-        self._dpUtilityApi(operator="annot-cif-to-public-pdbx", inputFileName=self._pickleData["model"]["session_file"], \
-                            outputFileNameTupList=outputList)
+        outputList.append((cifFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
+        self._dpUtilityApi(operator="annot-cif-to-public-pdbx", inputFileName=self._pickleData["model"]["session_file"],
+                           outputFileNameTupList=outputList)
         #
         if not self.__verifyGeneratingFile("cif", cifFile):
             return
@@ -136,13 +139,13 @@ class ReleaseDpUtil(EntryUpdateBase):
             return
         #
         outputList = []
-        for xmlType in ( ( ".cif.xml", ".xml" ), ( ".cif.xml-noatom", "-noatom.xml" ), ( ".cif.xml-extatom", "-extatom.xml" ) ):
-            outputList.append( ( self.__pdbId + xmlType[0], True ) )
+        for xmlType in ((".cif.xml", ".xml"), (".cif.xml-noatom", "-noatom.xml"), (".cif.xml-extatom", "-extatom.xml")):
+            outputList.append((self.__pdbId + xmlType[0], True))
         #
-        logFile = "generate_xml_v5_" +  self._entryId + ".log"
-        clogFile = "generate_xml_command_v5_" +  self._entryId + ".log"
-        outputList.append( ( logFile, True ) )
-        outputList.append( ( clogFile, True ) )
+        logFile = "generate_xml_v5_" + self._entryId + ".log"
+        clogFile = "generate_xml_command_v5_" + self._entryId + ".log"
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
         #
         self._dpUtilityApi(operator="annot-public-pdbx-to-xml", inputFileName=os.path.join(self._sessionPath, cifFile), outputFileNameTupList=outputList)
         #
@@ -150,7 +153,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         self._processLogError("xml", "mmcif2XML", os.path.join(self._sessionPath, clogFile))
         #
         self._insertFileStatus("xml", True)
-        for xmlType in ( ( ".cif.xml", ".xml" ), ( ".cif.xml-noatom", "-noatom.xml" ), ( ".cif.xml-extatom", "-extatom.xml" ) ):
+        for xmlType in ((".cif.xml", ".xml"), (".cif.xml-noatom", "-noatom.xml"), (".cif.xml-extatom", "-extatom.xml")):
             if not self.__verifyGeneratingFile("xml", self.__pdbId + xmlType[0]):
                 continue
             #
@@ -168,11 +171,11 @@ class ReleaseDpUtil(EntryUpdateBase):
         logFile = self._entryId + "_MiscChecking.log"
         clogFile = self._entryId + "_MiscChecking_command.log"
         outputList = []
-        outputList.append( ( outputFile, True ) )
-        outputList.append( ( logFile, True ) )
-        outputList.append( ( clogFile, True ) )
-        self._dpUtilityApi(operator="annot-misc-checking", inputFileName=self._pickleData["model"]["session_file"], \
-                            outputFileNameTupList=outputList, option="-released")
+        outputList.append((outputFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
+        self._dpUtilityApi(operator="annot-misc-checking", inputFileName=self._pickleData["model"]["session_file"],
+                           outputFileNameTupList=outputList, option="-released")
         #
         self._processLogError("", "", os.path.join(self._sessionPath, logFile))
         self._processLogError("", "MiscChecking", os.path.join(self._sessionPath, clogFile))
@@ -182,7 +185,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         #
         data = self.__readFile(os.path.join(self._sessionPath, outputFile))
         if data:
-            self._insertEntryMessage(errType="MiscChecking", errMessage=data, messageType="warning", uniqueFlag=True) 
+            self._insertEntryMessage(errType="MiscChecking", errMessage=data, messageType="warning", uniqueFlag=True)
         #
 
     def __releasingPDBFile(self):
@@ -192,9 +195,9 @@ class ReleaseDpUtil(EntryUpdateBase):
         logFile = "generate_pdb_" + self._entryId + ".log"
         clogFile = "generate_pdb_command_" + self._entryId + ".log"
         outputList = []
-        outputList.append( ( pdbFile, True ) )
-        outputList.append( ( logFile, True ) )
-        outputList.append( ( clogFile, True ) )
+        outputList.append((pdbFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
         self._dpUtilityApi(operator="annot-get-pdb-file", inputFileName=self._pickleData["model"]["session_file"], outputFileNameTupList=outputList)
         #
         self._processLogError("pdb", "", os.path.join(self._sessionPath, logFile))
@@ -216,11 +219,11 @@ class ReleaseDpUtil(EntryUpdateBase):
         clogFile = "generate_bundle_command_" + self._entryId + ".log"
         #
         outputList = []
-        outputList.append( ( tarFile, True ) )
-        outputList.append( ( logFile, True ) )
-        outputList.append( ( clogFile, True ) )
-        self._dpUtilityApi(operator="annot-get-pdb-bundle", inputFileName=self._pickleData["model"]["session_file"], \
-                            outputFileNameTupList=outputList, id_value=self.__pdbId)
+        outputList.append((tarFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
+        self._dpUtilityApi(operator="annot-get-pdb-bundle", inputFileName=self._pickleData["model"]["session_file"],
+                           outputFileNameTupList=outputList, id_value=self.__pdbId)
         #
         self._processLogError("pdb", "", os.path.join(self._sessionPath, logFile), messageType="warning")
         self._processLogError("pdb", "GetPdbBundle", os.path.join(self._sessionPath, clogFile), messageType="warning")
@@ -251,23 +254,23 @@ class ReleaseDpUtil(EntryUpdateBase):
         logFile = "generate_biol_" + self._entryId + "_" + program + ".log"
         clogFile = "generate_biol_command_" + self._entryId + "_" + program + ".log"
         outputList = []
-        outputList.append( ( tarFile, True ) )
-        outputList.append( ( logFile, True ) )
-        outputList.append( ( clogFile, True ) )
+        outputList.append((tarFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
         #
         if fileType == "cif":
-            self._dpUtilityApi(operator="annot-get-biol-cif-file", inputFileName=self._pickleData["model"]["session_file"], \
-                                outputFileNameTupList=outputList, id_value=self.__pdbId)
+            self._dpUtilityApi(operator="annot-get-biol-cif-file", inputFileName=self._pickleData["model"]["session_file"],
+                               outputFileNameTupList=outputList, id_value=self.__pdbId)
         else:
-            self._dpUtilityApi(operator="annot-get-biol-pdb-file", inputFileName=self._pickleData["model"]["session_file"], \
-                                outputFileNameTupList=outputList, id_value=self.__pdbId)
+            self._dpUtilityApi(operator="annot-get-biol-pdb-file", inputFileName=self._pickleData["model"]["session_file"],
+                               outputFileNameTupList=outputList, id_value=self.__pdbId)
         #
         self._extractTarFile(tarFile)
         self._processLogError(fileType, "", os.path.join(self._sessionPath, logFile))
         self._processLogError(fileType, program, os.path.join(self._sessionPath, clogFile))
         #
         if not os.access(os.path.join(self._sessionPath, indexFile), os.F_OK):
-            self._insertEntryMessage(errType=fileType, errMessage="Generating bio-assembly file(s) failed.", uniqueFlag=True) 
+            self._insertEntryMessage(errType=fileType, errMessage="Generating bio-assembly file(s) failed.", uniqueFlag=True)
             return
         #
         data = self.__readFile(os.path.join(self._sessionPath, indexFile))
@@ -304,10 +307,10 @@ class ReleaseDpUtil(EntryUpdateBase):
         strFile = self.__pdbId + "_cs.str"
         clogFile = "str_logfile_" + self._entryId + ".log"
         outputList = []
-        outputList.append( ( strFile, True ) )
-        outputList.append( ( clogFile, True ) )
-        self._dpUtilityApi(operator="annot-pdbx2nmrstar", inputFileName=self._pickleData["nmr-chemical-shifts"]["session_file"], \
-                            outputFileNameTupList=outputList, id_value=self.__pdbId)
+        outputList.append((strFile, True))
+        outputList.append((clogFile, True))
+        self._dpUtilityApi(operator="annot-pdbx2nmrstar", inputFileName=self._pickleData["nmr-chemical-shifts"]["session_file"],
+                           outputFileNameTupList=outputList, id_value=self.__pdbId)
         #
         self._processLogError("cs", "GenNMRStarCSFile" , os.path.join(self._sessionPath, clogFile))
         #
@@ -325,11 +328,11 @@ class ReleaseDpUtil(EntryUpdateBase):
         internalNefFile = self._entryId + '_nmr-data-nef_P1.str'
         externalStrFile = self.__pdbId + '_nmr-data.str'
         externalNefFile = self.__pdbId + '_nmr-data.nef'
-        for fileName in ( internalStrFile, internalNefFile, externalStrFile, externalNefFile ):
+        for fileName in (internalStrFile, internalNefFile, externalStrFile, externalNefFile):
             self._removeFile(os.path.join(self._sessionPath, fileName))
         #
         generator = NmrDataGenerator(siteId=self._siteId, workingDirPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
-        errMsg = generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile), \
+        errMsg = generator.getNmrDataFiles(self.__pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile),
                                            os.path.join(self._sessionPath, internalNefFile))
         #
         if not self.__verifyGeneratingFile('nmr_data', internalStrFile):
@@ -345,9 +348,9 @@ class ReleaseDpUtil(EntryUpdateBase):
         self._insertReleseFile('nmr-data-nef', os.path.join(self._sessionPath, externalNefFile), externalNefFile, '', True)
 
     def __checkReleaseFlag(self, contentType):
-        if (not contentType in self._pickleData) or (not self._pickleData[contentType]) or \
-           (not 'release' in self._pickleData[contentType]) or (not self._pickleData[contentType]['release']) or \
-           (not 'session_file' in self._pickleData[contentType]) or (not self._pickleData[contentType]['session_file']):
+        if (contentType not in self._pickleData) or (not self._pickleData[contentType]) or \
+           ('release' not in self._pickleData[contentType]) or (not self._pickleData[contentType]['release']) or \
+           ('session_file' not in self._pickleData[contentType]) or (not self._pickleData[contentType]['session_file']):
             return False
         #
         return True
@@ -368,11 +371,11 @@ class ReleaseDpUtil(EntryUpdateBase):
         """
         """
         reportFile = fileName + "-diag.log"
-        logFile = "checking_cif_" + fileType + ext + "_" + self._entryId + ".log"
+        _logFile = "checking_cif_" + fileType + ext + "_" + self._entryId + ".log"  # noqa: F841
         clogFile = "checking_cif_" + fileType + ext + "_command_" + self._entryId + ".log"
         outputList = []
-        outputList.append( ( reportFile, True ) )
-        outputList.append( ( clogFile, True ) )
+        outputList.append((reportFile, True))
+        outputList.append((clogFile, True))
         self._dpUtilityApi(operator="annot-check-cif", inputFileName=os.path.join(self._sessionPath, fileName), outputFileNameTupList=outputList)
         self._processLogError(fileType, "CifCheck", os.path.join(self._sessionPath, clogFile))
         #
@@ -383,7 +386,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         """
         reportFile = self.__pdbId + "." + version + ".xml.diag"
         outputList = []
-        outputList.append( ( reportFile, True ) )
+        outputList.append((reportFile, True))
         #
         xmlPath = os.path.join(self._sessionPath, xmlFile)
         statinfo = os.stat(xmlPath)
@@ -404,16 +407,16 @@ class ReleaseDpUtil(EntryUpdateBase):
         logFile = "checking_pdb_" + self._entryId + ".log"
         clogFile = "checking_pdb_command_" + self._entryId + ".log"
         outputList = []
-        outputList.append( ( tarFile, True ) )
-        outputList.append( ( logFile, True ) )
-        outputList.append( ( clogFile, True ) )
+        outputList.append((tarFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
         #
         options = " -status " + self._entryDir["status_code"]
         if ("directory" in self._entryDir) and self._entryDir["directory"] == "modified":
             options += " -re_release "
         #
-        self._dpUtilityApi(operator="annot-check-pdb-file", inputFileName=os.path.join(self._sessionPath, pdbFile), \
-                            outputFileNameTupList=outputList, option=options, id_value=self.__pdbId)
+        self._dpUtilityApi(operator="annot-check-pdb-file", inputFileName=os.path.join(self._sessionPath, pdbFile),
+                           outputFileNameTupList=outputList, option=options, id_value=self.__pdbId)
         #
         self._extractTarFile(tarFile)
         self._processLogError("pdb", "", os.path.join(self._sessionPath, logFile))
@@ -429,8 +432,8 @@ class ReleaseDpUtil(EntryUpdateBase):
         reportFile = self.__pdbId + "_" + expType + ".report"
         clogFile = "checking_" + expType + "_" + self._entryId + ".log"
         outputList = []
-        outputList.append( ( reportFile, True ) )
-        outputList.append( ( clogFile, True ) )
+        outputList.append((reportFile, True))
+        outputList.append((clogFile, True))
         #
         options = ""
         if self._entryDir["status_code_" + expType] == "REL":
@@ -442,7 +445,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         self.__processCheckReoprt(expType, reportFile, True, False)
 
     def __processCheckReoprt(self, errType, reportFile, missingFlag, warningOnlyFlag):
-        status,msg = self._getLogMessage("", os.path.join(self._sessionPath, reportFile))
+        status, msg = self._getLogMessage("", os.path.join(self._sessionPath, reportFile))
         if status == "not found":
             if missingFlag:
                 self._insertEntryMessage(errType=errType, errMessage="Checking releasing " + errType + " failed.", messageType="warning", uniqueFlag=True)

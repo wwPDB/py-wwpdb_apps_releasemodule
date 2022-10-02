@@ -158,7 +158,7 @@ class DepictRequest(DepictBase):
             rows += '<tr>\n'
             for j in range(n):
                 filepath = FileInfo['releasedFiles'][i * num_per_line + j]
-                (path, filename) = os.path.split(filepath)
+                (_path, filename) = os.path.split(filepath)
                 rows += '<td style="text-align:left;border-style:none">' \
                     + '<a href="/service/entity/download_file?filepath=' \
                     + filepath + '" target="_blank"> ' + filename + ' </a></td>\n'

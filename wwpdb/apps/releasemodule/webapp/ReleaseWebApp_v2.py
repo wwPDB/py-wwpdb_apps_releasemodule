@@ -16,43 +16,47 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle as pickle
 
-import os, sys, tarfile, types, traceback
+import os
+import sys
+import tarfile
+import traceback
 
-from wwpdb.utils.config.ConfigInfo                                import ConfigInfo
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
-from wwpdb.utils.session.WebRequest                                import InputRequest,ResponseContent
+from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
 from wwpdb.apps.releasemodule.citation.ReadCitationFinderResult_v2 import ReadCitationFinderResult
-from wwpdb.apps.releasemodule.depict.DepictAnnotatorHistory     import DepictAnnotatorHistory
-from wwpdb.apps.releasemodule.depict.DepictCitation_v2          import DepictCitation
-from wwpdb.apps.releasemodule.depict.DepictCitationForm_v2      import DepictCitationForm
-from wwpdb.apps.releasemodule.depict.DepictEntryHistory         import DepictEntryHistory
-from wwpdb.apps.releasemodule.depict.DepictReleaseInfo          import DepictReleaseInfo
-from wwpdb.apps.releasemodule.depict.DepictRemovalMark          import DepictRemovalMark
-from wwpdb.apps.releasemodule.depict.DepictRequest              import DepictRequest
-from wwpdb.apps.releasemodule.update.CitationFormParser_v2      import CitationFormParser
-from wwpdb.apps.releasemodule.update.EntryFormParser_v2         import EntryFormParser
-from wwpdb.apps.releasemodule.update.MultiUpdateProcess         import MultiUpdateProcess
-from wwpdb.apps.releasemodule.update.UpdateFormParser           import UpdateFormParser
-from wwpdb.apps.releasemodule.utils.CombineDbApi                import CombineDbApi
-from wwpdb.apps.releasemodule.utils.Utility                     import FindFiles,FindLogFiles,getFileName
-from wwpdb.io.locator.PathInfo                                  import PathInfo
+from wwpdb.apps.releasemodule.depict.DepictAnnotatorHistory import DepictAnnotatorHistory
+from wwpdb.apps.releasemodule.depict.DepictCitation_v2 import DepictCitation
+from wwpdb.apps.releasemodule.depict.DepictCitationForm_v2 import DepictCitationForm
+from wwpdb.apps.releasemodule.depict.DepictEntryHistory import DepictEntryHistory
+from wwpdb.apps.releasemodule.depict.DepictReleaseInfo import DepictReleaseInfo
+from wwpdb.apps.releasemodule.depict.DepictRemovalMark import DepictRemovalMark
+from wwpdb.apps.releasemodule.depict.DepictRequest import DepictRequest
+from wwpdb.apps.releasemodule.update.CitationFormParser_v2 import CitationFormParser
+from wwpdb.apps.releasemodule.update.EntryFormParser_v2 import EntryFormParser
+from wwpdb.apps.releasemodule.update.MultiUpdateProcess import MultiUpdateProcess
+from wwpdb.apps.releasemodule.update.UpdateFormParser import UpdateFormParser
+from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
+from wwpdb.apps.releasemodule.utils.Utility import FindFiles, FindLogFiles
+from wwpdb.io.locator.PathInfo import PathInfo
 #
+
 
 class ReleaseWebApp(object):
     """Handle request and response object processing for release module web application.
-    
+
     """
-    def __init__(self,parameterDict={},verbose=False,log=sys.stderr,siteId="WWPDB_DEV"):
+    def __init__(self, parameterDict={}, verbose=False, log=sys.stderr, siteId="WWPDB_DEV"):
         """
         Create an instance of `ReleaseWebApp` to manage a release module web request.
 
@@ -60,46 +64,46 @@ class ReleaseWebApp(object):
              Storage model for GET and POST parameter data is a dictionary of lists.
          :param `verbose`:  boolean flag to activate verbose logging.
          :param `log`:      stream for logging.
-          
+
         """
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__debug=False
-        self.__siteId=siteId
-        self.__cI=ConfigInfo(self.__siteId)
-        self.__topPath=self.__cI.get('SITE_WEB_APPS_TOP_PATH')
+        self.__verbose = verbose
+        self.__lfh = log
+        self.__debug = False
+        self.__siteId = siteId
+        self.__cI = ConfigInfo(self.__siteId)
+        self.__topPath = self.__cI.get('SITE_WEB_APPS_TOP_PATH')
         #
 
         if isinstance(parameterDict, dict):
-            self.__myParameterDict=parameterDict
+            self.__myParameterDict = parameterDict
         else:
-            self.__myParameterDict={}
+            self.__myParameterDict = {}
 
-        if (self.__verbose):
-            self.__lfh.write("+ReleaseWebApp.__init() - REQUEST STARTING ------------------------------------\n" )
-            self.__lfh.write("+ReleaseWebApp.__init() - dumping input parameter dictionary \n" )                        
-            #self.__lfh.write("%s" % (''.join(self.__dumpRequest())))
-            
-        self.__reqObj=InputRequest(self.__myParameterDict,verbose=self.__verbose,log=self.__lfh)
-        
-        self.__topSessionPath  = self.__cI.get('SITE_WEB_APPS_TOP_SESSIONS_PATH')
-        self.__templatePath = os.path.join(self.__topPath,"htdocs","releasemodule","templates")
+        if self.__verbose:
+            self.__lfh.write("+ReleaseWebApp.__init() - REQUEST STARTING ------------------------------------\n")
+            self.__lfh.write("+ReleaseWebApp.__init() - dumping input parameter dictionary \n")
+            # self.__lfh.write("%s" % (''.join(self.__dumpRequest())))
+
+        self.__reqObj = InputRequest(self.__myParameterDict, verbose=self.__verbose, log=self.__lfh)
+
+        self.__topSessionPath = self.__cI.get('SITE_WEB_APPS_TOP_SESSIONS_PATH')
+        self.__templatePath = os.path.join(self.__topPath, "htdocs", "releasemodule", "templates")
         #
         self.__reqObj.setValue("TopSessionPath", self.__topSessionPath)
-        self.__reqObj.setValue("TemplatePath",   self.__templatePath)
-        self.__reqObj.setValue("TopPath",        self.__topPath)
-        self.__reqObj.setValue("WWPDB_SITE_ID",  self.__siteId)
-        os.environ["WWPDB_SITE_ID"]=self.__siteId
+        self.__reqObj.setValue("TemplatePath", self.__templatePath)
+        self.__reqObj.setValue("TopPath", self.__topPath)
+        self.__reqObj.setValue("WWPDB_SITE_ID", self.__siteId)
+        os.environ["WWPDB_SITE_ID"] = self.__siteId
         #
         self.__reqObj.setReturnFormat(return_format="html")
         #
-        if (self.__verbose):
+        if self.__verbose:
             self.__lfh.write("-----------------------------------------------------\n")
-            self.__lfh.write("+ReleaseWebApp.__init() Leaving _init with request contents\n" )            
+            self.__lfh.write("+ReleaseWebApp.__init() Leaving _init with request contents\n")
             self.__reqObj.printIt(ofh=self.__lfh)
-            self.__lfh.write("---------------ReleaseWebApp - done -------------------------------\n")   
+            self.__lfh.write("---------------ReleaseWebApp - done -------------------------------\n")
             self.__lfh.flush()
-            
+
     def doOp(self):
         """ Execute request and package results in response dictionary.
 
@@ -108,17 +112,17 @@ class ReleaseWebApp(object):
              Minimally, the content of this dictionary will include the
              keys: CONTENT_TYPE and REQUEST_STRING.
         """
-        stw=ReleaseWebAppWorker(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
-        rC=stw.doOp()
-        if (self.__debug):
-            rqp=self.__reqObj.getRequestPath()
+        stw = ReleaseWebAppWorker(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        rC = stw.doOp()
+        if self.__debug:
+            rqp = self.__reqObj.getRequestPath()
             self.__lfh.write("+ReleaseWebApp.doOp() operation %s\n" % rqp)
             self.__lfh.write("+ReleaseWebApp.doOp() return format %s\n" % self.__reqObj.getReturnFormat())
             if rC is not None:
                 self.__lfh.write("%s" % (''.join(rC.dump())))
             else:
                 self.__lfh.write("+ReleaseWebApp.doOp() return object is empty\n")
-                
+
         #
         # Package return according to the request return_format -
         #
@@ -129,115 +133,116 @@ class ReleaseWebApp(object):
            containing data from the input web request.
 
            :Returns:
-               ``list`` of formatted text lines 
+               ``list`` of formatted text lines
         """
-        retL=[]
-        retL.append("\n\-----------------ReleaseWebApp().__dumpRequest()-----------------------------\n")
-        retL.append("Parameter dictionary length = %d\n" % len(self.__myParameterDict))            
-        for k,vL in self.__myParameterDict.items():
+        retL = []
+        retL.append("\n-----------------ReleaseWebApp().__dumpRequest()-----------------------------\n")
+        retL.append("Parameter dictionary length = %d\n" % len(self.__myParameterDict))
+        for k, vL in self.__myParameterDict.items():
             retL.append("Parameter %30s :" % k)
             for v in vL:
                 retL.append(" ->  %s\n" % v)
-        retL.append("-------------------------------------------------------------\n")                
+        retL.append("-------------------------------------------------------------\n")
         return retL
 
+
 class ReleaseWebAppWorker(object):
-    def __init__(self, reqObj=None, verbose=False,log=sys.stderr):
+    def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         """
          Worker methods for the chemical component editor application
 
          Performs URL - application mapping and application launching
          for chemical component editor tool.
-         
+
          All operations can be driven from this interface which can
          supplied with control information from web application request
          or from a testing application.
         """
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__reqObj=reqObj
-        self.__siteId  = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
-        self.__cI=ConfigInfo(self.__siteId)
+        self.__verbose = verbose
+        self.__lfh = log
+        self.__reqObj = reqObj
+        self.__siteId = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
+        self.__cI = ConfigInfo(self.__siteId)
         self.__cICommon = ConfigInfoAppCommon(self.__siteId)
         self.__annotator = str(self.__reqObj.getValue('annotator'))
         self.__owner = str(self.__reqObj.getValue('owner'))
         if not self.__owner and self.__annotator:
             self.__owner = self.__annotator
         #
-        self.__appPathD={'/service/environment/dump':          '_dumpOp',
-                         '/service/release/get_anno_list':     '_GetAnnoListOp',
-                         '/service/release/start':             '_StandaloneOp',
-                         '/service/release/new_session/wf':    '_WorkflowOp',
-                         '/service/release/citation_finder':   '_CitationFinderPage',
-                         '/service/release/citation_update':   '_CitationUpdatePage',
-                         '/service/release/release_onhold':    '_RequestReleasePage',
-                         '/service/release/expired_onhold':    '_ExpiredEntryPage',
-                         '/service/release/release_entry':     '_ReleasedEntryPage',
-#                        '/service/release/check_marked_pubmed_id': '_MarkedPubmedIDPage',
-                         '/service/release/check_marked_pubmed_id': '_DisPlayMarkedPubmedIDOp',
-                         '/service/release/update':            '_UpdateOp',
-                         '/service/release/citation_request':  '_CitationRequestOp',
-                         '/service/release/entry_request':     '_EntryRequestOp',
-                         '/service/release/marked_pubmed_request': '_MarkedPubmedRequestOp',
-                         '/service/release/mark_pubmed_id':    '_MarkPubmedIDOp',
-                         '/service/release/remove_marked_pubmed': '_RemoveMarkedPubmedIDOp',
-                         '/service/release/download_file':     '_downloadFilePage',
-                         '/service/release/download_logfile':  '_downloadLogFilePage',
-                         '/service/release/view_entry_history': '_viewEntryHistoryOp',
-                         '/service/release/view_entry_history_detail': '_viewEntryHistoryDetailOp',
-                         '/service/release/view_release_history': '_viewAnnotatorHistoryOp',
-                         '/service/release/view_release_info': '_viewReleaseInfoOp'
-                         }
-        
+        self.__appPathD = {'/service/environment/dump': '_dumpOp',
+                           '/service/release/get_anno_list': '_GetAnnoListOp',
+                           '/service/release/start': '_StandaloneOp',
+                           '/service/release/new_session/wf': '_WorkflowOp',
+                           '/service/release/citation_finder': '_CitationFinderPage',
+                           '/service/release/citation_update': '_CitationUpdatePage',
+                           '/service/release/release_onhold': '_RequestReleasePage',
+                           '/service/release/expired_onhold': '_ExpiredEntryPage',
+                           '/service/release/release_entry': '_ReleasedEntryPage',
+                           # '/service/release/check_marked_pubmed_id': '_MarkedPubmedIDPage',
+                           '/service/release/check_marked_pubmed_id': '_DisPlayMarkedPubmedIDOp',
+                           '/service/release/update': '_UpdateOp',
+                           '/service/release/citation_request': '_CitationRequestOp',
+                           '/service/release/entry_request': '_EntryRequestOp',
+                           '/service/release/marked_pubmed_request': '_MarkedPubmedRequestOp',
+                           '/service/release/mark_pubmed_id': '_MarkPubmedIDOp',
+                           '/service/release/remove_marked_pubmed': '_RemoveMarkedPubmedIDOp',
+                           '/service/release/download_file': '_downloadFilePage',
+                           '/service/release/download_logfile': '_downloadLogFilePage',
+                           '/service/release/view_entry_history': '_viewEntryHistoryOp',
+                           '/service/release/view_entry_history_detail': '_viewEntryHistoryDetailOp',
+                           '/service/release/view_release_history': '_viewAnnotatorHistoryOp',
+                           '/service/release/view_release_info': '_viewReleaseInfoOp'
+                           }
+
     def doOp(self):
-        """Map operation to path and invoke operation.  
-        
+        """Map operation to path and invoke operation.
+
             :Returns:
 
             Operation output is packaged in a ResponseContent() object.
         """
         return self.__doOpException()
-    
+
     def __doOpNoException(self):
         """Map operation to path and invoke operation.  No exception handling is performed.
-        
+
             :Returns:
 
             Operation output is packaged in a ResponseContent() object.
         """
         #
-        reqPath=self.__reqObj.getRequestPath()
-        if not reqPath in self.__appPathD:
+        reqPath = self.__reqObj.getRequestPath()
+        if reqPath not in self.__appPathD:
             # bail out if operation is unknown -
-            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
             rC.setError(errMsg='Unknown operation')
             return rC
         else:
-            mth=getattr(self,self.__appPathD[reqPath],None)
-            rC=mth()
+            mth = getattr(self, self.__appPathD[reqPath], None)
+            rC = mth()
         return rC
 
     def __doOpException(self):
         """Map operation to path and invoke operation.  Exceptions are caught within this method.
-        
+
             :Returns:
 
             Operation output is packaged in a ResponseContent() object.
         """
         #
         try:
-            reqPath=self.__reqObj.getRequestPath()
-            if not reqPath in self.__appPathD:
+            reqPath = self.__reqObj.getRequestPath()
+            if reqPath not in self.__appPathD:
                 # bail out if operation is unknown -
-                rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+                rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
                 rC.setError(errMsg='Unknown operation')
             else:
-                mth=getattr(self,self.__appPathD[reqPath],None)
-                rC=mth()
+                mth = getattr(self, self.__appPathD[reqPath], None)
+                rC = mth()
             return rC
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             traceback.print_exc(file=self.__lfh)
-            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
             rC.setError(errMsg='Operation failure')
             return rC
 
@@ -247,7 +252,7 @@ class ReleaseWebAppWorker(object):
     # ------------------------------------------------------------------------------------------------------------
     #
     def _dumpOp(self):
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         rC.setHtmlList(self.__reqObj.dump(format='html'))
         return rC
 
@@ -257,10 +262,10 @@ class ReleaseWebAppWorker(object):
         if (self.__verbose):
             self.__lfh.write("+ReleaseWebAppWorker._GetAnnoListOp() Starting now\n")
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
         #
         rC.setText(text=self.__getAnnotatorSelection(dbUtil, '', 'annotator'))
         return rC
@@ -273,18 +278,18 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="html")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="html")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         #
         myD = {}
-        myD['sessionid']  = self.__sessionId
+        myD['sessionid'] = self.__sessionId
         myD['identifier'] = str(self.__reqObj.getValue('identifier'))
         myD['filesource'] = str(self.__reqObj.getValue('filesource'))
-        myD['instance']   = str(self.__reqObj.getValue('instance'))
-        myD['annotator']  = self.__annotator
-        myD['owner_selection']  = self.__getAnnotatorSelection(dbUtil, self.__owner, 'owner')
+        myD['instance'] = str(self.__reqObj.getValue('instance'))
+        myD['annotator'] = self.__annotator
+        myD['owner_selection'] = self.__getAnnotatorSelection(dbUtil, self.__owner, 'owner')
         citPath = self.__cICommon.get_citation_finder_path()
         resultFile = os.path.join(citPath, 'citation_finder_' + self.__siteId + '.db')
         self.__lfh.write("+ReleaseWebAppWorker._StandaloneOp() resultFile %s\n" % resultFile)
@@ -315,20 +320,20 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="html")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="html")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         #
         entryId = str(self.__reqObj.getValue('identifier'))
         citation_update = str(self.__reqObj.getValue('citation_update'))
         myD = {}
-        myD['sessionid']  = self.__sessionId
+        myD['sessionid'] = self.__sessionId
         myD['identifier'] = entryId
         myD['filesource'] = str(self.__reqObj.getValue('filesource'))
-        myD['instance']   = str(self.__reqObj.getValue('instance'))
-        myD['annotator']  = self.__annotator
-        myD['owner_selection']  = self.__getAnnotatorSelection(dbUtil, self.__owner, 'owner')
+        myD['instance'] = str(self.__reqObj.getValue('instance'))
+        myD['annotator'] = self.__annotator
+        myD['owner_selection'] = self.__getAnnotatorSelection(dbUtil, self.__owner, 'owner')
         #
         entryList = []
         if (citation_update == 'pubmed') and entryId:
@@ -347,7 +352,7 @@ class ReleaseWebAppWorker(object):
             myD['result_list'] = self.__processTemplate('citation_request/input_form_without_pubmed_tmplt.html', myDir)
         else:
             if entryId:
-                entryList = dbUtil.getEntryInfo([ entryId ])
+                entryList = dbUtil.getEntryInfo([entryId])
             else:
                 entryList = dbUtil.getRequestReleaseEntryInfo(self.__owner)
             #
@@ -359,7 +364,7 @@ class ReleaseWebAppWorker(object):
                 myDir = {}
                 myDir['sessionid'] = self.__sessionId
                 myDir['annotator'] = self.__annotator
-                myDir['task']      = 'Entries to be released'
+                myDir['task'] = 'Entries to be released'
                 myD['result_list'] = self.__processTemplate('request/input_form_tmplt.html', myDir)
             #
         #
@@ -383,8 +388,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         #
         citPath = self.__cICommon.get_citation_finder_path()
@@ -413,8 +418,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         myD = {}
         myD['sessionid'] = self.__sessionId
@@ -437,10 +442,10 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         entryList = dbUtil.getRequestReleaseEntryInfo(self.__owner)
         #
         if entryList:
@@ -449,7 +454,7 @@ class ReleaseWebAppWorker(object):
             myDir = {}
             myDir['sessionid'] = self.__sessionId
             myDir['annotator'] = self.__annotator
-            myDir['task']      = str(self.__reqObj.getValue('task'))
+            myDir['task'] = str(self.__reqObj.getValue('task'))
             rC.setText(text=self.__processTemplate('request/input_form_tmplt.html', myDir))
         #
         return rC
@@ -462,17 +467,17 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         entryList = dbUtil.getExpiredEntryInfo(self.__owner)
         #
         if entryList:
             rC.setText(text=self.__depcitRequestForm(entryList=entryList))
         else:
             returnText = '<h1 style="text-align:center">' + str(self.__reqObj.getValue('task')) + '</h1></br>' \
-                       + '<h2 style="text-align:center">No entry found.</h2>'
+                + '<h2 style="text-align:center">No entry found.</h2>'
             rC.setText(text=returnText)
         #
         return rC
@@ -485,10 +490,10 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         entryList = []
         id_list = self.__getReleasedEntryList(dbUtil)
         if id_list:
@@ -514,13 +519,13 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         myD = {}
         myD['sessionid'] = self.__sessionId
         myD['annotator'] = self.__annotator
-        myD['task']      = str(self.__reqObj.getValue('task'))
+        myD['task'] = str(self.__reqObj.getValue('task'))
         #
         rC.setText(text=self.__processTemplate('citation_finder/marked_pubmed_input_form_tmplt.html', myD))
         return rC
@@ -533,8 +538,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         frmParser = UpdateFormParser(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         errContent = frmParser.getErrorContent()
@@ -561,8 +566,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         citationformflag = str(self.__reqObj.getValue('citationformflag'))
         requestParser = CitationFormParser(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
@@ -585,7 +590,7 @@ class ReleaseWebAppWorker(object):
             rC.setText(text=context)
         else:
             rC.setError(errMsg='Unknown error')
-         
+
         #
         return rC
 
@@ -597,8 +602,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         requestParser = EntryFormParser(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         content = requestParser.getErrorContent()
@@ -620,26 +625,26 @@ class ReleaseWebAppWorker(object):
         if (self.__verbose):
             self.__lfh.write("+ReleaseWebAppWorker._DisPlayMarkedPubmedIDOp() Starting now\n")
         #
-        statusList = [ 'PROC', 'AUTH', 'HPUB', 'HOLD', 'REPL', 'AUCO', 'REUP', 'WAIT', 'REFI', 'REL' ]
+        statusList = ['PROC', 'AUTH', 'HPUB', 'HOLD', 'REPL', 'AUCO', 'REUP', 'WAIT', 'REFI', 'REL']
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        dbUtil = CombineDbApi(siteId=self.__siteId,path=self.__sessionPath,verbose=self.__verbose,log=self.__lfh)
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         entryList = dbUtil.getEntriesWithStatusList(self.__owner, statusList)
         foundList = []
         if entryList:
             pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
             for dataDict in entryList:
                 try:
-                    archiveDirPath = pI.getDirPath(dataSetId=dataDict['structure_id'], wfInstanceId=None, contentType='model', \
-                            formatType='pdbx', fileSource='archive', versionId='latest', partNumber=1)
+                    archiveDirPath = pI.getDirPath(dataSetId=dataDict['structure_id'], wfInstanceId=None, contentType='model',
+                                                   formatType='pdbx', fileSource='archive', versionId='latest', partNumber=1)
                     pickle_file = os.path.join(archiveDirPath, 'marked_pubmed_id.pic')
                     if os.access(pickle_file, os.F_OK):
                         foundList.append(dataDict)
                     #
-                except:
+                except:  # noqa: E722 pylint: disable=bare-except
                     traceback.print_exc(file=self.__lfh)
                 #
             #
@@ -660,8 +665,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         requestParser = EntryFormParser(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         content = requestParser.getErrorContent()
@@ -690,8 +695,8 @@ class ReleaseWebAppWorker(object):
         pubmed_id = str(self.__reqObj.getValue('pubmed_id'))
         #
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
-        archiveDirPath = pI.getDirPath(dataSetId=identifier, wfInstanceId=None, contentType='model', formatType='pdbx', \
-                              fileSource='archive', versionId='latest', partNumber=1)
+        archiveDirPath = pI.getDirPath(dataSetId=identifier, wfInstanceId=None, contentType='model', formatType='pdbx',
+                                       fileSource='archive', versionId='latest', partNumber=1)
         pickle_file = os.path.join(archiveDirPath, 'marked_pubmed_id.pic')
         #
         pubmed_id_list = []
@@ -708,8 +713,8 @@ class ReleaseWebAppWorker(object):
         pickle.dump(pubmed_id_list, fb)
         fb.close()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         rC.setText(text='Mark ' + identifier + ' as unwanted.')
         #
         return rC
@@ -722,8 +727,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         combList = self.__reqObj.getValueList('combine_id')
         if not combList:
@@ -745,11 +750,11 @@ class ReleaseWebAppWorker(object):
         #
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         content = ''
-        for structure_id,pubmed_id_list in map.items():
+        for structure_id, pubmed_id_list in map.items():
             content += '\n' + structure_id + ': Removed ' + ','.join(pubmed_id_list)
             #
-            archiveDirPath = pI.getDirPath(dataSetId=structure_id, wfInstanceId=None, contentType='model', formatType='pdbx', \
-                                  fileSource='archive', versionId='latest', partNumber=1)
+            archiveDirPath = pI.getDirPath(dataSetId=structure_id, wfInstanceId=None, contentType='model', formatType='pdbx',
+                                           fileSource='archive', versionId='latest', partNumber=1)
             pickle_file = os.path.join(archiveDirPath, 'marked_pubmed_id.pic')
             #
             existing_pubmed_id_list = []
@@ -760,7 +765,7 @@ class ReleaseWebAppWorker(object):
             #
             updated_pubmed_id_list = []
             for id in existing_pubmed_id_list:
-                if not id in pubmed_id_list:
+                if id not in pubmed_id_list:
                     updated_pubmed_id_list.append(id)
                 #
             #
@@ -784,14 +789,14 @@ class ReleaseWebAppWorker(object):
         self.__getSession()
         ungzip_flag = str(self.__reqObj.getValue('ungzip'))
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         filelist = FindFiles(self.__sessionPath)
         if not filelist:
             rC.setText(text='<h3 style="text-align:center">No entry updated</h3>')
         else:
-            #for f in ('all_files.tar.gz', 'all_files.tar'):
+            # for f in ('all_files.tar.gz', 'all_files.tar'):
             #    filename = os.path.join(self.__sessionPath, f)
             #    if os.access(filename, os.F_OK):
             #        os.remove(filename)
@@ -804,7 +809,7 @@ class ReleaseWebAppWorker(object):
                     fname = 'all_files.tar'
                 else:
                     fname = 'all_files.tar.gz'
-                #for f in filelist:
+                # for f in filelist:
                 #    if f.endswith('.gz'):
                 #        fname = 'all_files.tar'
                 #        break
@@ -840,8 +845,8 @@ class ReleaseWebAppWorker(object):
         #
         self.__getSession()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         filelist = FindLogFiles(self.__sessionPath)
         if not filelist:
@@ -866,7 +871,7 @@ class ReleaseWebAppWorker(object):
         if (self.__verbose):
             self.__lfh.write("+ReleaseWebApp._viewEntryHistoryOp() Starting now\n")
         #
-        self.__reqObj.setReturnFormat(return_format="html")        
+        self.__reqObj.setReturnFormat(return_format="html")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         myD = {}
         myD['identifier'] = str(self.__reqObj.getValue('identifier'))
@@ -881,8 +886,8 @@ class ReleaseWebAppWorker(object):
             self.__lfh.write("+ReleaseWebApp._viewEntryHistoryDetailOp() Starting now\n")
         #
         dp = DepictEntryHistory(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
-        self.__reqObj.setReturnFormat(return_format="json")        
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         rC.setText(text=dp.getText())
         #
         return rC
@@ -896,7 +901,7 @@ class ReleaseWebAppWorker(object):
         dp = DepictAnnotatorHistory(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         returnText = dp.DoRender()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
+        self.__reqObj.setReturnFormat(return_format="json")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         if returnText:
             rC.setText(text=returnText)
@@ -914,7 +919,7 @@ class ReleaseWebAppWorker(object):
         dp = DepictReleaseInfo(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         returnText = dp.DoRender()
         #
-        self.__reqObj.setReturnFormat(return_format="json")        
+        self.__reqObj.setReturnFormat(return_format="json")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         if returnText:
             rC.setText(text=returnText)
@@ -966,8 +971,8 @@ class ReleaseWebAppWorker(object):
         """
         tPath = self.__reqObj.getValue("TemplatePath")
         fPath = os.path.join(tPath, fn)
-        ifh=open(fPath,'r')
-        sIn=ifh.read()
+        ifh = open(fPath, 'r')
+        sIn = ifh.read()
         ifh.close()
         #
         tmp_list = sIn.split('\n')
@@ -982,7 +987,7 @@ class ReleaseWebAppWorker(object):
 
     def __returnNotFound(self, annotator):
         myD = {}
-        myD['annotator']  = annotator
+        myD['annotator'] = annotator
         myD['task'] = str(self.__reqObj.getValue('task'))
         return self.__processTemplate('not_found_tmplt.html', myD)
 
@@ -990,20 +995,20 @@ class ReleaseWebAppWorker(object):
         """ Join existing session or create new session as required.
         """
         #
-        self.__sObj=self.__reqObj.newSessionObj()
-        self.__sessionId=self.__sObj.getId()
-        self.__sessionPath=self.__sObj.getPath()
-        self.__rltvSessionPath=self.__sObj.getRelativePath()
+        self.__sObj = self.__reqObj.newSessionObj()
+        self.__sessionId = self.__sObj.getId()
+        self.__sessionPath = self.__sObj.getPath()
+        self.__rltvSessionPath = self.__sObj.getRelativePath()
         if (self.__verbose):
-            self.__lfh.write("------------------------------------------------------\n")                    
+            self.__lfh.write("------------------------------------------------------\n")
             self.__lfh.write("+ReleaseWebAppWorker.__getSession() - creating/joining session %s\n" % self.__sessionId)
-            self.__lfh.write("+ReleaseWebAppWorker.__getSession() - session path %s\n" % self.__sessionPath)            
+            self.__lfh.write("+ReleaseWebAppWorker.__getSession() - session path %s\n" % self.__sessionPath)
 
     def __getReleasedEntryList(self, dbUtil):
         """ Get released entry Id list
         """
         id_list = []
-        anno_list = [ self.__owner ]
+        anno_list = [self.__owner]
         if self.__owner == 'ALL':
             anno_list = self.__getAnnotatorList(dbUtil, '')
         #
@@ -1015,18 +1020,18 @@ class ReleaseWebAppWorker(object):
             fb = open(anno_indexfile, 'rb')
             annoPickle = pickle.load(fb)
             fb.close()
-            if (not 'entryDir' in annoPickle) or (not annoPickle['entryDir']):
+            if ('entryDir' not in annoPickle) or (not annoPickle['entryDir']):
                 continue
             #
-            for entry_id,idMap in annoPickle['entryDir'].items():
+            for entry_id, idMap in annoPickle['entryDir'].items():
                 found = False
-                for id_type in ( 'pdb_id', 'emdb_id' ):
-                    if (not id_type in idMap) or (not idMap[id_type]):
+                for id_type in ('pdb_id', 'emdb_id'):
+                    if (id_type not in idMap) or (not idMap[id_type]):
                         continue
                     #
                     upper_id = idMap[id_type].upper()
                     lower_id = idMap[id_type].lower()
-                    for release_dir in ( 'added', 'modified', 'obsolete', 'reloaded', 'emd' ):
+                    for release_dir in ('added', 'modified', 'obsolete', 'reloaded', 'emd'):
                         if os.access(os.path.join(self.__cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release', release_dir, upper_id), os.F_OK) or \
                            os.access(os.path.join(self.__cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release', release_dir, lower_id), os.F_OK):
                             found = True
@@ -1048,7 +1053,7 @@ class ReleaseWebAppWorker(object):
         return id_list
 
     def __loadAnnotatorPickle(self):
-        """ Load annotator.index pickle file 
+        """ Load annotator.index pickle file
         """
         anno_indexfile = os.path.join(self.__cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release', 'index', self.__owner + '.index')
         if os.access(anno_indexfile, os.F_OK):
@@ -1059,27 +1064,28 @@ class ReleaseWebAppWorker(object):
         #
         return {}
 
-    def __processTemplate(self,fn,parameterDict={}):
+    def __processTemplate(self, fn, parameterDict={}):
         """ Read the input HTML template data file and perform the key/value substitutions in the
             input parameter dictionary.
-            
+
             :Params:
                 ``parameterDict``: dictionary where
                 key = name of subsitution placeholder in the template and
                 value = data to be used to substitute information for the placeholder
-                
+
             :Returns:
                 string representing entirety of content with subsitution placeholders now replaced with data
         """
-        tPath =self.__reqObj.getValue("TemplatePath")
-        fPath=os.path.join(tPath,fn)
-        ifh=open(fPath,'r')
-        sIn=ifh.read()
+        tPath = self.__reqObj.getValue("TemplatePath")
+        fPath = os.path.join(tPath, fn)
+        ifh = open(fPath, 'r')
+        sIn = ifh.read()
         ifh.close()
-        return (  sIn % parameterDict )
+        return (sIn % parameterDict)
+
 
 if __name__ == '__main__':
-    sTool=ReleaseWebApp()
-    d=sTool.doOp()
-    for k,v in d.items():
-        sys.stdout.write("Key - %s  value - %r\n" % (k,v))
+    sTool = ReleaseWebApp()
+    d = sTool.doOp()
+    for k, v in d.items():
+        sys.stdout.write("Key - %s  value - %r\n" % (k, v))

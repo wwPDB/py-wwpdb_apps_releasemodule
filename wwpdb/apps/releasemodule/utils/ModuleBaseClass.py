@@ -16,34 +16,36 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle as pickle
 
-import os, sys
+import os
+import sys
 
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
 
+
 class ModuleBaseClass(object):
     """ Base Class responsible for all release module activities
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        self._verbose=verbose
-        self._lfh=log
-        self._reqObj=reqObj
-        self._sObj=None
-        self._sessionId=None
-        self._sessionPath=None
-        self._siteId  = str(self._reqObj.getValue("WWPDB_SITE_ID"))
-        self._cI=ConfigInfo(self._siteId)
+        self._verbose = verbose
+        self._lfh = log
+        self._reqObj = reqObj
+        self._sObj = None
+        self._sessionId = None
+        self._sessionPath = None
+        self._siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
+        self._cI = ConfigInfo(self._siteId)
         self._cICommon = ConfigInfoAppCommon(self._siteId)
         self._topReleaseDir = os.path.join(self._cICommon.get_for_release_path())
         self._topReleaseBetaDir = os.path.join(self._cICommon.get_for_release_beta_path())
@@ -137,22 +139,22 @@ class ModuleBaseClass(object):
         pickleFile = self.__getAnnotatorPickleFileName(self._getLoginAnnotator())
         self._dumpPickle(pickleFile, pickleData)
 
-    def _processTemplate(self,fn,parameterDict={}):
+    def _processTemplate(self, fn, parameterDict={}):
         """ Read the input HTML template data file and perform the key/value substitutions in the
             input parameter dictionary.
-            
+
             :Params:
                 ``parameterDict``: dictionary where
                 key = name of subsitution placeholder in the template and
                 value = data to be used to substitute information for the placeholder
-                
+
             :Returns:
                 string representing entirety of content with subsitution placeholders now replaced with data
         """
-        tPath =self._reqObj.getValue("TemplatePath")
-        fPath=os.path.join(tPath,fn)
-        ifh=open(fPath,'r')
-        sIn=ifh.read()
+        tPath = self._reqObj.getValue("TemplatePath")
+        fPath = os.path.join(tPath, fn)
+        ifh = open(fPath, 'r')
+        sIn = ifh.read()
         ifh.close()
         return (  sIn % parameterDict )
 
@@ -175,19 +177,19 @@ class ModuleBaseClass(object):
                 selectedOptionText += self.__selectOptionMap[option_value + typeList[1]]
             #
         #
-        return selectedOptionText,selectedOptionMap
+        return selectedOptionText, selectedOptionMap
 
     def __getSession(self):
         """ Join existing session or create new session as required.
         """
         #
-        self._sObj=self._reqObj.newSessionObj()
-        self._sessionId=self._sObj.getId()
-        self._sessionPath=self._sObj.getPath()
+        self._sObj = self._reqObj.newSessionObj()
+        self._sessionId = self._sObj.getId()
+        self._sessionPath = self._sObj.getPath()
         if (self._verbose):
-            self._lfh.write("------------------------------------------------------\n")                    
+            self._lfh.write("------------------------------------------------------\n")
             self._lfh.write("+ModuleBaseClass._getSession() - creating/joining session %s\n" % self._sessionId)
-            self._lfh.write("+ModuleBaseClass._getSession() - session path %s\n" % self._sessionPath)            
+            self._lfh.write("+ModuleBaseClass._getSession() - session path %s\n" % self._sessionPath)
         #
 
     def __getselectOptionMap(self):

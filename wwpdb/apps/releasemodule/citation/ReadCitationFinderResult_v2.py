@@ -93,7 +93,7 @@ class ReadCitationFinderResult(object):
             annList.append('NULL')
             annList.append('UNASSIGN')
             for ann in annList:
-                if not ann in self.__annotEntryMap:
+                if ann not in self.__annotEntryMap:
                     continue
                 #
                 for dataDict in self.__annotEntryMap[ann]:
@@ -110,11 +110,11 @@ class ReadCitationFinderResult(object):
         uniqueMap = {}
         idlist = []
         for dataDict in self.__foundEntryList:
-            if (not 'pubmed' in dataDict) or (not dataDict['pubmed']):
+            if ('pubmed' not in dataDict) or (not dataDict['pubmed']):
                 continue
             #
             for pdir in dataDict['pubmed']:
-                if (not 'pdbx_database_id_PubMed' in pdir) or (not pdir['pdbx_database_id_PubMed']) or (
+                if ('pdbx_database_id_PubMed' not in pdir) or (not pdir['pdbx_database_id_PubMed']) or (
                         pdir['pdbx_database_id_PubMed'] in uniqueMap):
                     continue
                 #
@@ -150,13 +150,13 @@ class ReadCitationFinderResult(object):
         rlist = []
         dmap = {}
         for oldDir in self.__foundEntryList:
-            if (not 'pubmed' in oldDir) or (not oldDir['pubmed']):
+            if ('pubmed' not in oldDir) or (not oldDir['pubmed']):
                 continue
             #
             # Get current entry information from database
             #
             if (not EntryInfoMap) or (not oldDir['structure_id'] in EntryInfoMap) or (
-            not EntryInfoMap[oldDir['structure_id']]):
+                    not EntryInfoMap[oldDir['structure_id']]):
                 continue
             #
             currDir = EntryInfoMap[oldDir['structure_id']]
@@ -183,8 +183,9 @@ class ReadCitationFinderResult(object):
             #
             # Get current citation information from database
             #
-            if EntryCitationInfoMap and (oldDir['structure_id'] in EntryCitationInfoMap) and EntryCitationInfoMap[
-                oldDir['structure_id']]:
+            if EntryCitationInfoMap \
+               and (oldDir['structure_id'] in EntryCitationInfoMap) \
+               and EntryCitationInfoMap[oldDir['structure_id']]:
                 currDir = self.__getCitationInfo(currDir, EntryCitationInfoMap[oldDir['structure_id']])
             #
             # Get marked unwanted pubmed ID list
@@ -204,7 +205,7 @@ class ReadCitationFinderResult(object):
                 #
                 if self.__pubmedInfoMap and (pubmed_id in self.__pubmedInfoMap):
                     for item in self.__items:
-                        if not item in self.__pubmedInfoMap[pubmed_id]:
+                        if item not in self.__pubmedInfoMap[pubmed_id]:
                             continue
                         #
                         pdir[item] = self.__pubmedInfoMap[pubmed_id][item]
@@ -274,7 +275,7 @@ class ReadCitationFinderResult(object):
         """
         """
         for item in self.__items:
-            if (not item in cinfo) or (not cinfo[item]):
+            if (item not in cinfo) or (not cinfo[item]):
                 continue
             #
             if item == 'title':
@@ -302,7 +303,7 @@ class ReadCitationFinderResult(object):
 
     def __compareCitationInfo(self, cinfo, pdir, release_flag):
         code = ' '
-        if (not 'pdbx_database_id_PubMed' in cinfo) or (not 'pdbx_database_id_PubMed' in pdir):
+        if ('pdbx_database_id_PubMed' not in cinfo) or ('pdbx_database_id_PubMed' not in pdir):
             if ('pdbx_database_id_PubMed' in pdir) and pdir['pdbx_database_id_PubMed'] and \
                     ('pdbx_database_id_DOI' in pdir) and pdir['pdbx_database_id_DOI'] and \
                     ('pdbx_database_id_DOI' in cinfo) and cinfo['pdbx_database_id_DOI'] and \
@@ -320,12 +321,12 @@ class ReadCitationFinderResult(object):
             #
             # Not allowed missing value in citation
             #
-            if ((not item in cinfo) or (not cinfo[item])) and (item in pdir):
+            if ((item not in cinfo) or (not cinfo[item])) and (item in pdir):
                 return code
             #
             # Allowed missing value in pubmed
             #
-            if (not item in pdir) or (not pdir[item]):
+            if (item not in pdir) or (not pdir[item]):
                 continue
             #
             if (item in cinfo) and cinfo[item] and str(cinfo[item]) != str(pdir[item]):

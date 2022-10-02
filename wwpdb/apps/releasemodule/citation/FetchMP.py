@@ -54,7 +54,7 @@ class FetchWorker(multiprocessing.Process):
         return fetch.getPubmedInfoList()
 
     def run(self):
-        processName = self.name
+        # processName = self.name
         while True:
             nextList = self.__taskQueue.get()
             # end of queue condition
@@ -113,7 +113,7 @@ class FetchMP(object):
         #
         workers = [FetchWorker(path=self.__sessionPath, processLabel=str(i + 1), taskQueue=taskQueue,
                                resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose,
-                               siteId=self.__siteId, mpl=mpl) \
+                               siteId=self.__siteId, mpl=mpl)
                    for i in range(numProc)]
         #
         for w in workers:
@@ -136,7 +136,7 @@ class FetchMP(object):
                 w.terminate()
                 w.join(1)
             #
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             if self.__verbose:
                 traceback.print_exc(file=self.__lfh)
             #

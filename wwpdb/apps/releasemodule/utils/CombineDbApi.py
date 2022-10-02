@@ -16,17 +16,20 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys,traceback
+import os
+import sys
+# import traceback
 #
-from wwpdb.apps.releasemodule.utils.ContentDbApi   import ContentDbApi
+from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
-from wwpdb.apps.releasemodule.utils.Utility        import getCleanValue,getCombIDs,getCombStatus
-from wwpdb.io.locator.PathInfo                     import PathInfo
+from wwpdb.apps.releasemodule.utils.Utility import getCleanValue, getCombIDs, getCombStatus
+from wwpdb.io.locator.PathInfo import PathInfo
+
 
 class CombineDbApi(object):
     """
@@ -35,13 +38,13 @@ class CombineDbApi(object):
         """
            connect to local database
         """
-        self.__lfh       = log
-        self.__verbose   = verbose
-        self.__siteId    = siteId
+        self.__lfh = log
+        self.__verbose = verbose
+        self.__siteId = siteId
         self.__sessionPath = path
         self.__ContentDB = None
-        self.__StatusDB  = None
-   
+        self.__StatusDB = None
+
     def __connectContentDB(self):
         """
         """
@@ -49,7 +52,7 @@ class CombineDbApi(object):
             return
         #
         self.__ContentDB = ContentDbApi(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
-   
+
     def __connectStatusDB(self):
         """
         """
@@ -81,15 +84,15 @@ class CombineDbApi(object):
                     return getattr(self.__ContentDB, '%s' % funcName)()
                 #
             #
-        except:
-            #traceback.print_exc(file=self.__lfh)
+        except:  # noqa: E722 pylint: disable=bare-except
+            # traceback.print_exc(file=self.__lfh)
             return None
         #
-    
+
     def getRequestReleaseEntryInfo(self, annotator):
         self.__connectAllDB()
         return self.getEntryInfo(self.__ContentDB.getRequestReleaseEntryList(annotator))
-    
+
     def getExpiredEntryInfo(self, annotator):
         self.__connectAllDB()
         entryList = []
@@ -136,7 +139,7 @@ class CombineDbApi(object):
                             row['name'] = s2 + s1
                         else:
                             row['name'] = s2 + "." + s1
-                        # 
+                        #
                     #
                 #
                 a_list.append(row)
@@ -146,7 +149,7 @@ class CombineDbApi(object):
 
     def getEntryInfoFromInputIDs(self, entry_ids):
         if not entry_ids:
-            return '',[]
+            return '', []
         #
         self.__connectAllDB()
         #
@@ -183,7 +186,7 @@ class CombineDbApi(object):
                 if id_type in id_type_map:
                     id_type_map[id_type].append(id.upper())
                 else:
-                    id_type_map[id_type] = [ id.upper() ]
+                    id_type_map[id_type] = [id.upper()]
                 #
             #
         #
@@ -191,11 +194,11 @@ class CombineDbApi(object):
             if not message:
                 message += 'No input IDs\n'
             #
-            return message,[]
+            return message, []
         #
         if group_ids:
             group_ids = sorted(set(group_ids))
-            group_err_message,dep_id_list = self.__getDepIDFromGroupID(group_ids)
+            group_err_message, dep_id_list = self.__getDepIDFromGroupID(group_ids)
             if group_err_message:
                 message += group_err_message
             #
@@ -208,15 +211,15 @@ class CombineDbApi(object):
             #
         #
         if (not id_type_map):
-            return message,[]
+            return message, []
         #
-        ret_id_list,ret_map = self.__processDepInfo(self.__StatusDB.getEntryListFromIdTypeMap(id_type_map))
+        ret_id_list, ret_map = self.__processDepInfo(self.__StatusDB.getEntryListFromIdTypeMap(id_type_map))
         #
         all_id_map = {}
         if ret_map:
-            for k,myD in ret_map.items():
-                for id_type in ( 'dep_set_id', 'pdb_id', 'bmrb_id', 'emdb_id' ):
-                    if (id_type in myD) and myD[id_type]: 
+            for k, myD in ret_map.items():
+                for id_type in ('dep_set_id', 'pdb_id', 'bmrb_id', 'emdb_id'):
+                    if (id_type in myD) and myD[id_type]:
                         all_id_map[myD[id_type].upper()] = 'yes'
                     #
                 #
@@ -227,9 +230,9 @@ class CombineDbApi(object):
             message += not_valid_id_message
         #
         if (not ret_id_list):
-            return message,[]
+            return message, []
         #
-        return message,self.__getEntryInfo(ret_id_list,ret_map)
+        return message, self.__getEntryInfo(ret_id_list, ret_map)
 
     def getEntryInfo(self, id_list):
         if not id_list:
@@ -238,7 +241,7 @@ class CombineDbApi(object):
         self.__connectAllDB()
         #
         uniq_list = sorted(set(id_list))
-        ret_id_list,ret_map = self.__processDepInfo(self.__StatusDB.getEntryListFromDepIdList(uniq_list))
+        ret_id_list, ret_map = self.__processDepInfo(self.__StatusDB.getEntryListFromDepIdList(uniq_list))
         return self.__getEntryInfo(uniq_list, ret_map)
 
     def getEntryInfoMap(self, id_list):
@@ -286,11 +289,11 @@ class CombineDbApi(object):
                 #
             #
         #
-        return self.__getNotValidIDMessage(group_ids, group_id_map),return_id_list
+        return self.__getNotValidIDMessage(group_ids, group_id_map), return_id_list
 
     def __processDepInfo(self, dep_info_list):
         if not dep_info_list:
-            return [],{}
+            return [], {}
         #
         return_id_list = []
         return_map = {}
@@ -304,7 +307,7 @@ class CombineDbApi(object):
             return_id_list.append(myD['dep_set_id'])
             return_map[myD['dep_set_id']] = myD
         #
-        return return_id_list,return_map
+        return return_id_list, return_map
 
     def __getNotValidIDMessage(self, id_list, id_map):
         message = ''
@@ -323,7 +326,7 @@ class CombineDbApi(object):
         selectedEntryList = self.__ContentDB.getEntryInfo(id_string)
         em_info_map = self.__getEMInfo(id_string)
         #
-        pdbIdMap = self.__getPdbIdMap(selectedEntryList) 
+        pdbIdMap = self.__getPdbIdMap(selectedEntryList)
         obsprMap = self.__getObsSprMap(id_string, pdbIdMap)
         #
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
@@ -335,14 +338,15 @@ class CombineDbApi(object):
             #
             pdb_id = getCleanValue(myD, 'pdb_id')
             if not pdb_id:
-                for item in ( 'pdb_id', 'status_code' ):
+                for item in ('pdb_id', 'status_code'):
                     if item in myD:
                         del myD[item]
                     #
                 #
-            elif ('exp_method' in myD) and ((myD['exp_method'].upper().find("ELECTRON CRYSTALLOGRAPHY") != -1) or \
-                 (myD['exp_method'].upper().find("ELECTRON MICROSCOPY") != -1) or (myD['exp_method'].upper().find("ELECTRON TOMOGRAPHY") != -1)):
-                emVolumeFile = pI.getFilePath(dataSetId=myD['structure_id'], wfInstanceId=None, contentType='em-volume', formatType='map', \
+            elif ('exp_method' in myD) and ((myD['exp_method'].upper().find("ELECTRON CRYSTALLOGRAPHY") != -1)
+                                            or (myD['exp_method'].upper().find("ELECTRON MICROSCOPY") != -1)
+                                            or (myD['exp_method'].upper().find("ELECTRON TOMOGRAPHY") != -1)):
+                emVolumeFile = pI.getFilePath(dataSetId=myD['structure_id'], wfInstanceId=None, contentType='em-volume', formatType='map',
                                               fileSource='archive', versionId='latest', partNumber=1)
                 if (not emVolumeFile) or (not os.access(emVolumeFile, os.F_OK)):
                     assoicatedEmdIdList = self.__ContentDB.getNotReleasedAssoicatedEmdId(myD['structure_id'])
@@ -358,11 +362,11 @@ class CombineDbApi(object):
                 #
             #
             if (myD['structure_id'] in dep_info_map) and dep_info_map[myD['structure_id']]:
-                merging_items = ( 'emdb_id', 'bmrb_id', 'author_release_status_code', 'status_code_em', 'author_release_status_code_em', \
-                                  'locking', 'notify', 'title', 'title_emdb', 'author_list', 'author_list_emdb' )
+                merging_items = ('emdb_id', 'bmrb_id', 'author_release_status_code', 'status_code_em', 'author_release_status_code_em',
+                                 'locking', 'notify', 'title', 'title_emdb', 'author_list', 'author_list_emdb')
                 if pdb_id:
-                    merging_items = ( 'emdb_id', 'bmrb_id', 'status_code', 'author_release_status_code', 'status_code_em', 'locking', \
-                                      'notify', 'author_release_status_code_em', 'title', 'title_emdb', 'author_list', 'author_list_emdb' )
+                    merging_items = ('emdb_id', 'bmrb_id', 'status_code', 'author_release_status_code', 'status_code_em', 'locking',
+                                     'notify', 'author_release_status_code_em', 'title', 'title_emdb', 'author_list', 'author_list_emdb')
                 #
                 for item in merging_items:
                     data = getCleanValue(dep_info_map[myD['structure_id']], item)
@@ -380,13 +384,13 @@ class CombineDbApi(object):
                 if ('emdb_id' in myD) and myD['emdb_id'] and (myD['structure_id'] in em_info_map) and em_info_map[myD['structure_id']] and \
                    ('emdb_release' in em_info_map[myD['structure_id']]) and em_info_map[myD['structure_id']]['emdb_release']:
                     myD['recvd_em_map'] = 'Y'
-                    for item in ( 'emdb_release', 'status_code_em', 'date_of_EM_release' ):
+                    for item in ('emdb_release', 'status_code_em', 'date_of_EM_release'):
                         if (item in em_info_map[myD['structure_id']]) and em_info_map[myD['structure_id']][item]:
                             myD[item] = em_info_map[myD['structure_id']][item]
                         #
                     #
                     if ('pdb_id' not in myD) or (not myD['pdb_id']):
-                        for item in ( 'title_emdb', 'author_list_emdb' ):
+                        for item in ('title_emdb', 'author_list_emdb'):
                             if (item in em_info_map[myD['structure_id']]) and em_info_map[myD['structure_id']][item]:
                                 myD[item] = em_info_map[myD['structure_id']][item]
                             #
@@ -394,7 +398,7 @@ class CombineDbApi(object):
                     #
                 #
             #
-            for item in ( 'author_list', 'author_list_emdb' ):
+            for item in ('author_list', 'author_list_emdb'):
                 if item in myD:
                     myD[item] = self.__processAuthorList(myD[item])
                 #
@@ -403,7 +407,7 @@ class CombineDbApi(object):
                 myD['obspr'] = obsprMap[myD['structure_id']]
             #
             myD['comb_ids'] = getCombIDs(myD)
-            myD['comb_status_code'],myD['author_release_status_code'],titleEM,authorListEM = getCombStatus(myD)
+            myD['comb_status_code'], myD['author_release_status_code'], titleEM, authorListEM = getCombStatus(myD)
             if titleEM:
                 myD['title'] = titleEM
             #
@@ -434,7 +438,7 @@ class CombineDbApi(object):
                 if myD['structure_id'] in em_info_map:
                     em_info_map[myD['structure_id']]['emdb_release'] = True
                 else:
-                    em_info_map[myD['structure_id']] = { 'structure_id': myD['structure_id'], 'emdb_release': True }
+                    em_info_map[myD['structure_id']] = {'structure_id': myD['structure_id'], 'emdb_release': True}
                 #
             #
         #
@@ -460,7 +464,7 @@ class CombineDbApi(object):
         elif (not pdbxObsSprMap) and depuiObsSprMap:
             return depuiObsSprMap
         #
-        for entry_key,obsSprList in depuiObsSprMap.items():
+        for entry_key, obsSprList in depuiObsSprMap.items():
             if entry_key in pdbxObsSprMap:
                 found = False
                 for obsSprDict in pdbxObsSprMap[entry_key]:
@@ -481,7 +485,7 @@ class CombineDbApi(object):
                     #
                     """
                     if (obsSprDict['pdb_id'] == obsSprList[0]['pdb_id']) and (obsSprDict['id'] == obsSprList[0]['id']):
-                        pdbxReplaceIdList = self.__getReplaceIdList(obsSprDict)
+                        # pdbxReplaceIdList = self.__getReplaceIdList(obsSprDict)
                         depuiReplaceIdList = self.__getReplaceIdList(obsSprList[0])
                         if depuiReplaceIdList:
                             foundList = []
@@ -510,10 +514,10 @@ class CombineDbApi(object):
         #
         retMap = {}
         for obsD in obsprList:
-#           if ('pdb_id' not in obsD) or (not obsD['pdb_id']) or ('structure_id' not in obsD) or (not obsD['structure_id']) or \
-#              ('replace_pdb_id' not in obsD) or (not obsD['replace_pdb_id']):
-#               continue
-#           #
+            # if ('pdb_id' not in obsD) or (not obsD['pdb_id']) or ('structure_id' not in obsD) or (not obsD['structure_id']) or \
+            #  ('replace_pdb_id' not in obsD) or (not obsD['replace_pdb_id']):
+            #   continue
+            #
             if ('structure_id' not in obsD) or (not obsD['structure_id']) or (obsD['structure_id'] not in pdbIdMap):
                 continue
             #
@@ -545,7 +549,7 @@ class CombineDbApi(object):
             if replace_pdb_id:
                 myD['replace_pdb_id'] = replace_pdb_id
             #
-            for item in ( 'id', 'date', 'details' ):
+            for item in ('id', 'date', 'details'):
                 if (item not in obsD) or (not obsD[item]):
                     continue
                 #
@@ -558,7 +562,7 @@ class CombineDbApi(object):
             if obsD['structure_id'] in retMap:
                 retMap[obsD['structure_id']].append(myD)
             else:
-                retMap[obsD['structure_id']] = [ myD ]
+                retMap[obsD['structure_id']] = [myD]
             #
         #
         return retMap
@@ -583,7 +587,7 @@ class CombineDbApi(object):
             myD['id'] = 'SPRSDE'
             myD['pdb_id'] = pdb_id
             myD['replace_pdb_id'] = replace_pdb_id
-            retMap[obsD['structure_id']] = [ myD ]
+            retMap[obsD['structure_id']] = [myD]
         #
         return retMap
 
@@ -608,7 +612,8 @@ class CombineDbApi(object):
         #
         return org_authors
 
+
 if __name__ == '__main__':
     siteId = os.getenv('WWPDB_SITE_ID')
-    c=CombineDbApi(siteId=siteId, verbose=True, log=sys.stderr)
+    c = CombineDbApi(siteId=siteId, verbose=True, log=sys.stderr)
     print((c.getFunctionCall(True, 'getAnnoList', [])))

@@ -16,10 +16,10 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
 import os
 import sys
@@ -38,7 +38,7 @@ class EmReleaseUtil(EntryUpdateBase):
     """
     def __init__(self, reqObj=None, entryDir=None, verbose=False, log=sys.stderr):
         super(EmReleaseUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
-        #
+        # fmt: off
         self.__additionalTypeList = [ [ 'em-mask-volume',       '_msk',        'masks',            False, True,  True  ],
                                       [ 'em-additional-volume', '_additional', 'other',            True,  True,  True  ],
                                       [ 'em-half-volume',       '_half_map',   'other',            True,  True,  True  ],
@@ -46,7 +46,7 @@ class EmReleaseUtil(EntryUpdateBase):
                                       [ 'img-emdb',             '',            'images',           False, False, True  ],
                                       [ 'layer-lines',          '_ll',         'layerLines',       True,  False, False ],
                                       [ 'structure-factors',    '_sf',         'structureFactors', True,  False, False ] ]
-        #
+        # fmt: on
         self.__embdId = self._entryDir['emdb_id'].replace('-', '_').lower()
         self.__contentD = {}
         self.__formatD = {}
@@ -75,7 +75,7 @@ class EmReleaseUtil(EntryUpdateBase):
                             continue
                         #
                         for formatType in emVolumeContentInfo[0]:
-                            if self.__formatD[formatType] == part_type_split[1]: # file type match
+                            if self.__formatD[formatType] == part_type_split[1]:  # file type match
                                 tmpFile = self._findArchiveFileName("em-volume", formatType, "latest", part_type_split[0])
                                 if os.access(tmpFile, os.F_OK):
                                     mapFile = tmpFile
@@ -93,7 +93,7 @@ class EmReleaseUtil(EntryUpdateBase):
                 mapFile = self._findArchiveFileName('em-volume', 'map', 'latest', '1')
                 fileType = "map"
             #
-            if mapFile and os.access(mapFile, os.F_OK):   
+            if mapFile and os.access(mapFile, os.F_OK):
                 self._insertReleseFile('em-volume', mapFile, self.__embdId + '.' + fileType, 'map', True)
             #
             self.__getAdditionalFilePartNumber()
@@ -130,14 +130,14 @@ class EmReleaseUtil(EntryUpdateBase):
                         continue
                     #
                     for formatType in ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]][0]:
-                        if self.__formatD[formatType] == part_type_split[1]: # file type match
+                        if self.__formatD[formatType] == part_type_split[1]:  # file type match
                             contentFormatType = typeList[0] + '_' + formatType
                             if contentFormatType in self.__partD:
                                 if part_type_split[0] not in self.__partD[contentFormatType]:
                                     self.__partD[contentFormatType].append(part_type_split[0])
                                 #
                             else:
-                                self.__partD[contentFormatType] = [ part_type_split[0] ]
+                                self.__partD[contentFormatType] = [part_type_split[0]]
                             #
                             found = True
                             break
@@ -150,7 +150,7 @@ class EmReleaseUtil(EntryUpdateBase):
             #
             self.__contentD[typeList[0]] = ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]]
         #
-        for k,v in self.__contentD.items():
+        for k, v in self.__contentD.items():
             if k in em_map_selected_list:
                 continue
             #
@@ -165,10 +165,10 @@ class EmReleaseUtil(EntryUpdateBase):
         if not os.access(modelfile, os.F_OK):
             return
             # per DAOTHER-2459's request, removed automtically generating xml header file. It is controlled by 'GenEmXmlHeaderFlag' now.
-#           modelfile = self._findArchiveFileName(self._fileTypeList[0][3], self._fileTypeList[0][4], 'latest', '1')
-#           if not os.access(modelfile, os.F_OK):
-#               return
-#           #
+            # modelfile = self._findArchiveFileName(self._fileTypeList[0][3], self._fileTypeList[0][4], 'latest', '1')
+            # if not os.access(modelfile, os.F_OK):
+            #    return
+            #
         #
         emdfile = os.path.join(self._sessionPath, self.__embdId + '.cif')
         self._removeFile(emdfile)
@@ -179,16 +179,16 @@ class EmReleaseUtil(EntryUpdateBase):
         ok = im.translate(modelfile, emdfile, mode="src-dst")
         if ok:
             xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v3.xml')
-            #xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v2.xml')
+            # xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v2.xml')
             self._removeFile(xmlfile)
             #
-            status,error = self.__cif2xmlTranslate(emdfile, xmlfile, validateFlag)
+            status, error = self.__cif2xmlTranslate(emdfile, xmlfile, validateFlag)
             if validateFlag:
                 self._removeFile(xmlfile)
             #
             if status == 'failed':
                 self._insertEntryMessage(errType='em', errMessage='emd -> xml translation failed:\n' + error)
-                #self._insertEntryMessage(errType='em', errMessage='emd -> xml translation failed:\n' + error, messageType='warning')
+                # self._insertEntryMessage(errType='em', errMessage='emd -> xml translation failed:\n' + error, messageType='warning')
             elif error.find('ERROR') != -1:
                 self._insertEntryMessage(errType='em', errMessage=error)
             elif error.find('WARNING') != -1:
@@ -196,14 +196,14 @@ class EmReleaseUtil(EntryUpdateBase):
                 self._insertEntryMessage(errType='em', errMessage=error, messageType='warning')
             else:
                 self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v3.xml', 'header', False)
-                #self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v2.xml', 'header', False)
-                #if (error.find('- WARNING -') != -1) or (error.find('- ERROR -') != -1):
-                #    self._insertEntryMessage(errType='em', errMessage=error, messageType='warning')
+                # self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v2.xml', 'header', False)
+                # if (error.find('- WARNING -') != -1) or (error.find('- ERROR -') != -1):
+                #     self._insertEntryMessage(errType='em', errMessage=error, messageType='warning')
                 #
             #
         else:
             self._insertEntryMessage(errType='em', errMessage='em -> emd translation failed.')
-            #self._insertEntryMessage(errType='em', errMessage='em -> emd translation failed.', messageType='warning')
+            # self._insertEntryMessage(errType='em', errMessage='em -> emd translation failed.', messageType='warning')
         #
 
     def __cif2xmlTranslate(self, ciffile, xmlfile, validateFlag):
@@ -223,11 +223,11 @@ class EmReleaseUtil(EntryUpdateBase):
                 translator.translate(in_cif=ciffile, out_xml=xmlfile)
             #
             translator.write_logger_logs(write_error_log=True)
-            #if translator.is_translation_log_empty and os.access(xmlfile, os.F_OK):
+            # if translator.is_translation_log_empty and os.access(xmlfile, os.F_OK):
             if os.access(xmlfile, os.F_OK):
                 status = 'ok'
             #
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             error = traceback.format_exc()
         #
         if os.access(logFilePath, os.F_OK):
@@ -244,7 +244,7 @@ class EmReleaseUtil(EntryUpdateBase):
         if (not error) and status == 'failed':
             error = 'CifEMDBTranslator failed without error message'
         #
-        return status,error
+        return status, error
 
     """
     def __cif2xmlTranslate(self, ciffile, xmlfile):
@@ -263,7 +263,7 @@ class EmReleaseUtil(EntryUpdateBase):
             translator.readCifFile(ciffile)
             translator.translateCif2Xml()
             translator.writeXmlFile(xmlfile)
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             logging.info("Map header translation failed for %s" % ciffile)
             self._lfh.write("+EmReleaseUtil.__cif2xmlTranslate failing for %s\n" % ciffile)
             se = traceback.format_exc()
@@ -297,7 +297,7 @@ class EmReleaseUtil(EntryUpdateBase):
             formatExt = str(fFields[1]).strip()
             nFields = baseName.split('_')
             fileExt = nFields[2] + '_' + formatExt
-            if not fileExt in self.__fileExtContentTypeD:
+            if fileExt not in self.__fileExtContentTypeD:
                 continue
             #
             ContentType = self.__fileExtContentTypeD[fileExt]
@@ -307,7 +307,7 @@ class EmReleaseUtil(EntryUpdateBase):
                     self.__partD[ContentType].append(PartNumber)
                 #
             else:
-                self.__partD[ContentType] = [ PartNumber ]
+                self.__partD[ContentType] = [PartNumber]
             #
         #
 
@@ -320,8 +320,8 @@ class EmReleaseUtil(EntryUpdateBase):
                 continue
             #
             for fType in self.__contentD[typeList[0]][0]:
-                contentType = typeList[0]+ '_' + fType
-                if not contentType in self.__partD:
+                contentType = typeList[0] + '_' + fType
+                if contentType not in self.__partD:
                     continue
                 #
                 formatExt = self.__formatD[fType]

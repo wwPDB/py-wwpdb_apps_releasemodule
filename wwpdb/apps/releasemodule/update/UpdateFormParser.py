@@ -16,33 +16,36 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, string, traceback
+import os
+import sys
+import traceback
 
 from wwpdb.apps.releasemodule.citation.FetchResultParser import UniCodeHandler
-from wwpdb.apps.releasemodule.utils.CombineDbApi         import CombineDbApi
-from wwpdb.apps.releasemodule.utils.TimeUtil             import TimeUtil
-from wwpdb.io.file.mmCIFUtil                             import mmCIFUtil
-from wwpdb.io.locator.PathInfo                           import PathInfo
+from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
+from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.io.locator.PathInfo import PathInfo
 #
+
 
 class UpdateFormParser(object):
     """ Class responsible for parsing submitted form
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__reqObj=reqObj
+        self.__verbose = verbose
+        self.__lfh = log
+        self.__reqObj = reqObj
         #
-        self.__sObj=self.__reqObj.newSessionObj()
-        self.__sessionId=self.__sObj.getId()
-        self.__sessionPath=self.__sObj.getPath()
+        self.__sObj = self.__reqObj.newSessionObj()
+        self.__sessionId = self.__sObj.getId()
+        self.__sessionPath = self.__sObj.getPath()
         #
-        self.__siteId  = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
+        self.__siteId = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
         self.__pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         #
         t = TimeUtil()
@@ -104,12 +107,12 @@ class UpdateFormParser(object):
             # merge emdb_id, bmrb_id and comb_ids
             #
             if (entry in ret_map) and ret_map[entry]:
-                for item in ( 'bmrb_id', 'comb_ids', 'emdb_id', 'exp_method', 'emdb_release', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date' ):
+                for item in ('bmrb_id', 'comb_ids', 'emdb_id', 'exp_method', 'emdb_release', 'post_rel_status', 'post_rel_recvd_coord', 'post_rel_recvd_coord_date'):
                     if (item in ret_map[entry]) and ret_map[entry][item]:
                         dataDict[item] = ret_map[entry][item]
                     #
                 #
-                for k,v in statusMapping.items():
+                for k, v in statusMapping.items():
                     if (k in ret_map[entry]) and ret_map[entry][k]:
                         dataDict[v] = ret_map[entry][k]
                     #
@@ -120,7 +123,7 @@ class UpdateFormParser(object):
                 self.__errorContent += 'Entry ' + entry + ' has no pubmed id selected\n'
                 continue
             #
-            for k,v in itemMapping.items():
+            for k, v in itemMapping.items():
                 val = str(self.__reqObj.getValue(k + '_' + entry))
                 if not val:
                     continue
@@ -132,7 +135,7 @@ class UpdateFormParser(object):
             has_SelectedOption = False
             has_ReleaseInfo = False
             check_flag = False
-            for ext in ( '', '_sf', '_em', '_mr', '_cs', '_nmr_data' ):
+            for ext in ('', '_sf', '_em', '_mr', '_cs', '_nmr_data'):
                 if ('status_code' + ext) in dataDict:
                     has_SelectedOption = True
                     if dataDict['status_code' + ext] == 'REL_added' or dataDict['status_code' + ext] == 'OBS_obsolete':
@@ -153,8 +156,8 @@ class UpdateFormParser(object):
                 dataDict['status_code'] = 'CITATIONUpdate'
             #
             if ('status_code' in dataDict) and (dataDict['status_code'] == 'CITATIONUpdate' or dataDict['status_code'] == 'EMHEADERUpdate'):
-                removeList = [ 'status_code_sf', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data', 'directory', 'directory_sf', \
-                               'directory_mr', 'directory_cs', 'directory_nmr_data', 'obsolete_ids', 'supersede_ids', 'obspr_details' ]
+                removeList = ['status_code_sf', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data', 'directory', 'directory_sf',
+                              'directory_mr', 'directory_cs', 'directory_nmr_data', 'obsolete_ids', 'supersede_ids', 'obspr_details']
                 #
                 if dataDict['status_code'] == 'CITATIONUpdate':
                     removeList.append('status_code_em')
@@ -171,7 +174,7 @@ class UpdateFormParser(object):
             if (not has_SelectedOption) and (option != 'pull_release'):
                 self.__errorContent += 'Entry ' + entry + ' has no release option selected\n'
             #
-            if has_ReleaseInfo and (not 'approval_type' in dataDict):
+            if has_ReleaseInfo and ('approval_type' not in dataDict):
                 self.__errorContent += 'Entry ' + entry + ' has no approval type selected\n'
             #
             if self.__errorContent:
@@ -203,12 +206,12 @@ class UpdateFormParser(object):
                 p_list = []
                 for pubmed_id in pubmed_list:
                     p_dir = {}
-                    #val = str(self.__reqObj.getValue('title_' + entry + '_' + pubmed_id))
+                    # val = str(self.__reqObj.getValue('title_' + entry + '_' + pubmed_id))
                     val = self.__codeHandler.process(self.__reqObj.getValue('title_' + entry + '_' + pubmed_id), False)
                     if val:
                         p_dir['title'] = val
                     #
-                    #val = str(self.__reqObj.getValue('author_' + entry + '_' + pubmed_id))
+                    # val = str(self.__reqObj.getValue('author_' + entry + '_' + pubmed_id))
                     val = self.__codeHandler.process(self.__reqObj.getValue('author_' + entry + '_' + pubmed_id), False)
                     if val:
                         p_dir['author'] = val
@@ -229,8 +232,8 @@ class UpdateFormParser(object):
                     if author_list_number_val:
                         author_list = []
                         author_list_number = int(author_list_number_val)
-                        for i in range (0, author_list_number):
-                            #name = str(self.__reqObj.getValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)))
+                        for i in range(0, author_list_number):
+                            # name = str(self.__reqObj.getValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)))
                             name = self.__codeHandler.process(self.__reqObj.getRawValue('c_author_name_' + entry + '_' + pubmed_id + '_' + str(i)), False)
                             if not name:
                                 continue
@@ -277,14 +280,14 @@ class UpdateFormParser(object):
             status_map = {}
             value_map = {}
             not_EM_type = False
-            #for status_type in ( 'status_code', 'status_code_sf', 'status_code_em', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data' ):
-            for status_type in ( 'status_code', 'status_code_sf', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data' ):
-                if not status_type in dataDict:
+            # for status_type in ( 'status_code', 'status_code_sf', 'status_code_em', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data' ):
+            for status_type in ('status_code', 'status_code_sf', 'status_code_mr', 'status_code_cs', 'status_code_nmr_data'):
+                if status_type not in dataDict:
                     continue
                 #
                 if status_type != 'status_code_em':
                     not_EM_type = True
-               #
+                #
                 status_map[status_type] = dataDict[status_type]
                 if dataDict[status_type] in value_map:
                     continue
@@ -303,18 +306,21 @@ class UpdateFormParser(object):
                 if checkFlag:
                     error = ''
                     count = 0
-#                   for t_list in ( [ 'recvd_coordinates',     'status_code', 'Coord. file'], \
-#                                   [ 'recvd_struct_fact',     'status_code_sf', 'SF file' ], \
-#                                   [ 'recvd_em_map',          'status_code_em', 'EM file' ], \
-#                                   [ 'recvd_nmr_constraints', 'status_code_mr', 'MR file' ], \
-#                                   [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ], \
-#                                   [ 'recvd_nmr_data',       'status_code_nmr_data', 'NMR DATA file' ] ):
-#                   removed checking EM consistency because of rare release/obsolete policy
-                    for t_list in ( [ 'recvd_coordinates',     'status_code', 'Coord. file'], \
-                                    [ 'recvd_struct_fact',     'status_code_sf', 'SF file' ], \
-                                    [ 'recvd_nmr_constraints', 'status_code_mr', 'MR file' ], \
-                                    [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ], \
-                                    [ 'recvd_nmr_data',       'status_code_nmr_data', 'NMR DATA file' ] ):
+                    # for t_list in ( [ 'recvd_coordinates',     'status_code', 'Coord. file'], \
+                    #                [ 'recvd_struct_fact',     'status_code_sf', 'SF file' ], \
+                    #                [ 'recvd_em_map',          'status_code_em', 'EM file' ], \
+                    #                [ 'recvd_nmr_constraints', 'status_code_mr', 'MR file' ], \
+                    #                [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ], \
+                    #                [ 'recvd_nmr_data',       'status_code_nmr_data', 'NMR DATA file' ] ):
+                    # removed checking EM consistency because of rare release/obsolete policy
+
+                    # fmt: off
+                    for t_list in ([ 'recvd_coordinates',     'status_code', 'Coord. file'],
+                                   [ 'recvd_struct_fact',     'status_code_sf', 'SF file' ],
+                                   [ 'recvd_nmr_constraints', 'status_code_mr', 'MR file' ],
+                                   [ 'recvd_chemical_shifts', 'status_code_cs', 'CS file' ],
+                                   [ 'recvd_nmr_data',       'status_code_nmr_data', 'NMR DATA file']):
+                        # fmt: on
                         if not t_list[0] in self.__checkIdMap[dataDict['entry']]:
                             continue
                         #
@@ -342,11 +348,11 @@ class UpdateFormParser(object):
                 #
             else:
                 self.__errorContent += 'Entry ' + dataDict['entry'] + ' has inconsist release status:'
-#               for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'EM', 'status_code_em' ], \
-#                               [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
-#               removed checking EM consistency because of rare release/obsolete policy
-                for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'MR', 'status_code_mr' ], \
-                                [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
+                # for t_list in ( [ 'Coord.', 'status_code' ], [ 'SF', 'status_code_sf' ], [ 'EM', 'status_code_em' ], \
+                #     [ 'MR', 'status_code_mr' ], [ 'CS', 'status_code_cs' ], [ 'NMR DATA', 'status_code_nmr_data' ] ):
+                # removed checking EM consistency because of rare release/obsolete policy
+                for t_list in (['Coord.', 'status_code'], ['SF', 'status_code_sf'], ['MR', 'status_code_mr'],
+                               ['CS', 'status_code_cs'], ['NMR DATA', 'status_code_nmr_data']):
                     if not t_list[1] in dataDict:
                         continue
                     #
@@ -363,8 +369,8 @@ class UpdateFormParser(object):
         """ Parse manually input citation information
         """
         citation = {}
-        items = [ 'citation_id', 'title', 'journal_abbrev', 'journal_volume', 'year', 'page_first',
-                  'page_last', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI' ]
+        items = ['citation_id', 'title', 'journal_abbrev', 'journal_volume', 'year', 'page_first',
+                 'page_last', 'pdbx_database_id_PubMed', 'pdbx_database_id_DOI']
         for item in items:
             angstromFlag = False
             if item == 'title':
@@ -385,8 +391,8 @@ class UpdateFormParser(object):
             max_author_num = int(val)
             t_list = []
             author_list = []
-            for i in range (0, max_author_num):
-                #name = str(self.__reqObj.getValue('name_' + str(i + 1)))
+            for i in range(0, max_author_num):
+                # name = str(self.__reqObj.getValue('name_' + str(i + 1)))
                 name = self.__codeHandler.process(self.__reqObj.getRawValue('name_' + str(i + 1)), False)
                 if not name:
                     continue
@@ -430,7 +436,7 @@ class UpdateFormParser(object):
             if t_list[0] in keepCitationMap:
                 keepCitationMap[t_list[0]].append(t_list[1])
             else:
-                keepCitationMap[t_list[0]] = [ t_list[1] ]
+                keepCitationMap[t_list[0]] = [t_list[1]]
             #
         #
         return keepCitationMap
@@ -442,7 +448,7 @@ class UpdateFormParser(object):
             return
         #
         hasExperimentalDataRelease = False
-        for status_item in ( "status_code_cs", "status_code_em", "status_code_mr", "status_code_nmr_data", "status_code_sf"):
+        for status_item in ("status_code_cs", "status_code_em", "status_code_mr", "status_code_nmr_data", "status_code_sf"):
             if (status_item in dataDict) and ((dataDict[status_item] == "REL") or (dataDict[status_item] == "REREL")):
                 hasExperimentalDataRelease = True
                 break
@@ -455,7 +461,7 @@ class UpdateFormParser(object):
             return
         #
         try:
-            latestArchiveFilePath = self.__pI.getFilePath(dataSetId=entry, wfInstanceId=None, contentType="model", formatType="pdbx", \
+            latestArchiveFilePath = self.__pI.getFilePath(dataSetId=entry, wfInstanceId=None, contentType="model", formatType="pdbx",
                                                           fileSource='archive', versionId="latest", partNumber="1")
             if not os.access(latestArchiveFilePath, os.F_OK):
                 return
@@ -468,6 +474,6 @@ class UpdateFormParser(object):
                     return
                 #
             #
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             traceback.print_exc(file=self.__lfh)
         #

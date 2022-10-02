@@ -48,7 +48,7 @@ class MatchWorker(multiprocessing.Process):
         return mUtil.getMatchList()
 
     def run(self):
-        processName = self.name
+        # processName = self.name
         while True:
             nextList = self.__taskQueue.get()
             # end of queue condition
@@ -108,14 +108,14 @@ class MatchMP(object):
             #
             for list in lists:
                 self.__matchResultMap[list[0]] = list[1]
-            # 
+            #
         #
         try:
             for w in workers:
                 w.terminate()
                 w.join(1)
             #
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             if self.__verbose:
                 traceback.print_exc(file=self.__lfh)
             #

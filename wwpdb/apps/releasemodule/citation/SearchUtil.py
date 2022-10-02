@@ -21,10 +21,14 @@ __email__ = "zfeng@rcsb.rutgers.edu"
 __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.07"
 
+import os
+import sys
+
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 
 from wwpdb.apps.releasemodule.citation.SearchResultParser import SearchResultParser
-from wwpdb.apps.releasemodule.utils.Utility import *
+# from wwpdb.apps.releasemodule.utils.Utility import *
+from wwpdb.apps.releasemodule.utils.Utility import getFileName, RunScript
 
 
 class SearchUtil(object):

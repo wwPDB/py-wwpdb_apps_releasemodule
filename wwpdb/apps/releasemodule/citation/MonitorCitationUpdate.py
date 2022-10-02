@@ -30,9 +30,9 @@ import sys
 from wwpdb.apps.releasemodule.citation.FetchUtil import FetchUtil
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
 from wwpdb.apps.releasemodule.utils.Utility import isDEPLocked
-
-
+from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
 #
+
 
 class MonitorCitationUpdate(object):
     """
@@ -66,7 +66,8 @@ class MonitorCitationUpdate(object):
         #
         self.__getPubmedInfoMap()
         #
-        db = DBUtil(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
+        # db = DBUtil(siteId=self.__siteId, verbose=self.__verbose, log=self.__lfh)
+        db = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         fw = open(self.__resultFile, 'w')
         fw.write('Annot. \t Found \t Updated\n')
         for ann in self.__annotatorList:
@@ -80,7 +81,7 @@ class MonitorCitationUpdate(object):
         #
 
     def __getEntryIDList(self, annotator):
-        if (not self.__annotEntryMap) or (not annotator in self.__annotEntryMap):
+        if (not self.__annotEntryMap) or (annotator not in self.__annotEntryMap):
             return
         #
         foundList = []
@@ -129,7 +130,7 @@ class MonitorCitationUpdate(object):
             #
             if cinfo:
                 for item in items:
-                    if (not item in cinfo) or (not cinfo[item]):
+                    if (item not in cinfo) or (not cinfo[item]):
                         continue
                     #
                     if item == 'title':
@@ -153,7 +154,7 @@ class MonitorCitationUpdate(object):
                 #
                 if self.__pubmedInfoMap and (pubmed_id in self.__pubmedInfoMap):
                     for item in items:
-                        if not item in self.__pubmedInfoMap[pubmed_id]:
+                        if item not in self.__pubmedInfoMap[pubmed_id]:
                             continue
                         #
                         pdir[item] = self.__pubmedInfoMap[pubmed_id][item]
@@ -196,7 +197,7 @@ class MonitorCitationUpdate(object):
 
     def __compareCitationInfo(self, cinfo, dir, release_flag):
         code = ' '
-        if (not 'pdbx_database_id_PubMed' in cinfo) or (not 'pdbx_database_id_PubMed' in dir):
+        if ('pdbx_database_id_PubMed' not in cinfo) or ('pdbx_database_id_PubMed' not in dir):
             return code
         #
         if str(cinfo['pdbx_database_id_PubMed']) != dir['pdbx_database_id_PubMed']:
@@ -208,12 +209,12 @@ class MonitorCitationUpdate(object):
             #
             # Not allowed missing value in citation
             #
-            if ((not item in cinfo) or (not cinfo[item])) and (item in dir):
+            if ((item not in cinfo) or (not cinfo[item])) and (item in dir):
                 return code
             #
             # Allowed missing value in pubmed
             #
-            if (not item in dir) or (not dir[item]):
+            if (item not in dir) or (not dir[item]):
                 continue
             #
             if (item in cinfo) and cinfo[item] and str(cinfo[item]) != str(dir[item]):

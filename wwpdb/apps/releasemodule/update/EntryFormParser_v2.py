@@ -16,15 +16,16 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import copy, operator, os, string, sys, traceback
+import sys
 
 from wwpdb.apps.releasemodule.update.InputFormParser_v2 import InputFormParser
 #
+
 
 class EntryFormParser(InputFormParser):
     """ Class responsible for parsing submitted form
@@ -75,12 +76,12 @@ class EntryFormParser(InputFormParser):
         #
         entryListFromAuthor = self._dbUtil.getEntriesWithAuthorName(self.__owner, author)
         if not entryListFromAuthor:
-            self._errorContent += 'No entry found for author "' + author  + '".\n'
+            self._errorContent += 'No entry found for author "' + author + '".\n'
             return
         #
         self._processReturnResult('', entryListFromAuthor, True)
         if (not self._entryList) and (not self._errorContent):
-            self._errorContent += 'No entry found for author "' + author  + '".\n'
+            self._errorContent += 'No entry found for author "' + author + '".\n'
         #
 
     def __checkErrorContent(self):

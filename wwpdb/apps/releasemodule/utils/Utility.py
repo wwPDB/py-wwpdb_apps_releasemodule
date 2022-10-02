@@ -16,18 +16,21 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys
+import os
+import sys
+
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 from wwpdb.apps.wf_engine.engine.dbAPI import dbAPI
 
+
 def isDEPLocked(depid):
     ss = dbAPI(depid, verbose=True)
-    ret = ss.runSelectNQ(table='deposition',select=['locking'],where ={'dep_set_id': depid})
+    ret = ss.runSelectNQ(table='deposition', select=['locking'], where={'dep_set_id': depid})
     if not ret:
         return False
     #
@@ -40,20 +43,22 @@ def isDEPLocked(depid):
     #
     return False
 
+
 def getCleanValue(dataDict, key):
     """
     """
-    if not key in dataDict:
+    if key not in dataDict:
         return ''
     #
-    if not dataDict[key]: 
+    if not dataDict[key]:
         return ''
     #
-    return dataDict[key].strip().replace('None', '').replace('none', '').replace('?','')
+    return dataDict[key].strip().replace('None', '').replace('none', '').replace('?', '')
+
 
 def getCombIDs(dataDict):
     comb_ids = ''
-    for item in ( 'pdb_id', 'bmrb_id', 'emdb_id' ):
+    for item in ('pdb_id', 'bmrb_id', 'emdb_id'):
         if comb_ids:
             comb_ids += '/'
         #
@@ -64,6 +69,7 @@ def getCombIDs(dataDict):
         #
     #
     return comb_ids
+
 
 def getCombStatus(dataDict):
     statusCode = ''
@@ -105,17 +111,18 @@ def getCombStatus(dataDict):
             authorReleaseStatusCode = dataDict['author_release_status_code']
         #
     #
-    return statusCode,authorReleaseStatusCode,titleEM,authorListEM
+    return statusCode, authorReleaseStatusCode, titleEM, authorListEM
+
 
 def getCombinationInfo(EntryList, infoMap):
     if not EntryList:
         return []
     #
     for entry in EntryList:
-        merging_items = ( 'author_release_status_code', 'status_code_em', 'author_release_status_code_em', 'title', 'title_emdb', 'author_list', 'author_list_emdb' )
+        merging_items = ('author_release_status_code', 'status_code_em', 'author_release_status_code_em', 'title', 'title_emdb', 'author_list', 'author_list_emdb')
         pdb_id = getCleanValue(entry, 'pdb_id')
         if pdb_id:
-            merging_items = ( 'status_code', 'author_release_status_code', 'status_code_em', 'author_release_status_code_em', 'title', 'title_emdb', 'author_list', 'author_list_emdb' )
+            merging_items = ('status_code', 'author_release_status_code', 'status_code_em', 'author_release_status_code_em', 'title', 'title_emdb', 'author_list', 'author_list_emdb')
         #
         if (not pdb_id) and ('pdb_id' in entry):
             del entry['pdb_id']
@@ -127,7 +134,7 @@ def getCombinationInfo(EntryList, infoMap):
             entryId = entry['structure_id']
         #
         if entryId and (entryId in infoMap):
-            for item in ( 'emdb_id', 'bmrb_id' ):
+            for item in ('emdb_id', 'bmrb_id'):
                 data = getCleanValue(infoMap[entryId], item)
                 if data:
                     entry[item] = data
@@ -144,7 +151,7 @@ def getCombinationInfo(EntryList, infoMap):
             #
         #
         entry['comb_ids'] = getCombIDs(entry)
-        entry['comb_status_code'],entry['author_release_status_code'],titleEM,authorListEM = getCombStatus(entry)
+        entry['comb_status_code'], entry['author_release_status_code'], titleEM, authorListEM = getCombStatus(entry)
         if titleEM:
             entry['title'] = titleEM
         #
@@ -153,6 +160,7 @@ def getCombinationInfo(EntryList, infoMap):
         #
     #
     return EntryList
+
 
 def getFileName(path, root, ext):
     """Create unique file name.
@@ -168,22 +176,24 @@ def getFileName(path, root, ext):
     #
     return root + '_1.' + ext
 
+
 def RunScript(path, script, log):
     """Run script command
     """
     cmd = 'cd ' + path + '; chmod 755 ' + script \
-            + '; ./' + script + ' >& ' + log
+        + '; ./' + script + ' >& ' + log
     os.system(cmd)
+
 
 def FindFiles(path):
     """ Find entry files
     """
     list = []
     for filename in os.listdir(path):
-        #if filename.endswith('.cif') and filename[:4] == 'rcsb' and \
-        #   (len(filename) == 14 or len(filename) == 17) or \
-        #   filename.endswith('.mr') and filename[:4] == 'rcsb' and \
-        #   len(filename) == 13:
+        # if filename.endswith('.cif') and filename[:4] == 'rcsb' and \
+        #    (len(filename) == 14 or len(filename) == 17) or \
+        #    filename.endswith('.mr') and filename[:4] == 'rcsb' and \
+        #    len(filename) == 13:
         trueFlag = False
         if filename == 'all_files.tar.gz' or filename == 'all_files.tar':
             continue
@@ -217,11 +227,12 @@ def FindFiles(path):
         elif len(filename) > 8 and filename[4:8] == '.pdb':
             trueFlag = True
         #
-        if trueFlag:    
+        if trueFlag:
             list.append(filename)
         #
     #
     return list
+
 
 def FindLogFiles(path):
     """ Find log files
@@ -234,21 +245,23 @@ def FindLogFiles(path):
         elif filename.endswith('-validation.log'):
             trueFlag = True
         #
-        if trueFlag:    
+        if trueFlag:
             list.append(filename)
         #
     #
     return list
 
+
 def FindRCSBFile(rcsbid, ext):
     rcsbTopPath = '/net/annotation'
-    for dir in ( 'prot', 'nmr', 'ndb' ):
+    for dir in ('prot', 'nmr', 'ndb'):
         filename = os.path.join(rcsbTopPath, dir, rcsbid, rcsbid + ext)
         if os.access(filename, os.F_OK):
             return filename
         #
     #
     return ''
+
 
 def GetUniqueLogMessage(program, logfile):
     if not os.access(logfile, os.F_OK):
@@ -287,6 +300,7 @@ def GetUniqueLogMessage(program, logfile):
     #
     return error
 
+
 def FindReleaseFiles(siteId, entry_dir):
     returnMap = {}
     id_list = []
@@ -305,7 +319,7 @@ def FindReleaseFiles(siteId, entry_dir):
     map = {}
     for id in id_list:
         lower_id = id.lower()
-        for dir in ( 'added', 'modified', 'obsolete', 'reloaded', 'emd' ):
+        for dir in ('added', 'modified', 'obsolete', 'reloaded', 'emd'):
             path = os.path.join(opReleaseDir, dir, id)
             if not os.access(path, os.F_OK):
                 continue
@@ -316,7 +330,7 @@ def FindReleaseFiles(siteId, entry_dir):
                     continue
                 #
                 map[filename] = 'yes'
-                if filename in ( 'header', 'map', 'masks', 'other', 'fsc', 'images', 'layerLines', 'structureFactors'):
+                if filename in ('header', 'map', 'masks', 'other', 'fsc', 'images', 'layerLines', 'structureFactors'):
                     path1 = os.path.join(opReleaseDir, dir, id, filename)
                     list1 = os.listdir(path1)
                     for filename1 in list1:
@@ -333,7 +347,7 @@ def FindReleaseFiles(siteId, entry_dir):
                             returnMap['releasedFiles'] = tlist
                         #
                     #
-                else: 
+                else:
                     fullname = os.path.join(path, filename)
                     if filename.endswith('.summary'):
                         returnMap['summary'] = fullname
@@ -346,7 +360,7 @@ def FindReleaseFiles(siteId, entry_dir):
                             returnMap['releasedFiles'] = tlist
                         #
                         if (filename.startswith('pdb') and filename.endswith('.ent')) or filename == lower_id + '.cif.gz' or \
-                            filename == lower_id + '.cif' or filename == lower_id + '.xml':
+                           filename == lower_id + '.cif' or filename == lower_id + '.xml':
                             returnMap['coor'] = True
                         elif filename.endswith('-sf.cif'):
                             returnMap['sf'] = True
@@ -361,6 +375,7 @@ def FindReleaseFiles(siteId, entry_dir):
         #
     #
     return returnMap
+
 
 if __name__ == "__main__":
     list = FindFiles(sys.argv[1])

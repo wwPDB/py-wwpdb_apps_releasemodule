@@ -25,18 +25,23 @@ import copy
 
 import operator
 import time
+import os
+import sys
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-from mmcif.api.PdbxContainers import *
+# from mmcif.api.PdbxContainers import *
+from mmcif.api.PdbxContainers import DataContainer
+from mmcif.api.DataCategory import DataCategory
 from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
 from wwpdb.apps.releasemodule.citation.MatchMP import MatchMP
-from wwpdb.apps.releasemodule.utils.Utility import *
+# from wwpdb.apps.releasemodule.utils.Utility import *
+from wwpdb.apps.releasemodule.utils.Utility import RunScript
 
 
 class Analysis(object):
@@ -143,7 +148,7 @@ class Analysis(object):
                 #
                 rlist = []
                 for tlist in slist:
-                    if not dmap.has_key(tlist[0]):
+                    if tlist[0] not in dmap:
                         continue
                     #
                     rlist.append(dmap[tlist[0]])
@@ -240,8 +245,8 @@ class Analysis(object):
         f.write('setenv RCSBROOT   ' + self.__cICommon.get_site_annot_tools_path() + '\n')
         f.write('setenv BINPATH  ${RCSBROOT}/bin\n')
         f.write('#\n')
-        f.write('${BINPATH}/CitationMatch -input ' + self.__resultfile + \
-                ' -output matchresult.cif\n')
+        f.write('${BINPATH}/CitationMatch -input ' + self.__resultfile
+                + ' -output matchresult.cif\n')
         f.close()
         #
         RunScript(self.__sessionPath, 'runCitationMatch.csh', 'runCitationMatch.log')
@@ -266,9 +271,9 @@ class Analysis(object):
             pubmed_id = dir['pubmed_id']
             similarity_score = dir['similarity_score']
             if structure_id in self.__matchResultMap:
-                self.__matchResultMap[structure_id].append([dir['pubmed_id'], dir['similarity_score']])
+                self.__matchResultMap[structure_id].append([pubmed_id, similarity_score])
             else:
-                self.__matchResultMap[structure_id] = [[dir['pubmed_id'], dir['similarity_score']]]
+                self.__matchResultMap[structure_id] = [[pubmed_id, similarity_score]]
             #
         #
 

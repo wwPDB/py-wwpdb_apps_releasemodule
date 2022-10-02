@@ -67,9 +67,9 @@ class CheckResult(object):
                     if sim < 0.5:
                         continue
                     #
-                    print(pdir['pdbx_database_id_PubMed'] + ': ' + \
-                          pdir['similarity_score'] + ' <--> ' + \
-                          '%.3f' % sim + ' ' + pdir['title'])
+                    print(pdir['pdbx_database_id_PubMed'] + ': '
+                          + pdir['similarity_score'] + ' <--> '
+                          + '%.3f' % sim + ' ' + pdir['title'])
                     plist.append(pdir)
                 #
                 if not plist:
