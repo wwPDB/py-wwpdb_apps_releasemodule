@@ -140,9 +140,9 @@ class ContentDbApi(object):
         name1 = name.strip()
         query_string = "a.name = '" + name1 + "'"
         if name1.find(',') != -1:
-            list = name1.split(',')
-            a1 = list[0].strip()
-            a2 = list[1].strip()
+            nlist = name1.split(',')
+            a1 = nlist[0].strip()
+            a2 = nlist[1].strip()
             name1 = a1 + ',' + a2
             name2 = a1 + ', ' + a2
             query_string = "(a.name = '" + name1 + "' or a.name = '" + name2 + "')"
@@ -182,7 +182,7 @@ class ContentDbApi(object):
         return self.getCitation(entry_id)
 
     def getPrimaryCitationAuthorList(self, entry_id):
-        list1, list2 = self.__getCitationAuthor(entry_id)
+        list1, _list2 = self.__getCitationAuthor(entry_id)
         return list1
 
     def getCitationInfo(self, entry_id):
@@ -382,18 +382,22 @@ class ContentDbApi(object):
         return list1, list2
 
 
-if __name__ == '__main__':
+def test_main():
     siteId = os.getenv('WWPDB_SITE_ID')
     c = ContentDbApi(siteId=siteId, verbose=True, log=sys.stderr)
     # print c.getEntriesWithStatusList(sys.argv[1], sys.argv[2])
     # print c.getPubmedSearchList()
-    """
-    print c.getThisWeekRelEntries(sys.argv[1])
-    print c.getRequestReleaseEntryList(sys.argv[1])
-    print c.getCitation(sys.argv[2])
-    print c.getCitationInfo(sys.argv[2])
-    print c.getCitationAuthorList(sys.argv[2])
-    print((c.getLastPdbxAuditRevisionHistory(sys.argv[1])))
-    print((c.getLastReleaseDate(sys.argv[1])))
-    """
+    # """
+    # print c.getThisWeekRelEntries(sys.argv[1])
+    # print c.getRequestReleaseEntryList(sys.argv[1])
+    # print c.getCitation(sys.argv[2])
+    # print c.getCitationInfo(sys.argv[2])
+    # print c.getCitationAuthorList(sys.argv[2])
+    # print((c.getLastPdbxAuditRevisionHistory(sys.argv[1])))
+    # print((c.getLastReleaseDate(sys.argv[1])))
+    # """
     print(c.getNotReleasedAssoicatedEmdId(sys.argv[1]))
+
+
+if __name__ == '__main__':
+    test_main()

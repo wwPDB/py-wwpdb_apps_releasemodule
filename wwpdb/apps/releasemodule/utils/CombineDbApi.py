@@ -125,13 +125,13 @@ class CombineDbApi(object):
                     continue
                 #
                 if reformat:
-                    list = row['name'].split(',')
-                    if len(list) == 2:
-                        s1 = list[0].strip()
+                    nlist = row['name'].split(',')
+                    if len(nlist) == 2:
+                        s1 = nlist[0].strip()
                         if not s1:
                             continue
                         #
-                        s2 = list[1].strip()
+                        s2 = nlist[1].strip()
                         if not s2:
                             continue
                         #
@@ -159,7 +159,7 @@ class CombineDbApi(object):
         #
         message = ''
         input_ids = entry_ids.split(' ')
-        for id in input_ids:
+        for id in input_ids:  # pylint: disable=redefined-builtin
             if not id:
                 continue
             #
@@ -217,7 +217,7 @@ class CombineDbApi(object):
         #
         all_id_map = {}
         if ret_map:
-            for k, myD in ret_map.items():
+            for _k, myD in ret_map.items():
                 for id_type in ('dep_set_id', 'pdb_id', 'bmrb_id', 'emdb_id'):
                     if (id_type in myD) and myD[id_type]:
                         all_id_map[myD[id_type].upper()] = 'yes'
@@ -241,7 +241,7 @@ class CombineDbApi(object):
         self.__connectAllDB()
         #
         uniq_list = sorted(set(id_list))
-        ret_id_list, ret_map = self.__processDepInfo(self.__StatusDB.getEntryListFromDepIdList(uniq_list))
+        _ret_id_list, ret_map = self.__processDepInfo(self.__StatusDB.getEntryListFromDepIdList(uniq_list))
         return self.__getEntryInfo(uniq_list, ret_map)
 
     def getEntryInfoMap(self, id_list):
@@ -311,11 +311,11 @@ class CombineDbApi(object):
 
     def __getNotValidIDMessage(self, id_list, id_map):
         message = ''
-        for id in id_list:
-            if id in id_map:
+        for did in id_list:
+            if did in id_map:
                 continue
             #
-            message += "'" + id + "' is not a valid ID.\n"
+            message += "'" + did + "' is not a valid ID.\n"
         #
         return message
 
@@ -468,22 +468,22 @@ class CombineDbApi(object):
             if entry_key in pdbxObsSprMap:
                 found = False
                 for obsSprDict in pdbxObsSprMap[entry_key]:
-                    """
-                    if obsSprDict['pdb_id'] == obsSprList[0]['pdb_id']:
-                        found = True
-                        replace_id = obsSprDict['replace_pdb_id'] + ' ' + obsSprList[0]['replace_pdb_id']
-                        tmp_list = replace_id.replace(',', ' ').split(' ')
-                        relace_id_list = []
-                        for pdb_id in tmp_list:
-                            if not pdb_id:
-                                continue
-                            #
-                            relace_id_list.append(pdb_id)
-                        #
-                        uniq_list = sorted(set(relace_id_list))
-                        obsSprDict['replace_pdb_id'] = ' '.join(uniq_list)
-                    #
-                    """
+                    # """
+                    # if obsSprDict['pdb_id'] == obsSprList[0]['pdb_id']:
+                    #     found = True
+                    #     replace_id = obsSprDict['replace_pdb_id'] + ' ' + obsSprList[0]['replace_pdb_id']
+                    #     tmp_list = replace_id.replace(',', ' ').split(' ')
+                    #     relace_id_list = []
+                    #     for pdb_id in tmp_list:
+                    #         if not pdb_id:
+                    #             continue
+                    #         #
+                    #         relace_id_list.append(pdb_id)
+                    #     #
+                    #     uniq_list = sorted(set(relace_id_list))
+                    #     obsSprDict['replace_pdb_id'] = ' '.join(uniq_list)
+                    # #
+                    # """
                     if (obsSprDict['pdb_id'] == obsSprList[0]['pdb_id']) and (obsSprDict['id'] == obsSprList[0]['id']):
                         # pdbxReplaceIdList = self.__getReplaceIdList(obsSprDict)
                         depuiReplaceIdList = self.__getReplaceIdList(obsSprList[0])
@@ -613,7 +613,11 @@ class CombineDbApi(object):
         return org_authors
 
 
-if __name__ == '__main__':
+def test_main():
     siteId = os.getenv('WWPDB_SITE_ID')
     c = CombineDbApi(siteId=siteId, verbose=True, log=sys.stderr)
     print((c.getFunctionCall(True, 'getAnnoList', [])))
+
+
+if __name__ == '__main__':
+    test_main()

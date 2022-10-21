@@ -43,7 +43,7 @@ class DbApiUtil(object):
         self.__dbPw = dbPw
         self.__dbSocket = dbSocket
         self.__dbPort = dbPort
-        self.__verbose = verbose
+        self.__verbose = verbose  # pylint: disable=unused-private-member
         self.__lfh = log
         self.__schemaMap = {}
         self.__dbState = 0
