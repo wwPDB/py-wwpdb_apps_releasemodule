@@ -42,14 +42,14 @@ class ReleaseUtil(EntryUpdateBase):
         # version, cif_extension, current_internal_dictionary, target_public_dictionary, xml_convertor_dictionary, xml_prefix, xml_schema, xml_extension
         self.__CifXmlInfo = self.__readDictionaryInfo()
         if not self.__CifXmlInfo:
-            """
-            self.__CifXmlInfo = [ \
-              [ 'v4', '.cif', self._cI.get('SITE_PDBX_DICT_NAME') + '.sdb', self._cI.get('SITE_PDBX_V4_DICT_NAME') + '.sdb', 'mmcif_pdbx_v42.odb', \
-                'pdbx-v42', 'pdbx-v42.xsd', [ [ '.cif.xml', '.xml' ], [ '.cif.xml-noatom', '-noatom.xml' ], [ '.cif.xml-extatom', '-extatom.xml' ] ] ],
-              [ 'v5', '.v5.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd', \
-                [ [ '.v5.cif.xml', '.v5.xml' ], [ '.v5.cif.xml-noatom', '-noatom.v5.xml' ], [ '.v5.cif.xml-extatom', '-extatom.v5.xml' ] ] ]
-            ]
-            """
+            # """
+            # self.__CifXmlInfo = [ \
+            #   [ 'v4', '.cif', self._cI.get('SITE_PDBX_DICT_NAME') + '.sdb', self._cI.get('SITE_PDBX_V4_DICT_NAME') + '.sdb', 'mmcif_pdbx_v42.odb', \
+            #     'pdbx-v42', 'pdbx-v42.xsd', [ [ '.cif.xml', '.xml' ], [ '.cif.xml-noatom', '-noatom.xml' ], [ '.cif.xml-extatom', '-extatom.xml' ] ] ],
+            #   [ 'v5', '.v5.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd', \
+            #     [ [ '.v5.cif.xml', '.v5.xml' ], [ '.v5.cif.xml-noatom', '-noatom.v5.xml' ], [ '.v5.cif.xml-extatom', '-extatom.v5.xml' ] ] ]
+            # ]
+            # """
             self.__CifXmlInfo = [
                 ['v5', '.cif', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.sdb', 'mmcif_pdbx_v50.odb', 'pdbx-v50', 'pdbx-v50.xsd',
                  [['.cif.xml', '.xml'], ['.cif.xml-noatom', '-noatom.xml'], ['.cif.xml-extatom', '-extatom.xml']]]

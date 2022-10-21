@@ -31,13 +31,13 @@ from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 class JournalAbbrev(object):
     """
     """
-    def __init__(self, reqObj=None, ciffile=None, verbose=False, log=sys.stderr):
+    def __init__(self, reqObj=None, ciffile=None, verbose=False, log=sys.stderr):  # pylint: disable=unused-argument
         """
         """
         self.__reqObj = reqObj
         self.__ciffile = ciffile
-        self.__lfh = log
-        self.__verbose = verbose
+        # self.__lfh = log
+        # self.__verbose = verbose
         self.__jalist = []
         self.__jamaps = {}
         self.__issnmaps = {}
@@ -146,5 +146,5 @@ class JournalAbbrev(object):
 
 
 if __name__ == '__main__':
-    c = JournalAbbrev(ciffile='/net/wwpdb_da/da_top/tools-centos-6/packages/annotation/data/ascii/ndb_refn.cif', verbose=True, log=sys.stderr)
-    print((c.GetJoinQuoterList(',\n')))
+    jc = JournalAbbrev(ciffile='/net/wwpdb_da/da_top/tools-centos-6/packages/annotation/data/ascii/ndb_refn.cif', verbose=True, log=sys.stderr)
+    print((jc.GetJoinQuoterList(',\n')))

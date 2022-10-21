@@ -56,7 +56,7 @@ class ReleaseWebApp(object):
     """Handle request and response object processing for release module web application.
 
     """
-    def __init__(self, parameterDict={}, verbose=False, log=sys.stderr, siteId="WWPDB_DEV"):
+    def __init__(self, parameterDict=None, verbose=False, log=sys.stderr, siteId="WWPDB_DEV"):
         """
         Create an instance of `ReleaseWebApp` to manage a release module web request.
 
@@ -66,6 +66,9 @@ class ReleaseWebApp(object):
          :param `log`:      stream for logging.
 
         """
+        if parameterDict is None:
+            parameterDict = {}
+
         self.__verbose = verbose
         self.__lfh = log
         self.__debug = False
@@ -128,7 +131,7 @@ class ReleaseWebApp(object):
         #
         return rC.get()
 
-    def __dumpRequest(self):
+    def __dumpRequest(self):  # pylint: disable=unused-private-member
         """Utility method to format the contents of the internal parameter dictionary
            containing data from the input web request.
 
@@ -203,24 +206,24 @@ class ReleaseWebAppWorker(object):
         """
         return self.__doOpException()
 
-    def __doOpNoException(self):
-        """Map operation to path and invoke operation.  No exception handling is performed.
+    # def __doOpNoException(self):
+    #     """Map operation to path and invoke operation.  No exception handling is performed.
 
-            :Returns:
+    #         :Returns:
 
-            Operation output is packaged in a ResponseContent() object.
-        """
-        #
-        reqPath = self.__reqObj.getRequestPath()
-        if reqPath not in self.__appPathD:
-            # bail out if operation is unknown -
-            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
-            rC.setError(errMsg='Unknown operation')
-            return rC
-        else:
-            mth = getattr(self, self.__appPathD[reqPath], None)
-            rC = mth()
-        return rC
+    #         Operation output is packaged in a ResponseContent() object.
+    #     """
+    #     #
+    #     reqPath = self.__reqObj.getRequestPath()
+    #     if reqPath not in self.__appPathD:
+    #         # bail out if operation is unknown -
+    #         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+    #         rC.setError(errMsg='Unknown operation')
+    #         return rC
+    #     else:
+    #         mth = getattr(self, self.__appPathD[reqPath], None)
+    #         rC = mth()
+    #     return rC
 
     def __doOpException(self):
         """Map operation to path and invoke operation.  Exceptions are caught within this method.
@@ -372,7 +375,10 @@ class ReleaseWebAppWorker(object):
         #
         return rC
 
-    def __depcitRequestForm(self, entryList=[], autoSelection=False):
+    def __depcitRequestForm(self, entryList=None, autoSelection=False):
+        if entryList is None:
+            entryList = []
+
         self.__reqObj.setValue('FormTemplate', 'request/request_form_tmplt.html')
         self.__reqObj.setValue('RowTemplate', 'request/request_row_tmplt.html')
         self.__reqObj.setValue('option', 'request_release')
@@ -735,17 +741,17 @@ class ReleaseWebAppWorker(object):
             rC.setError(errMsg='No pubmed ID selected')
             return rC
         #
-        map = {}
+        map = {}  # pylint: disable=redefined-builtin
         for comb_id in combList:
-            list = comb_id.split(':')
-            if list[0] in map:
-                if not list[1] in map[list[0]]:
-                    map[list[0]].append(list[1])
+            clist = comb_id.split(':')
+            if clist[0] in map:
+                if not clist[1] in map[clist[0]]:
+                    map[clist[0]].append(clist[1])
                 #
             else:
                 pubmed_id_list = []
-                pubmed_id_list.append(list[1])
-                map[list[0]] = pubmed_id_list
+                pubmed_id_list.append(clist[1])
+                map[clist[0]] = pubmed_id_list
             #
         #
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
@@ -764,9 +770,9 @@ class ReleaseWebAppWorker(object):
                 fb.close()
             #
             updated_pubmed_id_list = []
-            for id in existing_pubmed_id_list:
-                if id not in pubmed_id_list:
-                    updated_pubmed_id_list.append(id)
+            for pmid in existing_pubmed_id_list:
+                if pmid not in pubmed_id_list:
+                    updated_pubmed_id_list.append(pmid)
                 #
             #
             if updated_pubmed_id_list:
@@ -995,10 +1001,11 @@ class ReleaseWebAppWorker(object):
         """ Join existing session or create new session as required.
         """
         #
+        # pylint: disable=attribute-defined-outside-init
         self.__sObj = self.__reqObj.newSessionObj()
         self.__sessionId = self.__sObj.getId()
         self.__sessionPath = self.__sObj.getPath()
-        self.__rltvSessionPath = self.__sObj.getRelativePath()
+        # self.__rltvSessionPath = self.__sObj.getRelativePath()
         if (self.__verbose):
             self.__lfh.write("------------------------------------------------------\n")
             self.__lfh.write("+ReleaseWebAppWorker.__getSession() - creating/joining session %s\n" % self.__sessionId)
@@ -1052,19 +1059,19 @@ class ReleaseWebAppWorker(object):
         #
         return id_list
 
-    def __loadAnnotatorPickle(self):
-        """ Load annotator.index pickle file
-        """
-        anno_indexfile = os.path.join(self.__cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release', 'index', self.__owner + '.index')
-        if os.access(anno_indexfile, os.F_OK):
-            fb = open(anno_indexfile, 'rb')
-            pickleData = pickle.load(fb)
-            fb.close()
-            return pickleData
-        #
-        return {}
+    # def __loadAnnotatorPickle(self):
+    #     """ Load annotator.index pickle file
+    #     """
+    #     anno_indexfile = os.path.join(self.__cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'for_release', 'index', self.__owner + '.index')
+    #     if os.access(anno_indexfile, os.F_OK):
+    #         fb = open(anno_indexfile, 'rb')
+    #         pickleData = pickle.load(fb)
+    #         fb.close()
+    #         return pickleData
+    #     #
+    #     return {}
 
-    def __processTemplate(self, fn, parameterDict={}):
+    def __processTemplate(self, fn, parameterDict=None):
         """ Read the input HTML template data file and perform the key/value substitutions in the
             input parameter dictionary.
 
@@ -1076,6 +1083,9 @@ class ReleaseWebAppWorker(object):
             :Returns:
                 string representing entirety of content with subsitution placeholders now replaced with data
         """
+        if parameterDict is None:
+            parameterDict = {}
+
         tPath = self.__reqObj.getValue("TemplatePath")
         fPath = os.path.join(tPath, fn)
         ifh = open(fPath, 'r')
@@ -1084,8 +1094,12 @@ class ReleaseWebAppWorker(object):
         return (sIn % parameterDict)
 
 
-if __name__ == '__main__':
+def test_main():
     sTool = ReleaseWebApp()
     d = sTool.doOp()
     for k, v in d.items():
         sys.stdout.write("Key - %s  value - %r\n" % (k, v))
+
+
+if __name__ == "__main__":
+    test_main()

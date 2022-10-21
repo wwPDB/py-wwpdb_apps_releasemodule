@@ -303,7 +303,7 @@ class Analysis(object):
         return self.__annotEntryMap
 
 
-if __name__ == '__main__':
+def doMain():
     startTime = time.time()
     cf = Analysis(log=sys.stderr, verbose=False)
     cf.Read()
@@ -311,7 +311,11 @@ if __name__ == '__main__':
     endTime = time.time()
     diffTime = endTime - startTime
     print(diffTime)
-    for k, list in list(dir.items()):
-        print('annot=' + k + ': Total=' + str(len(list)))
-        for d in list:
+    for k, dlist in list(dir.items()):
+        print('annot=' + k + ': Total=' + str(len(dlist)))
+        for d in dlist:
             print(d['structure_id'] + '=' + str(len(d['pubmed'])))
+
+
+if __name__ == '__main__':
+    doMain()

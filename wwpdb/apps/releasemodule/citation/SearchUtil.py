@@ -35,14 +35,14 @@ class SearchUtil(object):
     """
     """
 
-    def __init__(self, path='.', processLabel='', term=None, siteId=None, log=sys.stderr, verbose=False):
+    def __init__(self, path='.', processLabel='', term=None, siteId=None, log=sys.stderr, verbose=False):  # pylint: disable=unused-argument
         """
         """
         self.__sessionPath = path
         self.__processLabel = processLabel
         self.__term = term
-        self.__lfh = log
-        self.__verbose = verbose
+        # self.__lfh = log
+        # self.__verbose = verbose
         self.__pubmedIdList = []
         self.__cI = ConfigInfo(siteId)
         self.__apikey = self.__cI.get('NCBI_API_KEY')
@@ -94,5 +94,5 @@ class SearchUtil(object):
 if __name__ == '__main__':
     cf = SearchUtil(term='Badger+J[au]', log=sys.stderr, verbose=False)
     cf.doSearch()
-    list = cf.getPubmedIdList()
-    print(list)
+    plist = cf.getPubmedIdList()
+    print(plist)

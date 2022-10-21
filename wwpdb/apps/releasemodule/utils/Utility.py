@@ -34,8 +34,8 @@ def isDEPLocked(depid):
     if not ret:
         return False
     #
-    for list in ret:
-        for status in list:
+    for rlist in ret:
+        for status in rlist:
             if status.find('DEP') != -1:
                 return True
             #
@@ -188,7 +188,7 @@ def RunScript(path, script, log):
 def FindFiles(path):
     """ Find entry files
     """
-    list = []
+    rlist = []
     for filename in os.listdir(path):
         # if filename.endswith('.cif') and filename[:4] == 'rcsb' and \
         #    (len(filename) == 14 or len(filename) == 17) or \
@@ -228,16 +228,16 @@ def FindFiles(path):
             trueFlag = True
         #
         if trueFlag:
-            list.append(filename)
+            rlist.append(filename)
         #
     #
-    return list
+    return rlist
 
 
 def FindLogFiles(path):
     """ Find log files
     """
-    list = []
+    rlist = []
     for filename in os.listdir(path):
         trueFlag = False
         if filename.startswith('release') and filename.endswith('.log'):
@@ -246,16 +246,16 @@ def FindLogFiles(path):
             trueFlag = True
         #
         if trueFlag:
-            list.append(filename)
+            rlist.append(filename)
         #
     #
-    return list
+    return rlist
 
 
 def FindRCSBFile(rcsbid, ext):
     rcsbTopPath = '/net/annotation'
-    for dir in ('prot', 'nmr', 'ndb'):
-        filename = os.path.join(rcsbTopPath, dir, rcsbid, rcsbid + ext)
+    for subdir in ('prot', 'nmr', 'ndb'):
+        filename = os.path.join(rcsbTopPath, subdir, rcsbid, rcsbid + ext)
         if os.access(filename, os.F_OK):
             return filename
         #
@@ -276,16 +276,16 @@ def GetUniqueLogMessage(program, logfile):
     f.close()
     #
     error = ''
-    dir = {}
-    list = data.split('\n')
-    for line in list:
+    ldir = {}
+    dlist = data.split('\n')
+    for line in dlist:
         if not line:
             continue
         #
-        if line in dir:
+        if line in ldir:
             continue
         #
-        dir[line] = 'y'
+        ldir[line] = 'y'
         #
         if line == 'Finished!':
             continue
@@ -316,28 +316,28 @@ def FindReleaseFiles(siteId, entry_dir):
     cIcommon = ConfigInfoAppCommon(siteId)
     opReleaseDir = cIcommon.get_for_release_path()
 
-    map = {}
-    for id in id_list:
+    fmap = {}
+    for id in id_list:  # pylint: disable=redefined-builtin
         lower_id = id.lower()
-        for dir in ('added', 'modified', 'obsolete', 'reloaded', 'emd'):
-            path = os.path.join(opReleaseDir, dir, id)
+        for subdir in ('added', 'modified', 'obsolete', 'reloaded', 'emd'):
+            path = os.path.join(opReleaseDir, subdir, id)
             if not os.access(path, os.F_OK):
                 continue
             #
-            list = os.listdir(path)
-            for filename in list:
-                if filename in map:
+            dlist = os.listdir(path)
+            for filename in dlist:
+                if filename in fmap:
                     continue
                 #
-                map[filename] = 'yes'
+                fmap[filename] = 'yes'
                 if filename in ('header', 'map', 'masks', 'other', 'fsc', 'images', 'layerLines', 'structureFactors'):
-                    path1 = os.path.join(opReleaseDir, dir, id, filename)
+                    path1 = os.path.join(opReleaseDir, subdir, id, filename)
                     list1 = os.listdir(path1)
                     for filename1 in list1:
-                        if filename1 in map:
+                        if filename1 in fmap:
                             continue
                         #
-                        map[filename1] = 'yes'
+                        fmap[filename1] = 'yes'
                         fullname = os.path.join(path1, filename1)
                         if 'releasedFiles' in returnMap:
                             returnMap['releasedFiles'].append(fullname)
@@ -378,6 +378,6 @@ def FindReleaseFiles(siteId, entry_dir):
 
 
 if __name__ == "__main__":
-    list = FindFiles(sys.argv[1])
-    print((len(list)))
-    print(list)
+    flist = FindFiles(sys.argv[1])
+    print((len(flist)))
+    print(flist)

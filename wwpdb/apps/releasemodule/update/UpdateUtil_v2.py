@@ -71,6 +71,7 @@ class UpdateUtil(EntryUpdateBase):
         return emMapTypeList
 
     def __initializeFileName(self):
+        # pylint: disable=attribute-defined-outside-init
         self.__inputfile = 'inputfile_' + self._entryId + '.cif'
         self.__inputFilePath = os.path.join(self._sessionPath, self.__inputfile)
         self.__outputfile = 'outputfile_' + self._entryId + '.cif'

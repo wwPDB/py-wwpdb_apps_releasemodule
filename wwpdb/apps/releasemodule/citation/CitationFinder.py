@@ -231,7 +231,7 @@ class CitationFinder(object):
             return
         #
         tmap = {}
-        for key, plist in self.__termMap.items():
+        for _key, plist in self.__termMap.items():
             for pid in plist:
                 if pid in tmap:
                     continue
@@ -334,7 +334,7 @@ class CitationFinder(object):
         cat.appendAttribute('title')
         #
         row = 0
-        for key, v_dict in self.__pubmedInfo.items():
+        for _key, v_dict in self.__pubmedInfo.items():
             cat.setValue(str(v_dict['pdbx_database_id_PubMed']), 'id', row)
             if 'pdbx_database_id_DOI' in v_dict:
                 cat.setValue(str(v_dict['pdbx_database_id_DOI']), 'doi', row)

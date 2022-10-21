@@ -89,9 +89,12 @@ class EntryUpdateBase(UpdateBase):
             self._processLogError(errType, programName, os.path.join(self._sessionPath, clogFile), messageType=messageType)
         #
 
-    def _dpUtilityApi(self, operator="", inputFileName="", outputFileNameTupList=[], option="", id_value="", id_name="pdb_id"):
+    def _dpUtilityApi(self, operator="", inputFileName="", outputFileNameTupList=None, option="", id_value="", id_name="pdb_id"):
         """
         """
+        if outputFileNameTupList is None:
+            outputFileNameTupList = []
+
         if (not operator) or (not inputFileName) or (not outputFileNameTupList):
             return
         #
@@ -147,14 +150,14 @@ class EntryUpdateBase(UpdateBase):
             realType = self._fileTypeMap[realType][1]
         #
         if messageType == 'error':
-            """
-            if errType == 'em':
-                self._blockEmErrorFlag = True
-            else:
-                self._blockErrorFlag = True
-                self._blockEmErrorFlag = True
-            #
-            """
+            # """
+            # if errType == 'em':
+            #     self._blockEmErrorFlag = True
+            # else:
+            #     self._blockErrorFlag = True
+            #     self._blockEmErrorFlag = True
+            # #
+            # """
             self._blockErrorFlag = True
             self._blockEmErrorFlag = True
             self._insertFileStatus(realType, False)
@@ -382,7 +385,7 @@ class EntryUpdateBase(UpdateBase):
                         skipVersionNumberUpdate = True
                     #
                     if not skipVersionNumberUpdate:
-                        head, tail = ntpath.split(nextArchiveFilePath)
+                        _head, tail = ntpath.split(nextArchiveFilePath)
                         vList = tail.split(".V")
                         if len(vList) == 2:
                             if self._processing_site == "PDBE":
@@ -509,7 +512,7 @@ class EntryUpdateBase(UpdateBase):
         return status, msg
 
     def _processLogError(self, errType, program, logfile, messageType='error'):
-        status, error = self._getLogMessage(program, logfile)
+        _status, error = self._getLogMessage(program, logfile)
         if error:
             if errType:
                 self._insertEntryMessage(errType=errType, errMessage=error, messageType=messageType)

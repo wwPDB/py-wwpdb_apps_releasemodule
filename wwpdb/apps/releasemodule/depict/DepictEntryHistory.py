@@ -65,7 +65,7 @@ class DepictEntryHistory(ModuleBaseClass):
             myD['sessionid'] = self._sessionId
             myD['identifier'] = str(self._reqObj.getValue('identifier'))
             myD['bg_class'] = bg_class
-            selectedText, selectedMap = self._getReleaseOptionFromPickle(pickleData)
+            selectedText, _selectedMap = self._getReleaseOptionFromPickle(pickleData)
             myD['options'] = selectedText
             myD['count'] = str(count)
             for item in ('annotator', 'task', 'details', 'block', 'start_time', 'finish_time'):

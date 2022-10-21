@@ -110,13 +110,13 @@ class EntryUpdateProcess(EntryUpdateBase):
                 self._copyUpdatedFilesFromSessionToArchive()
             #
             if self.__releaseFlag or self.__EmEntryFlag:
-                individualContent, sysErrorContent, status = self._generateReturnContent(self._entryDir, self._entryMessageContent, self._fileStatus)
+                individualContent, sysErrorContent, _status = self._generateReturnContent(self._entryDir, self._entryMessageContent, self._fileStatus)
                 returnContent = str(self._reqObj.getValue('task'))
                 if sysErrorContent:
-                    msgType, msgText = self._getConcatMessageContent(sysErrorContent)
+                    _msgType, msgText = self._getConcatMessageContent(sysErrorContent)
                     returnContent += '\n\nSystem related error:\n' + msgText
                 #
-                selectText, selectMap = self._getReleaseOptionFromPickle(self._pickleData)
+                selectText, _selectMap = self._getReleaseOptionFromPickle(self._pickleData)
                 returnContent += '\n\nRelease Option: ' + selectText + individualContent
                 summaryfile = open(os.path.join(self._sessionPath, self._entryId + '.summary'), 'w')
                 summaryfile.write(returnContent + '\n')
@@ -345,16 +345,16 @@ class EntryUpdateProcess(EntryUpdateBase):
                     #
                     # Renaming v5 files in for_release_beta directory and removing v5 files in for_release directory
                     #
-                    """
-                    for file_exts in ( ( '.v5.cif.gz', '.cif.gz' ), ( '.v5.xml.gz', '.xml.gz'), ( '-noatom.v5.xml.gz', '-noatom.xml.gz'), \
-                                       ( '-extatom.v5.xml.gz', '-extatom.xml.gz' )):
-                        if os.access(os.path.join(betaDirPath, pdbId + file_exts[0]), os.F_OK):
-                            self._insertAction('Renamed ' + os.path.join(betaDirPath, pdbId + file_exts[0]) + \
-                                               ' to ' + os.path.join(betaDirPath, pdbId + file_exts[1]))
-                            os.rename(os.path.join(betaDirPath, pdbId + file_exts[0]), os.path.join(betaDirPath, pdbId + file_exts[1]))
-                        #
-                        self._removeFile(os.path.join(dirPath, pdbId + file_exts[0]))
-                    """
+                    # """
+                    # for file_exts in ( ( '.v5.cif.gz', '.cif.gz' ), ( '.v5.xml.gz', '.xml.gz'), ( '-noatom.v5.xml.gz', '-noatom.xml.gz'), \
+                    #                    ( '-extatom.v5.xml.gz', '-extatom.xml.gz' )):
+                    #     if os.access(os.path.join(betaDirPath, pdbId + file_exts[0]), os.F_OK):
+                    #         self._insertAction('Renamed ' + os.path.join(betaDirPath, pdbId + file_exts[0]) + \
+                    #                            ' to ' + os.path.join(betaDirPath, pdbId + file_exts[1]))
+                    #         os.rename(os.path.join(betaDirPath, pdbId + file_exts[0]), os.path.join(betaDirPath, pdbId + file_exts[1]))
+                    #     #
+                    #     self._removeFile(os.path.join(dirPath, pdbId + file_exts[0]))
+                    # """
                     #
                     # Copying for_release_version directory
                     #

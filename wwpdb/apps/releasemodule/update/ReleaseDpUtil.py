@@ -38,7 +38,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         super(ReleaseDpUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
         #
         self.__pdbId = self._entryDir['pdb_id'].lower()
-        self.__dictRoot = os.path.abspath(self._cICommon.get_mmcif_dict_path())
+        # self.__dictRoot = os.path.abspath(self._cICommon.get_mmcif_dict_path())
         self.__errorKeyWordList = []
         #
         self.__readErrorKeyWordList()

@@ -78,15 +78,15 @@ class MessageBaseClass(ModuleBaseClass):
             #
             blockFlag, returnText = self.__getReturnContent(entryMessageContent, fileStatus, typeList[5])
             if blockFlag:
-                """
-                if (typeList[5] == 'em') and hasPdbRelease:
-                    if entryStatus == 'OK':
-                        entryStatus = 'EM-BLOCKED'
-                    #
-                else:
-                    entryStatus = 'BLOCKED'
-                #
-                """
+                # """
+                # if (typeList[5] == 'em') and hasPdbRelease:
+                #     if entryStatus == 'OK':
+                #         entryStatus = 'EM-BLOCKED'
+                #     #
+                # else:
+                #     entryStatus = 'BLOCKED'
+                # #
+                # """
                 entryStatus = 'BLOCKED'
             #
             if typeList[5] == 'coor':
@@ -108,7 +108,7 @@ class MessageBaseClass(ModuleBaseClass):
             #
         #
         if ('MiscChecking' in entryMessageContent) and entryMessageContent['MiscChecking']:
-            messageType, messageText = self._getConcatMessageContent(entryMessageContent['MiscChecking'])
+            _messageType, messageText = self._getConcatMessageContent(entryMessageContent['MiscChecking'])
             returnContent += '\n\nMiscChecking report:\n\n' + messageText
         #
         if returnContent:

@@ -42,7 +42,7 @@ class UpdateFormParser(object):
         self.__reqObj = reqObj
         #
         self.__sObj = self.__reqObj.newSessionObj()
-        self.__sessionId = self.__sObj.getId()
+        self.__sessionId = self.__sObj.getId()  # pylint: disable=unused-private-member
         self.__sessionPath = self.__sObj.getPath()
         #
         self.__siteId = str(self.__reqObj.getValue("WWPDB_SITE_ID"))

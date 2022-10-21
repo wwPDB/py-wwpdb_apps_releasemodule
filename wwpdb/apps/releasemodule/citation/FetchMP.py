@@ -126,8 +126,8 @@ class FetchMP(object):
             taskQueue.put(None)
         #
         for i in range(len(subLists)):
-            list = resultQueue.get()
-            for info in list:
+            rlist = resultQueue.get()
+            for info in rlist:
                 self.__pubmedInfoMap[info['pdbx_database_id_PubMed']] = info
             #
         #
@@ -167,8 +167,8 @@ if __name__ == '__main__':
     print('idlist=' + str(len(idlist)))
     cf = FetchMP(idList=idlist, log=sys.stderr, verbose=False)
     cf.run()
-    dir = cf.getPubmedInfoMap()
-    print('dir=' + str(len(dir)))
+    pdir = cf.getPubmedInfoMap()
+    print('dir=' + str(len(pdir)))
     #
     # for k,v in dir.items():
     #    print v
