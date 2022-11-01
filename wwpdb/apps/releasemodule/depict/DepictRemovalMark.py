@@ -60,7 +60,7 @@ class DepictRemovalMark(object):
         text = ''
         flag = True
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
-        for dir in self.__resultList:
+        for dir in self.__resultList:  # pylint: disable=redefined-builtin
             myD = {}
             myD['structure_id'] = dir['structure_id']
             myD['comb_ids'] = dir['comb_ids']
@@ -84,10 +84,10 @@ class DepictRemovalMark(object):
             #
             if pubmed_id_list:
                 table_rows = ''
-                for id in pubmed_id_list:
+                for pmid in pubmed_id_list:
                     myD1 = {}
                     myD1['structure_id'] = dir['structure_id']
-                    myD1['pubmed_id'] = id
+                    myD1['pubmed_id'] = pmid
                     table_rows += self.__processTemplate('citation_finder/remove_marked_pubmed_row_tmplt.html', myD1)
                 #
                 myD['table_rows'] = table_rows
@@ -98,7 +98,7 @@ class DepictRemovalMark(object):
         #
         return text
 
-    def __processTemplate(self, fn, parameterDict={}):
+    def __processTemplate(self, fn, parameterDict=None):
         """ Read the input HTML template data file and perform the key/value substitutions in the
             input parameter dictionary.
 
@@ -110,6 +110,8 @@ class DepictRemovalMark(object):
             :Returns:
                 string representing entirety of content with subsitution placeholders now replaced with data
         """
+        if parameterDict is None:
+            parameterDict = {}
         tPath = self.__reqObj.getValue("TemplatePath")
         fPath = os.path.join(tPath, fn)
         ifh = open(fPath, 'r')

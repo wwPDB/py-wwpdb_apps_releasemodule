@@ -155,7 +155,7 @@ def ModelReleaseOption(dataDict, selectedOptions, citationFlag, newReleaseFlag, 
         #
     #
     if not val_list:
-        '', False, ''
+        '', False, ''  # pylint: disable=pointless-statement
     #
     if selectedOptions:
         value = ''

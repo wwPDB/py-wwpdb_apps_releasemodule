@@ -182,7 +182,7 @@ class DepictCitationForm(DepictBase):
                 text += self._processTemplate('citation_request/author_form_tmplt.html', myD)
             #
         #
-        for i in range(0, diff_num):
+        for _i in range(0, diff_num):
             count += 1
             myD = {}
             myD['count'] = str(count)
