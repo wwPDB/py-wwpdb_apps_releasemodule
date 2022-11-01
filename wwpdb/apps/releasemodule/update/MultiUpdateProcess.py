@@ -74,8 +74,8 @@ class MultiUpdateProcess(UpdateBase):
         mpu = MultiProcUtil(verbose=True)
         mpu.set(workerObj=self, workerMethod='runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)
-        ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
-                                                        numResults=1)
+        _ok, _failList, _retLists, _diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+                                                            numResults=1)
         #
         if self.__task == 'Entries in release pending':
             self.__getReturnContentForPullEntries()
@@ -101,16 +101,16 @@ class MultiUpdateProcess(UpdateBase):
         mpu = MultiProcUtil(verbose=True)
         mpu.set(workerObj=self, workerMethod='runMultiProcess')
         mpu.setWorkingDir(self._sessionPath)
-        ok, failList, retLists, diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
-                                                        numResults=1)
+        _ok, _failList, _retLists, _diagList = mpu.runMulti(dataList=self.__updateList, numProc=self.__numProc,
+                                                            numResults=1)
         #
         dbLoadFileList = []
         updatedEntryList = []
         for entryData in self.__updateList:
             pickleData = self._loadLocalEntryPickle(entryData['entry'])
             #
-            entryContent, entrySysError, status = self._generateReturnContent(entryData, pickleData['messages'],
-                                                                              pickleData['file_status'])
+            _entryContent, _entrySysError, status = self._generateReturnContent(entryData, pickleData['messages'],
+                                                                                pickleData['file_status'])
             if status != 'OK':
                 continue
             #
@@ -133,7 +133,7 @@ class MultiUpdateProcess(UpdateBase):
         #
         return updatedEntryList
 
-    def runMultiProcess(self, dataList, procName, optionsD, workingDir):
+    def runMultiProcess(self, dataList, procName, optionsD, workingDir):  # pylint: disable=unused-argument
         """
         """
         statusDbUtil = StatusDbApi(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
@@ -215,8 +215,8 @@ class MultiUpdateProcess(UpdateBase):
             self.__returnContent += ': '
             #
             pickleData = self._loadLocalEntryPickle(entryData['entry'])
-            entryContent, entrySysError, status = self._generateReturnContent({}, pickleData['messages'],
-                                                                              pickleData['file_status'])
+            entryContent, _entrySysError, _status = self._generateReturnContent({}, pickleData['messages'],
+                                                                                pickleData['file_status'])
             self.__returnContent += entryContent
         #
 
@@ -267,7 +267,7 @@ class MultiUpdateProcess(UpdateBase):
             elif status == 'BLOCKED':
                 allContents += '<span style="color:red">BLOCKED</span>'
             #
-            selectText, selectMap = self._getReleaseOptionFromPickle(pickleData)
+            selectText, _selectMap = self._getReleaseOptionFromPickle(pickleData)
             allContents += '\n\nRelease Option: ' + selectText + entryContent
             for error in entrySysError:
                 if error not in allSysErrors:
@@ -301,7 +301,7 @@ class MultiUpdateProcess(UpdateBase):
         else:
             self.__returnContent = str(self._reqObj.getValue('task'))
             if allSysErrors:
-                msgType, msgText = self._getConcatMessageContent(allSysErrors)
+                _msgType, msgText = self._getConcatMessageContent(allSysErrors)
                 self.__returnContent += '\n\nSystem related error:\n' + msgText
             #
             if allContents:

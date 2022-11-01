@@ -186,11 +186,11 @@ class CitationFormParser(InputFormParser):
                 self._errorContent += 'No pubmed information for ID: ' + id_list[0] + '.\n'
                 continue
             #
-            dir = pubmedInfoMap[id_list[0]]
-            dir['type'] = 'checkbox'
-            dir['citation_id'] = id_list[1]
-            dir['ordinal'] = id_list[2]
-            self.__pubmedList.append(dir)
+            pdir = pubmedInfoMap[id_list[0]]
+            pdir['type'] = 'checkbox'
+            pdir['citation_id'] = id_list[1]
+            pdir['ordinal'] = id_list[2]
+            self.__pubmedList.append(pdir)
         #
 
     def __getCitationInfo(self):
@@ -213,36 +213,36 @@ class CitationFormParser(InputFormParser):
             if self.__manualFlag == 'yes':
                 entry['citation'] = self.__getSelectedCitation(clist, alist)
             else:
-                list, map = self.__mergeCitationInfo(clist, alist)
-                entry['citation_id'] = list
-                entry['auth_citation'] = map
+                m_list, m_map = self.__mergeCitationInfo(clist, alist)
+                entry['citation_id'] = m_list
+                entry['auth_citation'] = m_map
             #
         #
 
     def __getSelectedCitation(self, clist, alist):
         c_map = {}
-        for dir in clist:
-            if dir['jrnl_serial_no'] == 1:
+        for c_dir in clist:
+            if c_dir['jrnl_serial_no'] == 1:
                 citation_id = 'primary'
             else:
-                citation_id = str(dir['jrnl_serial_no'] - 1)
+                citation_id = str(c_dir['jrnl_serial_no'] - 1)
             if citation_id == self.__citation_id:
-                c_map = dir
+                c_map = c_dir
                 break
             #
         #
         if c_map:
-            list = []
-            for dir in alist:
-                if ('citation_id' not in dir) or ('name' not in dir) or (not dir['name']):
+            list = []  # pylint: disable=redefined-builtin
+            for c_dir in alist:
+                if ('citation_id' not in c_dir) or ('name' not in c_dir) or (not c_dir['name']):
                     continue
                 #
-                if dir['citation_id'] == self.__citation_id:
+                if c_dir['citation_id'] == self.__citation_id:
                     myD = {}
                     for item in ('name', 'orcid'):
                         myD[item] = ''
-                        if (item in dir) and dir[item]:
-                            myD[item] = dir[item]
+                        if (item in c_dir) and c_dir[item]:
+                            myD[item] = c_dir[item]
                         #
                     #
                     list.append(myD)
@@ -256,15 +256,15 @@ class CitationFormParser(InputFormParser):
         return c_map
 
     def __mergeCitationInfo(self, clist, alist):
-        map = {}
-        for dir in alist:
+        map = {}  # pylint: disable=redefined-builtin
+        for dir in alist:  # pylint: disable=redefined-builtin
             if dir['citation_id'] in map:
                 map[dir['citation_id']] += ',' + dir['name']
             else:
                 map[dir['citation_id']] = dir['name']
             #
         #
-        list = []
+        list = []  # pylint: disable=redefined-builtin
         c_map = {}
         for dir in clist:
             if int(dir['jrnl_serial_no']) == 1:
@@ -290,9 +290,9 @@ class CitationFormParser(InputFormParser):
         allow_citation_ids = self.__getAllowCitationIDs()
         #
         for entry in self._entryList:
-            list, cid_map = self.__getSortCitationID(entry['citation_id'], allow_citation_ids)
+            list, cid_map = self.__getSortCitationID(entry['citation_id'], allow_citation_ids)  # pylint: disable=redefined-builtin
             p_map = {}
-            for dir in self.__pubmedList:
+            for dir in self.__pubmedList:  # pylint: disable=redefined-builtin
                 if dir['citation_id'] in cid_map:
                     p_map[dir['citation_id']] = dir
                 elif dir['ordinal'] < 11:
@@ -318,30 +318,30 @@ class CitationFormParser(InputFormParser):
             entry['pubmed'] = p_map
         #
 
-    def __getSortCitationID(self, list, allow_citation_ids):
+    def __getSortCitationID(self, list_in, allow_citation_ids):
         sort_cid_list = []
         cid_map = {}
-        if not list:
+        if not list_in:
             return sort_cid_list, cid_map
         #
-        for id in list:
-            if id in allow_citation_ids:
-                order = allow_citation_ids[id]
+        for lid in list_in:
+            if lid in allow_citation_ids:
+                order = allow_citation_ids[lid]
             else:
-                order = int(id) + 10
+                order = int(lid) + 10
             list1 = []
-            list1.append(id)
+            list1.append(lid)
             list1.append(order)
             sort_cid_list.append(list1)
-            cid_map[id] = order
+            cid_map[lid] = order
         #
         if len(sort_cid_list) > 1:
             sort_cid_list.sort(key=operator.itemgetter(1))
         #
         return sort_cid_list, cid_map
 
-    def __getPubmedInfoCopy(self, dir, sort_cid_list):
-        p_dir = copy.deepcopy(dir)
+    def __getPubmedInfoCopy(self, srcdir, sort_cid_list):
+        p_dir = copy.deepcopy(srcdir)
         order = 0
         if sort_cid_list:
             order = sort_cid_list[-1][1] + 1
@@ -352,7 +352,7 @@ class CitationFormParser(InputFormParser):
         # citation_id = str(order - 10)
         p_dir['citation_id'] = str(order - 10)
         p_dir['ordinal'] = order
-        list = []
-        list.append(p_dir['citation_id'])
-        list.append(order)
-        return p_dir, list
+        rlist = []
+        rlist.append(p_dir['citation_id'])
+        rlist.append(order)
+        return p_dir, rlist

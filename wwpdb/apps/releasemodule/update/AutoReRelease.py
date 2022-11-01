@@ -148,7 +148,7 @@ class AutoReRelease(object):
         entryList = []
         entryIdMap = {}
         pubmedInfoMap = {}
-        for ann, dataList in annotEntryMap.items():
+        for _ann, dataList in annotEntryMap.items():
             for dataDict in dataList:
                 if ("status_code" not in dataDict) or (dataDict["status_code"] != "REL"):
                     continue

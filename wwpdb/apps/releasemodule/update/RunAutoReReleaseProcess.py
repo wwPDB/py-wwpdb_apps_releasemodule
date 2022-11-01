@@ -11,6 +11,8 @@ from wwpdb.apps.releasemodule.update.AutoReRelease import AutoReRelease
 
 logger = logging.getLogger()
 
+# pylint: disable=logging-format-interpolation
+
 
 def make_directory(my_directory):
     if not os.path.exists(my_directory):
@@ -19,7 +21,6 @@ def make_directory(my_directory):
 
 
 class CitationUpdate:
-
     def __init__(self, site_id=None):
         self.wwpdb_site = site_id if site_id else getSiteId()
         cICommon = ConfigInfoAppCommon(self.wwpdb_site)

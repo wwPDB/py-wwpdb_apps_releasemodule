@@ -246,44 +246,44 @@ class EmReleaseUtil(EntryUpdateBase):
         #
         return status, error
 
-    """
-    def __cif2xmlTranslate(self, ciffile, xmlfile):
-        logFile = 'convert_em_xml_' + self._entryId + '.log'
-        self._removeFile(os.path.join(self._sessionPath, logFile))
-        logger = logging.getLogger()
-        logging.captureWarnings(True)
-        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(module)s - %(message)s")
-        handler = logging.FileHandler(os.path.join(self._sessionPath, logFile))
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logging.info("Starting conversion for %s " % ciffile)
-        #
-        try:
-            translator = CifEMDBTranslator()
-            translator.readCifFile(ciffile)
-            translator.translateCif2Xml()
-            translator.writeXmlFile(xmlfile)
-        except:  # noqa: E722 pylint: disable=bare-except
-            logging.info("Map header translation failed for %s" % ciffile)
-            self._lfh.write("+EmReleaseUtil.__cif2xmlTranslate failing for %s\n" % ciffile)
-            se = traceback.format_exc()
-            self._lfh.write("+EmReleaseUtil.__cif2xmlTranslate %s\n" % se)
-        #
-        status = 'failed'
-        if os.access(xmlfile, os.F_OK):
-            status = 'ok'
-        #
-        error = ''
-        if os.access(os.path.join(self._sessionPath, logFile), os.F_OK):
-            ifh = open(os.path.join(self._sessionPath, logFile), 'r')
-            error = ifh.read()
-            ifh.close()
-        #
-        if (not error) and status == 'failed':
-            error = 'CifEMDBTranslator failed without error message'
-        #
-        return status,error
-    """
+    # """
+    # def __cif2xmlTranslate(self, ciffile, xmlfile):
+    #     logFile = 'convert_em_xml_' + self._entryId + '.log'
+    #     self._removeFile(os.path.join(self._sessionPath, logFile))
+    #     logger = logging.getLogger()
+    #     logging.captureWarnings(True)
+    #     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(module)s - %(message)s")
+    #     handler = logging.FileHandler(os.path.join(self._sessionPath, logFile))
+    #     handler.setFormatter(formatter)
+    #     logger.addHandler(handler)
+    #     logging.info("Starting conversion for %s " % ciffile)
+    #     #
+    #     try:
+    #         translator = CifEMDBTranslator()
+    #         translator.readCifFile(ciffile)
+    #         translator.translateCif2Xml()
+    #         translator.writeXmlFile(xmlfile)
+    #     except:  # noqa: E722 pylint: disable=bare-except
+    #         logging.info("Map header translation failed for %s" % ciffile)
+    #         self._lfh.write("+EmReleaseUtil.__cif2xmlTranslate failing for %s\n" % ciffile)
+    #         se = traceback.format_exc()
+    #         self._lfh.write("+EmReleaseUtil.__cif2xmlTranslate %s\n" % se)
+    #     #
+    #     status = 'failed'
+    #     if os.access(xmlfile, os.F_OK):
+    #         status = 'ok'
+    #     #
+    #     error = ''
+    #     if os.access(os.path.join(self._sessionPath, logFile), os.F_OK):
+    #         ifh = open(os.path.join(self._sessionPath, logFile), 'r')
+    #         error = ifh.read()
+    #         ifh.close()
+    #     #
+    #     if (not error) and status == 'failed':
+    #         error = 'CifEMDBTranslator failed without error message'
+    #     #
+    #     return status,error
+    # """
 
     def __getAdditionalFilePartNumber(self):
         storagePath = os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive', self._entryId)
