@@ -485,5 +485,5 @@ if __name__ == '__main__':
     cf = CitationFinder(siteId=sys.argv[1], path=sys.argv[2], output=sys.argv[3], log=sys.stderr, verbose=False)
     cf.searchPubmed()
     endTime = time.time()
-    diffTime = endTime - startTime
-    print(diffTime)
+    ldiffTime = endTime - startTime
+    print(ldiffTime)

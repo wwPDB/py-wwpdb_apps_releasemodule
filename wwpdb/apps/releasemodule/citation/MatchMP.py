@@ -57,11 +57,11 @@ class MatchWorker(multiprocessing.Process):
             #
             resultList = []
             for entry in nextList:
-                list = self.getMatchList(entry)
-                if not list:
+                mlist = self.getMatchList(entry)
+                if not mlist:
                     continue
                 #
-                resultList.append([entry['structure_id'], list])
+                resultList.append([entry['structure_id'], mlist])
             #
             self.__resultQueue.put(resultList)
         #
@@ -106,8 +106,8 @@ class MatchMP(object):
             if not lists:
                 continue
             #
-            for list in lists:
-                self.__matchResultMap[list[0]] = list[1]
+            for reslist in lists:
+                self.__matchResultMap[reslist[0]] = reslist[1]
             #
         #
         try:
