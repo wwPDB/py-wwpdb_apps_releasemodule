@@ -44,7 +44,7 @@ setup(
     #
     install_requires=['mmcif', 'wwpdb.apps.msgmodule', 'wwpdb.apps.wf_engine',
                       'wwpdb.io', 'wwpdb.utils.config ~= 0.24', 'wwpdb.utils.dp',
-                      'wwpdb.utils.emdb>=0.17.dev1', 'wwpdb.utils.session',
+                      'wwpdb.utils.emdb ~= 1.0', 'wwpdb.utils.session',
                       'wwpdb.utils.wf', 'mmcif.utils', 'wwpdb.utils.db >= 0.8',
                       'rcsb.utils.multiproc'],
     packages=find_packages(exclude=['wwpdb.apps.tests-releasemodule',

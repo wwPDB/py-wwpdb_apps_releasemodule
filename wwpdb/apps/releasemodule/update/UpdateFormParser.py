@@ -24,6 +24,7 @@ __version__ = "V0.07"
 import os
 import sys
 import traceback
+from operator import itemgetter
 
 from wwpdb.apps.releasemodule.citation.FetchResultParser import UniCodeHandler
 from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
@@ -389,22 +390,51 @@ class UpdateFormParser(object):
         val = str(self.__reqObj.getValue('max_author_num'))
         if val:
             max_author_num = int(val)
-            t_list = []
             author_list = []
+            orderMap = {}
             for i in range(0, max_author_num):
-                # name = str(self.__reqObj.getValue('name_' + str(i + 1)))
-                name = self.__codeHandler.process(self.__reqObj.getRawValue('name_' + str(i + 1)), False)
-                if not name:
+                order = str(self.__reqObj.getValue('order_' + str(i + 1)))
+                try:
+                    int_order = int(order)
+                except:
+                    self.__errorContent += "Author ordinal number '" + order + "' is not an integer.\n"
                     continue
                 #
-                t_list.append(name)
+                if int_order < 1:
+                    continue
                 #
-                orcid = str(self.__reqObj.getValue('orcid_' + str(i + 1)))
+                name = self.__codeHandler.process(self.__reqObj.getRawValue('name_' + str(i + 1)), False)
+                orcid = str(self.__reqObj.getValue('orcid_' + str(i + 1))).strip()
+                if not name:
+                    if orcid:
+                        self.__errorContent += "For 'Author " + order + "', there is orcid ID without name.\n"
+                    #
+                    continue
+                #
+                if int_order in orderMap:
+                    orderMap[int_order] += 1
+                else:
+                    orderMap[int_order] = 1
+                #
+                #
                 a_dir = {}
+                a_dir['order'] = int_order
                 a_dir['id'] = citation['id']
                 a_dir['name'] = name
                 a_dir['orcid'] = orcid
                 author_list.append(a_dir)
+            #
+            for key,val in orderMap.items():
+                if val > 1:
+                    self.__errorContent += "There are " + str(val) + " 'Author " + str(key) + "'.\n"
+                #
+            #
+            if len(author_list) > 1:
+                author_list.sort(key=itemgetter('order'))
+            #
+            t_list = []
+            for a_dir in author_list:
+                t_list.append(a_dir['name'])
             #
             if t_list:
                 citation['author'] = '|'.join(t_list)
