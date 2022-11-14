@@ -30,14 +30,14 @@ class MatchUtil(object):
     """
     """
 
-    def __init__(self, entry=None, termMap=None, pubmedInfo=None, log=sys.stderr, verbose=False):
+    def __init__(self, entry=None, termMap=None, pubmedInfo=None, log=sys.stderr, verbose=False):  # pylint: disable=unused-argument
         """ Initial MatchUtil class
         """
         self.__entry = entry
         self.__termMap = termMap
         self.__pubmedInfo = pubmedInfo
-        self.__lfh = log
-        self.__verbose = verbose
+        # self.__lfh = log
+        # self.__verbose = verbose
         self.__pubmedMatchList = []
 
     def run(self):
@@ -58,30 +58,30 @@ class MatchUtil(object):
 
     def _getUniquePubmedIdList(self):
         idlist = []
-        map = {}
+        t_map = {}
         for term in self.__entry['pubmed_author']:
             if term not in self.__termMap:
                 continue
             #
-            for id in self.__termMap[term]:
-                if id in map:
+            for t_id in self.__termMap[term]:
+                if t_id in t_map:
                     continue
                 #
-                map[id] = 'y'
-                idlist.append(id)
+                t_map[t_id] = 'y'
+                idlist.append(t_id)
             #
         return idlist
 
     def _findMatchList(self, idlist):
-        for id in idlist:
-            if id not in self.__pubmedInfo:
+        for p_id in idlist:
+            if p_id not in self.__pubmedInfo:
                 continue
             sim = calStringSimilarity(self.__entry['c_title'],
-                                      self.__pubmedInfo[id]['title'])
+                                      self.__pubmedInfo[p_id]['title'])
             if sim < 0.5:
                 continue
             #
-            self.__pubmedMatchList.append([id, '%.3f' % sim])
+            self.__pubmedMatchList.append([p_id, '%.3f' % sim])
         #
         if len(self.__pubmedMatchList) < 2:
             return

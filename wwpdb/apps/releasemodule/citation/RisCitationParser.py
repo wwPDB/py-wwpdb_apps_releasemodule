@@ -200,8 +200,8 @@ class RisCitationParser(object):
 
 
 if __name__ == "__main__":
-    parser = RisCitationParser(sys.argv[1])
-    citDict = parser.getCitationData()
+    rparser = RisCitationParser(sys.argv[1])
+    citDict = rparser.getCitationData()
     for key, c_val in citDict.items():
         sys.stderr.write("%r=%r\n" % (key, c_val))
     #

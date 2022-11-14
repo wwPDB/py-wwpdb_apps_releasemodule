@@ -29,6 +29,7 @@ from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.utils.config.ConfigInfoData import ConfigInfoData
 from wwpdb.utils.emdb.cif_emdb_translator.cif_emdb_translator import CifEMDBTranslator
 
+
 class EmReleaseUtil(EntryUpdateBase):
     """ Class responsible for release/pull off entries
     """

@@ -51,8 +51,8 @@ class SearchResultParser(object):
         if len(entryList) > 0:
             for entry in entryList:
                 if entry.firstChild:
-                    id = str(entry.firstChild.data)
-                    idlist.append(id)
+                    d_id = str(entry.firstChild.data)
+                    idlist.append(d_id)
                 #
             #
         #
@@ -61,5 +61,5 @@ class SearchResultParser(object):
 
 if __name__ == "__main__":
     parser = SearchResultParser(sys.argv[1])
-    list = parser.getIdList()
-    print(list)
+    clist = parser.getIdList()
+    print(clist)

@@ -396,7 +396,7 @@ class UpdateFormParser(object):
                 order = str(self.__reqObj.getValue('order_' + str(i + 1)))
                 try:
                     int_order = int(order)
-                except:
+                except:  # noqa: E722 pylint: disable=bare-except
                     self.__errorContent += "Author ordinal number '" + order + "' is not an integer.\n"
                     continue
                 #
@@ -424,7 +424,7 @@ class UpdateFormParser(object):
                 a_dir['orcid'] = orcid
                 author_list.append(a_dir)
             #
-            for key,val in orderMap.items():
+            for key, val in orderMap.items():
                 if val > 1:
                     self.__errorContent += "There are " + str(val) + " 'Author " + str(key) + "'.\n"
                 #
