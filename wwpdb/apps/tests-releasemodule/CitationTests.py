@@ -45,7 +45,7 @@ class CitationTests(unittest.TestCase):
     def testFetch(self):
         """Test fetch author"""
         idList = ['30357411', '96883512', '29174494', '28190782']
-        pFetch = FetchMP(siteId=self.__siteId, idList=idList, path=TESTOUTPUT)
+        pFetch = FetchMP(siteId=self.__siteId, idList=idList, path=TESTOUTPUT, verbose=True)
         pFetch.run()
         pubmedInfo = pFetch.getPubmedInfoMap()
         self.assertNotEqual(pubmedInfo, {}, "Failed to fetch info from NCBI")

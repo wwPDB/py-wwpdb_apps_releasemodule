@@ -182,6 +182,8 @@ def RunScript(path, script, log):
     """
     cmd = 'cd ' + path + '; chmod 755 ' + script \
         + '; ./' + script + ' >& ' + log
+    print("XXXX cmd is ", cmd)
+    print("XXXX log is ", log)
     os.system(cmd)
 
 

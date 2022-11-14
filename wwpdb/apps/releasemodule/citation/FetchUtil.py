@@ -111,6 +111,7 @@ class FetchUtil(object):
         # Speed limit requests
         if self.__mpl:
             self.__mpl.waitnext()
+        print("XXXX about to run script", scriptfile)
         RunScript(self.__sessionPath, scriptfile, logfile)
         self._readFetchResultXml(xmlfile)
 
