@@ -181,6 +181,7 @@ def RunScript(path, script, log):
     """Run script command
     """
     cmd = 'cd ' + path + '; chmod 755 ' + script \
+        + "; echo $SHELL " \
         + '; ./' + script + ' >& ' + log
     print("XXXX cmd is ", cmd)
     print("XXXX log is ", log)
