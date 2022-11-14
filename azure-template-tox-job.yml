@@ -119,6 +119,9 @@ jobs:
           sudo ss -tulpn
         displayName: "Start Mongo service"
       #
+    - ${{ if and(contains(parameters.fixtures, 'tcsh'), startsWith(parameters.os, 'linux')) }}:
+      - script: sudo apt-get install tcsh
+        displayName: 'Install tcsh'
     #
     - script: "python -c \"import sys; print(sys.version); print(sys.executable)\""
       displayName: show python information
