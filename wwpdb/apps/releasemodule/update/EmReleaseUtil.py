@@ -25,13 +25,9 @@ import os
 import sys
 import traceback
 
-from mmcif_utils.trans.InstanceMapper import InstanceMapper
-from wwpdb.utils.config.ConfigInfoData import ConfigInfoData
-from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppEm
-from wwpdb.utils.emdb.cif_emdb_translator.cif_emdb_translator import CifEMDBTranslator
-
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
-
+from wwpdb.utils.config.ConfigInfoData import ConfigInfoData
+from wwpdb.utils.emdb.cif_emdb_translator.cif_emdb_translator import CifEMDBTranslator
 
 class EmReleaseUtil(EntryUpdateBase):
     """ Class responsible for release/pull off entries
@@ -170,40 +166,22 @@ class EmReleaseUtil(EntryUpdateBase):
             #    return
             #
         #
-        emdfile = os.path.join(self._sessionPath, self.__embdId + '.cif')
-        self._removeFile(emdfile)
+        xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v3.xml')
+        self._removeFile(xmlfile)
         #
-        im = InstanceMapper(verbose=self._verbose, log=self._lfh)
-        cIA = ConfigInfoAppEm(self._siteId)
-        im.setMappingFilePath(cIA.get_emd_mapping_file_path())
-        ok = im.translate(modelfile, emdfile, mode="src-dst")
-        if ok:
-            xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v3.xml')
-            # xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v2.xml')
+        status, error = self.__cif2xmlTranslate(modelfile, xmlfile, validateFlag)
+        if validateFlag:
             self._removeFile(xmlfile)
-            #
-            status, error = self.__cif2xmlTranslate(emdfile, xmlfile, validateFlag)
-            if validateFlag:
-                self._removeFile(xmlfile)
-            #
-            if status == 'failed':
-                self._insertEntryMessage(errType='em', errMessage='emd -> xml translation failed:\n' + error)
-                # self._insertEntryMessage(errType='em', errMessage='emd -> xml translation failed:\n' + error, messageType='warning')
-            elif error.find('ERROR') != -1:
-                self._insertEntryMessage(errType='em', errMessage=error)
-            elif error.find('WARNING') != -1:
-                self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v3.xml', 'header', False)
-                self._insertEntryMessage(errType='em', errMessage=error, messageType='warning')
-            else:
-                self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v3.xml', 'header', False)
-                # self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v2.xml', 'header', False)
-                # if (error.find('- WARNING -') != -1) or (error.find('- ERROR -') != -1):
-                #     self._insertEntryMessage(errType='em', errMessage=error, messageType='warning')
-                #
-            #
+        #
+        if status == 'failed':
+            self._insertEntryMessage(errType='em', errMessage='emd -> xml translation failed:\n' + error)
+        elif error.find('ERROR') != -1:
+            self._insertEntryMessage(errType='em', errMessage=error)
+        elif error.find('WARNING') != -1:
+            self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v3.xml', 'header', False)
+            self._insertEntryMessage(errType='em', errMessage=error, messageType='warning')
         else:
-            self._insertEntryMessage(errType='em', errMessage='em -> emd translation failed.')
-            # self._insertEntryMessage(errType='em', errMessage='em -> emd translation failed.', messageType='warning')
+            self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v3.xml', 'header', False)
         #
 
     def __cif2xmlTranslate(self, ciffile, xmlfile, validateFlag):
@@ -245,45 +223,6 @@ class EmReleaseUtil(EntryUpdateBase):
             error = 'CifEMDBTranslator failed without error message'
         #
         return status, error
-
-    # """
-    # def __cif2xmlTranslate(self, ciffile, xmlfile):
-    #     logFile = 'convert_em_xml_' + self._entryId + '.log'
-    #     self._removeFile(os.path.join(self._sessionPath, logFile))
-    #     logger = logging.getLogger()
-    #     logging.captureWarnings(True)
-    #     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(module)s - %(message)s")
-    #     handler = logging.FileHandler(os.path.join(self._sessionPath, logFile))
-    #     handler.setFormatter(formatter)
-    #     logger.addHandler(handler)
-    #     logging.info("Starting conversion for %s " % ciffile)
-    #     #
-    #     try:
-    #         translator = CifEMDBTranslator()
-    #         translator.readCifFile(ciffile)
-    #         translator.translateCif2Xml()
-    #         translator.writeXmlFile(xmlfile)
-    #     except:  # noqa: E722 pylint: disable=bare-except
-    #         logging.info("Map header translation failed for %s" % ciffile)
-    #         self._lfh.write("+EmReleaseUtil.__cif2xmlTranslate failing for %s\n" % ciffile)
-    #         se = traceback.format_exc()
-    #         self._lfh.write("+EmReleaseUtil.__cif2xmlTranslate %s\n" % se)
-    #     #
-    #     status = 'failed'
-    #     if os.access(xmlfile, os.F_OK):
-    #         status = 'ok'
-    #     #
-    #     error = ''
-    #     if os.access(os.path.join(self._sessionPath, logFile), os.F_OK):
-    #         ifh = open(os.path.join(self._sessionPath, logFile), 'r')
-    #         error = ifh.read()
-    #         ifh.close()
-    #     #
-    #     if (not error) and status == 'failed':
-    #         error = 'CifEMDBTranslator failed without error message'
-    #     #
-    #     return status,error
-    # """
 
     def __getAdditionalFilePartNumber(self):
         storagePath = os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive', self._entryId)
