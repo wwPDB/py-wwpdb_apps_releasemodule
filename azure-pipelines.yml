@@ -30,9 +30,9 @@ jobs:
   - template: azure-template-tox-job.yml
     parameters: {tox: 'lint_pylint', python: '3.10', os: 'linux'}
   - template: azure-template-tox-job.yml
-    parameters: {tox: 'test_coverage', python: '3.10', os: 'linux', fixtures: 'tcsh'}
+    parameters: {tox: 'test_coverage', python: '3.10', os: 'linux', fixtures: 'tcsh,curl'}
   - template: azure-template-tox-job.yml
-    parameters: {tox: 'py310', python: '3.10', os: 'linux', fixtures: 'tcsh'}
+    parameters: {tox: 'py310', python: '3.10', os: 'linux', fixtures: 'tcsh,curl'}
   #
   - template: azure-template-publish-job.yml
     parameters: {tox: 'py310', python: '3.10', os: 'linux'}

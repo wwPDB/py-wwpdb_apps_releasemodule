@@ -122,6 +122,9 @@ jobs:
     - ${{ if and(contains(parameters.fixtures, 'tcsh'), startsWith(parameters.os, 'linux')) }}:
       - script: sudo apt-get install tcsh
         displayName: 'Install tcsh'
+    - ${{ if and(contains(parameters.fixtures, 'curl'), startsWith(parameters.os, 'linux')) }}:
+      - script: sudo apt-get install curl
+        displayName: 'Install curl'
     #
     - script: "python -c \"import sys; print(sys.version); print(sys.executable)\""
       displayName: show python information
