@@ -15,7 +15,7 @@ __version__ = "V0.01"
 import os
 import unittest
 import sys
-
+from unittest.mock import patch
 
 if __package__ is None or __package__ == "":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,9 +27,28 @@ from wwpdb.apps.releasemodule.citation.SearchMP import SearchMP
 from wwpdb.apps.releasemodule.citation.FetchMP import FetchMP
 
 
+def RunReplace(path, script, log):
+    """This is for ubuntu in which /bin/sh is not bash.... Eventually fix code"""
+    cmd = 'cd ' + path + '; chmod 755 ' + script \
+        + '; ./' + script + ' > ' + log + " 2>&1"
+    os.system(cmd)
+
+
 class CitationTests(unittest.TestCase):
     def setUp(self):
         self.__siteId = 'WWPDB_DEPLOY_TEST'
+        self.__ubuntucompat = True
+        if self.__ubuntucompat:
+            # self.__mocks = [patch("wwpdb.apps.releasemodule.utils.Utility.RunScript", RunReplace)]
+            self.__mocks = [patch("wwpdb.apps.releasemodule.citation.FetchUtil.RunScript", RunReplace)]
+
+            for mock in self.__mocks:
+                mock.start()
+
+    def tearDown(self):
+        if self.__ubuntucompat:
+            for mock in self.__mocks:
+                mock.stop()
 
     def testSearch(self):
         """Test search for an author"""
