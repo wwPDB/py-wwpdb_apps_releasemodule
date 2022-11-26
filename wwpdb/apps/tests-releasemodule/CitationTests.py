@@ -32,6 +32,7 @@ def RunReplace(path, script, log):
     cmd = 'cd ' + path + '; chmod 755 ' + script \
         + '; ./' + script + ' > ' + log + " 2>&1"
     os.system(cmd)
+    sys.stderr.write("RunReplaceXXXXX %s\n" % cmd)
 
 
 class CitationTests(unittest.TestCase):
