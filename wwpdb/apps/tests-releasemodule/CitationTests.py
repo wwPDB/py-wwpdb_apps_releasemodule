@@ -42,6 +42,7 @@ class CitationTests(unittest.TestCase):
         if self.__ubuntucompat:
             # self.__mocks = [patch("wwpdb.apps.releasemodule.utils.Utility.RunScript", RunReplace)]
             self.__mocks = [patch("wwpdb.apps.releasemodule.citation.FetchUtil.RunScript", RunReplace)]
+            self.__mocks.append(patch("wwpdb.apps.releasemodule.citation.SearchUtil.RunScript", RunReplace))
 
             for mock in self.__mocks:
                 mock.start()
