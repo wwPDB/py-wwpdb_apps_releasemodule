@@ -102,7 +102,7 @@ class EmReleaseUtil(EntryUpdateBase):
         if self._blockErrorFlag or self._blockEmErrorFlag:
             return
         #
-        self.__generateEMapHeader(validateFlag=True)
+        self.__generateEMapHeader(removeFlag=True)
         #
         self._dumpLocalPickle()
 
@@ -156,7 +156,7 @@ class EmReleaseUtil(EntryUpdateBase):
         #
         return ciD['CONTENT_TYPE_DICTIONARY']['em-volume']
 
-    def __generateEMapHeader(self, validateFlag=False):
+    def __generateEMapHeader(self, validateFlag=True, removeFlag=False):
         modelfile = os.path.join(self._sessionPath, self._entryId + self._fileTypeList[0][0])
         if not os.access(modelfile, os.F_OK):
             return
@@ -170,7 +170,7 @@ class EmReleaseUtil(EntryUpdateBase):
         self._removeFile(xmlfile)
         #
         status, error = self.__cif2xmlTranslate(modelfile, xmlfile, validateFlag)
-        if validateFlag:
+        if removeFlag:
             self._removeFile(xmlfile)
         #
         if status == 'failed':
