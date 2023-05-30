@@ -65,14 +65,14 @@ class SearchWorker(multiprocessing.Process):
             #
             resultList = []
             for term in nextList:
-                list = self.fetchEntryList(term)
-                if not list:
+                f_list = self.fetchEntryList(term)
+                if not f_list:
                     continue
                 #
-                dir = {}
-                dir['term'] = term
-                dir['id'] = list
-                resultList.append(dir)
+                tdir = {}
+                tdir['term'] = term
+                tdir['id'] = f_list
+                resultList.append(tdir)
             #
             self.__resultQueue.put(resultList)
         #
@@ -129,12 +129,12 @@ class SearchMP(object):
             taskQueue.put(None)
         #
         for i in range(len(subLists)):
-            list = resultQueue.get()
-            if not list:
+            rqlist = resultQueue.get()
+            if not rqlist:
                 continue
             #
-            for dir in list:
-                self.__termMap[dir['term']] = dir['id']
+            for rqdir in rqlist:
+                self.__termMap[rqdir['term']] = rqdir['id']
             #
         #
         try:
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     print('termlist=' + str(len(termlist)))
     cf = SearchMP(termList=termlist, log=sys.stderr, verbose=False)
     cf.run()
-    dir = cf.getTermMap()
-    print('dir=' + str(len(dir)))
-    print(dir)
+    cdir = cf.getTermMap()
+    print('dir=' + str(len(cdir)))
+    print(cdir)
     #

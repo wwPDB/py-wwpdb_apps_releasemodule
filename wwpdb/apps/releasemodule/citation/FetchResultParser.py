@@ -32,6 +32,7 @@ class UniCodeHandler(object):
     """
 
     def __init__(self):
+        # pylint: disable=redundant-u-string-prefix
         self.__unicodeMapping = {
             u'\u00C0': 'A',
             u'\u00C1': 'A',
@@ -805,7 +806,7 @@ class UniCodeHandler(object):
         return data
 
     def __processUniCode(self, input_data, Mapping):
-        data = u''
+        data = u''  # pylint: disable=redundant-u-string-prefix
         for c in input_data:
             if c in Mapping:
                 data += Mapping[c]
@@ -865,7 +866,7 @@ class FetchResultParser(object):
         return infolist
 
     def _processMedlineCitationNode(self, entry):
-        id = ''
+        id = ''  # pylint: disable=redefined-builtin
         info = {}
         for node in entry.childNodes:
             if node.nodeType != node.ELEMENT_NODE:
@@ -1007,10 +1008,10 @@ class FetchResultParser(object):
                 #
                 first = pages
                 last = pages
-                list = pages.split('-')
-                if len(list) == 2:
-                    first = list[0].strip()
-                    last = list[1].strip()
+                plist = pages.split('-')
+                if len(plist) == 2:
+                    first = plist[0].strip()
+                    last = plist[1].strip()
                     if len(last) < len(first):
                         idx = len(first) - len(last)
                         last = first[0:idx] + last

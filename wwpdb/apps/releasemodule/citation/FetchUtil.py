@@ -31,14 +31,14 @@ from wwpdb.apps.releasemodule.utils.Utility import getFileName, RunScript
 class FetchUtil(object):
     """
     """
-    def __init__(self, path='.', processLabel='', idList=None, siteId=None, mpl=None, log=sys.stderr, verbose=False):
+    def __init__(self, path='.', processLabel='', idList=None, siteId=None, mpl=None, log=sys.stderr, verbose=False):  # pylint: disable=unused-argument
         """
         """
         self.__sessionPath = path
         self.__processLabel = processLabel
         self.__pubmedIdList = idList
-        self.__lfh = log
-        self.__verbose = verbose
+        # self.__lfh = log
+        # self.__verbose = verbose
         self.__pubmedInfoList = []
         # self.__pubmedInfoMap = {}
         self.__cI = ConfigInfo(siteId)
@@ -136,7 +136,7 @@ class FetchUtil(object):
 if __name__ == '__main__':
     cf = FetchUtil(idList=['23542341', '23326635'], log=sys.stderr, verbose=False)
     cf.doFetch()
-    list = cf.getPubmedInfoList()
-    print(list)
-    dir = cf.getPubmedInfoMap()
-    print(dir)
+    clist = cf.getPubmedInfoList()
+    print(clist)
+    cdir = cf.getPubmedInfoMap()
+    print(cdir)

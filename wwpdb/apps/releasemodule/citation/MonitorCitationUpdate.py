@@ -85,7 +85,7 @@ class MonitorCitationUpdate(object):
             return
         #
         foundList = []
-        for dir in self.__annotEntryMap[annotator]:
+        for dir in self.__annotEntryMap[annotator]:  # pylint: disable=redefined-builtin
             if isDEPLocked(dir['structure_id']):
                 foundList.append(dir)
                 #
@@ -120,7 +120,7 @@ class MonitorCitationUpdate(object):
         #
         num_hit = 0
         num_update = 0
-        for dir in foundEntryList:
+        for dir in foundEntryList:  # pylint: disable=redefined-builtin
             #
             # Get current citation information from database
             #
@@ -195,7 +195,7 @@ class MonitorCitationUpdate(object):
         #
         f.write(annotator + ' \t ' + str(num_hit) + ' \t ' + str(num_update) + '\n')
 
-    def __compareCitationInfo(self, cinfo, dir, release_flag):
+    def __compareCitationInfo(self, cinfo, dir, release_flag):  # pylint: disable=redefined-builtin
         code = ' '
         if ('pdbx_database_id_PubMed' not in cinfo) or ('pdbx_database_id_PubMed' not in dir):
             return code

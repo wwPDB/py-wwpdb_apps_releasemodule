@@ -36,13 +36,13 @@ class CheckResult(object):
     """
     """
 
-    def __init__(self, path='.', input='result.db', log=sys.stderr, verbose=False):
+    def __init__(self, path='.', input='result.db', log=sys.stderr, verbose=False):  # pylint: disable=unused-argument,redefined-builtin
         """ Initial CheckResult class
         """
         self.__sessionPath = path
         self.__picklefile = input
-        self.__lfh = log
-        self.__verbose = verbose
+        # self.__lfh = log
+        # self.__verbose = verbose
         self.__annotEntryMap = {}
         #
         self._deserialize()
@@ -55,11 +55,11 @@ class CheckResult(object):
         fb.close()
 
     def Check(self):
-        map = self.__annotEntryMap
+        aemap = self.__annotEntryMap
         self.__annotEntryMap = {}
-        for k, list in map.items():
+        for k, list in aemap.items():  # pylint: disable=redefined-builtin
             elist = []
-            for dir in list:
+            for dir in list:  # pylint: disable=redefined-builtin
                 print(dir['structure_id'] + ': ' + dir['c_title'])
                 plist = []
                 for pdir in dir['pubmed']:

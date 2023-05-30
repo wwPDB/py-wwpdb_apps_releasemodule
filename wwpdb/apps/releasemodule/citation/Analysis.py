@@ -38,7 +38,8 @@ from mmcif.api.PdbxContainers import DataContainer
 from mmcif.api.DataCategory import DataCategory
 from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
-from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
+# from wwpdb.apps.entity_transform.utils.mmCIFUtil import mmCIFUtil
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 from wwpdb.apps.releasemodule.citation.MatchMP import MatchMP
 # from wwpdb.apps.releasemodule.utils.Utility import *
 from wwpdb.apps.releasemodule.utils.Utility import RunScript
@@ -48,7 +49,7 @@ class Analysis(object):
     """
     """
 
-    def __init__(self, siteId="WWPDB_DEPLOY_TEST", path='.', input='result.db', log=sys.stderr, verbose=False):
+    def __init__(self, siteId="WWPDB_DEPLOY_TEST", path='.', input='result.db', log=sys.stderr, verbose=False):  # pylint: disable=redefined-builtin
         """ Initial Analysis class
         """
         self.__sessionPath = path
@@ -103,7 +104,7 @@ class Analysis(object):
                 continue
             #
             plist = []
-            for list in mList:
+            for list in mList:  # pylint: disable=redefined-builtin
                 if list[0] not in self.__pubmedInfo:
                     continue
                 #
@@ -130,9 +131,9 @@ class Analysis(object):
         if not self.__annotEntryMap:
             return
         #
-        map = self.__annotEntryMap
+        map = self.__annotEntryMap  # pylint: disable=redefined-builtin
         self.__annotEntryMap = {}
-        for k, list in map.items():
+        for k, list in map.items():  # pylint: disable=redefined-builtin
             if len(list) < 2:
                 self.__annotEntryMap[k] = list
             else:
@@ -214,7 +215,7 @@ class Analysis(object):
         cat.appendAttribute('pubmed_ids')
         #
         row = 0
-        for key, list in self.__termMap.items():
+        for key, list in self.__termMap.items():  # pylint: disable=redefined-builtin
             cat.setValue(str(key), 'author', row)
             cat.setValue(str(','.join(list)), 'pubmed_ids', row)
             row += 1
@@ -230,7 +231,7 @@ class Analysis(object):
         cat.appendAttribute('title')
         #
         row = 0
-        for key, dir in self.__pubmedInfo.items():
+        for _key, dir in self.__pubmedInfo.items():  # pylint: disable=redefined-builtin
             cat.setValue(str(dir['pdbx_database_id_PubMed']), 'id', row)
             cat.setValue(str(dir['title']), 'title', row)
             row += 1
@@ -261,7 +262,7 @@ class Analysis(object):
         if not rlist:
             return
         #
-        for dir in rlist:
+        for dir in rlist:  # pylint: disable=redefined-builtin
             if 'structure_id' not in dir or \
                     'pubmed_id' not in dir or \
                     'similarity_score' not in dir:
@@ -281,9 +282,9 @@ class Analysis(object):
         if not self.__matchResultMap:
             return
         #
-        map = self.__matchResultMap
+        map = self.__matchResultMap  # pylint: disable=redefined-builtin
         self.__matchResultMap = {}
-        for k, list in map.items():
+        for k, list in map.items():  # pylint: disable=redefined-builtin
             if len(list) > 1:
                 list.sort(key=operator.itemgetter(1))
                 list.reverse()
@@ -303,15 +304,19 @@ class Analysis(object):
         return self.__annotEntryMap
 
 
-if __name__ == '__main__':
+def doMain():
     startTime = time.time()
     cf = Analysis(log=sys.stderr, verbose=False)
     cf.Read()
-    dir = cf.getResult()
+    dir = cf.getResult()  # pylint: disable=redefined-builtin
     endTime = time.time()
     diffTime = endTime - startTime
     print(diffTime)
-    for k, list in list(dir.items()):
-        print('annot=' + k + ': Total=' + str(len(list)))
-        for d in list:
+    for k, dlist in list(dir.items()):
+        print('annot=' + k + ': Total=' + str(len(dlist)))
+        for d in dlist:
             print(d['structure_id'] + '=' + str(len(d['pubmed'])))
+
+
+if __name__ == '__main__':
+    doMain()

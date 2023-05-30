@@ -132,7 +132,8 @@ class RisCitationParser(object):
                 parser = html.parser.HTMLParser()
             #
         else:
-            import HTMLParser
+            # Python 2
+            import HTMLParser  # pylint: disable=import-error
             parser = HTMLParser.HTMLParser()
         #
         doc = minidom.parseString("<RisStringTag>" + parser.unescape(ris_value).replace("&", "&#38;").replace("<", "&#60;") + "</RisStringTag>")
@@ -199,8 +200,8 @@ class RisCitationParser(object):
 
 
 if __name__ == "__main__":
-    parser = RisCitationParser(sys.argv[1])
-    citDict = parser.getCitationData()
-    for key, val in citDict.items():
-        sys.stderr.write("%r=%r\n" % (key, val))
+    rparser = RisCitationParser(sys.argv[1])
+    citDict = rparser.getCitationData()
+    for key, c_val in citDict.items():
+        sys.stderr.write("%r=%r\n" % (key, c_val))
     #
