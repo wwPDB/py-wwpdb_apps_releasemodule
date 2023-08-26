@@ -160,7 +160,7 @@ class DepictRequest(DepictBase):
                 filepath = FileInfo['releasedFiles'][i * num_per_line + j]
                 (_path, filename) = os.path.split(filepath)
                 rows += '<td style="text-align:left;border-style:none">' \
-                    + '<a href="/service/entity/download_file?filepath=' \
+                    + '<a href="/service/release/download_file_with_filepath?filepath=' \
                     + filepath + '" target="_blank"> ' + filename + ' </a></td>\n'
             #
             rows += '</tr>\n'
