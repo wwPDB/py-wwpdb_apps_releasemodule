@@ -56,7 +56,8 @@ class EmReleaseUtil(EntryUpdateBase):
             return
         #
         if GenEmXmlHeaderFlag:
-            self.__generateEMapHeader()
+            self._generateEmCifHeader()
+            self._generateEmXmlHeader()
         #
         if (not EmXmlHeaderOnly) and (not self._blockEmErrorFlag):
             emVolumeContentInfo = self.__getFileContentDictionary(emMapTypeList)
@@ -103,7 +104,7 @@ class EmReleaseUtil(EntryUpdateBase):
         if self._blockErrorFlag or self._blockEmErrorFlag:
             return
         #
-        self.__generateEMapHeader(removeFlag=True)
+        self._generateEmXmlHeader(removeFlag=True)
         #
         self._dumpLocalPickle()
 
@@ -157,7 +158,30 @@ class EmReleaseUtil(EntryUpdateBase):
         #
         return ciD['CONTENT_TYPE_DICTIONARY']['em-volume']
 
-    def __generateEMapHeader(self, validateFlag=True, removeFlag=False):
+    def _generateEmCifHeader(self):
+        """
+        """
+        modelfile = os.path.join(self._sessionPath, self._entryId + self._fileTypeList[0][0])
+        if not os.access(modelfile, os.F_OK):
+            return
+        #
+        cifFile = self.__embdId.replace("_", "-") + ".cif"
+        logFile = "generate_em_header_cif_" + self._entryId + ".log"
+        clogFile = "generate_em_header_cif_command_" + self._entryId + ".log"
+        outputList = []
+        outputList.append((cifFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
+        self._dpUtilityApi(operator="annot-cif-to-pdbx-em-header", inputFileName=modelfile, outputFileNameTupList=outputList)
+        #
+        cifFilePath = os.path.join(self._sessionPath, cifFile)
+        if not os.access(cifFilePath, os.F_OK):
+            self._insertEntryMessage(errType="em", errMessage="Generating " + cifFile + " failed.")
+            return
+        #
+        self._insertReleseFile("em-volume", cifFilePath, cifFile, "metadata", True)
+
+    def _generateEmXmlHeader(self, validateFlag=True, removeFlag=False):
         modelfile = os.path.join(self._sessionPath, self._entryId + self._fileTypeList[0][0])
         if not os.access(modelfile, os.F_OK):
             return
