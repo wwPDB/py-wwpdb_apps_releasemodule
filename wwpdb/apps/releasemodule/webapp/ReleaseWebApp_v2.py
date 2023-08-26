@@ -191,6 +191,8 @@ class ReleaseWebAppWorker(object):
                            '/service/release/remove_marked_pubmed': '_RemoveMarkedPubmedIDOp',
                            '/service/release/download_file': '_downloadFilePage',
                            '/service/release/download_logfile': '_downloadLogFilePage',
+                           '/service/release/download_file_with_fileid': '_downloadWithFileIdOp',
+                           '/service/release/download_file_with_filepath': '_downloadWithFilePathOp',
                            '/service/release/view_entry_history': '_viewEntryHistoryOp',
                            '/service/release/view_entry_history_detail': '_viewEntryHistoryDetailOp',
                            '/service/release/view_release_history': '_viewAnnotatorHistoryOp',
@@ -836,11 +838,11 @@ class ReleaseWebAppWorker(object):
             for f in filelist:
                 myD = {}
                 myD['sessionid'] = self.__sessionId
-                myD['instanceid'] = ''
                 myD['fileid'] = f
                 content += self.__processTemplate('one_file_tmplt.html', myD) + '\n'
             #
             rC.setText(text=content)
+        #
         return rC
 
     def _downloadLogFilePage(self):
@@ -863,12 +865,39 @@ class ReleaseWebAppWorker(object):
             for f in filelist:
                 myD = {}
                 myD['sessionid'] = self.__sessionId
-                myD['instanceid'] = ''
                 myD['fileid'] = f
                 content += self.__processTemplate('one_file_tmplt.html', myD) + '\n'
             #
             rC.setText(text=content)
         #
+        return rC
+
+    def _downloadWithFileIdOp(self):
+        """ Download file with fileid
+        """
+        if (self.__verbose):
+            self.__lfh.write("+ReleaseWebApp._downloadWithFileIdOp() Starting now\n")
+        #
+        self.__getSession()
+        fileId = str(self.__reqObj.getValue('fileid'))
+        filePath = os.path.join(self.__sessionPath, fileId)
+        #
+        self.__reqObj.setReturnFormat(return_format="binary")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        rC.setBinaryFile(filePath, attachmentFlag=True)
+        return rC
+
+    def _downloadWithFilePathOp(self):
+        """ Download file with filepath
+        """
+        if (self.__verbose):
+            self.__lfh.write("+ReleaseWebApp._downloadWithFilePathOp() Starting now\n")
+        #
+        filePath = str(self.__reqObj.getValue('filepath'))
+        #
+        self.__reqObj.setReturnFormat(return_format="binary")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        rC.setBinaryFile(filePath, attachmentFlag=True)
         return rC
 
     def _viewEntryHistoryOp(self):
