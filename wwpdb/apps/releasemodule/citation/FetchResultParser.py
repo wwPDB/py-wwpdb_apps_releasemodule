@@ -1111,7 +1111,7 @@ if __name__ == "__main__":
     pList = parser.getPubmedInfoList()
     for pdir in pList:
         for k, v in pdir.items():
-            if (type(v) == tuple) or (type(v) == list) or (type(v) == dict):
+            if isinstance(v, tuple) or isinstance(v, list) or isinstance(v, dict):
                 print(k + '=')
                 print(v)
             else:

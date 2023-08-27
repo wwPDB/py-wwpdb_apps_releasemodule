@@ -40,7 +40,7 @@ class UpdateBase(MessageBaseClass):
         #
 
     def _getAuxiliaryFileNames(self, prefix):
-        return getFileName(self._sessionPath, prefix, 'csh'), getFileName(self._sessionPath, prefix, 'log'),\
+        return getFileName(self._sessionPath, prefix, 'csh'), getFileName(self._sessionPath, prefix, 'log'), \
             getFileName(self._sessionPath, prefix + '_command', 'log')
 
     def _openScriptFile(self, scriptfile):
