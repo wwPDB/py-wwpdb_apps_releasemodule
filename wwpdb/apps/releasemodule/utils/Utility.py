@@ -330,7 +330,7 @@ def FindReleaseFiles(siteId, entry_dir):
                     continue
                 #
                 fmap[filename] = 'yes'
-                if filename in ('header', 'map', 'masks', 'other', 'fsc', 'images', 'layerLines', 'structureFactors'):
+                if filename in ('header', 'metadata', 'map', 'masks', 'other', 'fsc', 'images', 'layerLines', 'structureFactors'):
                     path1 = os.path.join(opReleaseDir, subdir, id, filename)
                     list1 = os.listdir(path1)
                     for filename1 in list1:
