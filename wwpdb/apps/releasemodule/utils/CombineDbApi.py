@@ -27,6 +27,7 @@ import sys
 #
 from wwpdb.apps.releasemodule.utils.ContentDbApi import ContentDbApi
 from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
+from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
 from wwpdb.apps.releasemodule.utils.Utility import getCleanValue, getCombIDs, getCombStatus
 from wwpdb.io.locator.PathInfo import PathInfo
 
@@ -332,7 +333,6 @@ class CombineDbApi(object):
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         #
         for myD in selectedEntryList:
-            self.__lfh.write("structure_id=%s exp_method=%s\n" % (myD['structure_id'], myD['exp_method']))
             if myD['structure_id'] in majorIssueEntryList:
                 myD['major_issue'] = 'YES'
             #
@@ -445,10 +445,18 @@ class CombineDbApi(object):
         return em_info_map
 
     def __getPdbIdMap(self, entryList):
+        t = TimeUtil()
+        rel_date = t.NextWednesday()
+        #
         pdbIdMap = {}
         for entry in entryList:
             if ('structure_id' in entry) and entry['structure_id'] and ('pdb_id' in entry) and entry['pdb_id']:
-                pdbIdMap[entry['structure_id']] = entry['pdb_id'].upper()
+                status = ""
+                if ('status_code' in entry) and (entry['status_code'] == 'REL') and ('last_release_date' in entry) and \
+                   entry['last_release_date'] and (entry['last_release_date'] < rel_date):
+                    status = 'REL'
+                #
+                pdbIdMap[entry['structure_id']] = ( entry['pdb_id'].upper(), status )
             #
         #
         return pdbIdMap
@@ -539,7 +547,7 @@ class CombineDbApi(object):
             if ((not pdb_id) or (not replace_pdb_id)) and (not details):
                 continue
             #
-            if pdb_id != pdbIdMap[obsD['structure_id']] and replace_pdb_id != pdbIdMap[obsD['structure_id']]:
+            if pdb_id != pdbIdMap[obsD['structure_id']][0] and replace_pdb_id != pdbIdMap[obsD['structure_id']][0]:
                 continue
             #
             myD = {}
@@ -577,10 +585,10 @@ class CombineDbApi(object):
             if ('structure_id' not in obsD) or (not obsD['structure_id']) or ('replace_pdb_id' not in obsD) or (not obsD['replace_pdb_id']):
                 continue
             #
-            if obsD['structure_id'] not in pdbIdMap:
+            if (obsD['structure_id'] not in pdbIdMap) or (pdbIdMap[obsD['structure_id']][1] == 'REL'):
                 continue
             #
-            pdb_id = pdbIdMap[obsD['structure_id']]
+            pdb_id = pdbIdMap[obsD['structure_id']][0]
             replace_pdb_id = str(obsD['replace_pdb_id']).upper()
             #
             myD = {}
