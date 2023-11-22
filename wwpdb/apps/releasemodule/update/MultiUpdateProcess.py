@@ -306,7 +306,6 @@ class MultiUpdateProcess(UpdateBase):
             #
             # CS 2023-11-22 end
             #
-            
         #
         self.__loadContentDataBase(dbLoadFileList)
         #
@@ -403,14 +402,11 @@ class MultiUpdateProcess(UpdateBase):
                 okShLoad = self.__statusHUtils.loadEntryStatusHistory(entryIdList=[entryId])
             #
             if (self._verbose):
-                self._lfh.write(
-                    "+MultiUpdateProcess.__updateStatusHistory() %s status history database load status %r\n" % (
-                        entryId, okShLoad))
+                self._lfh.write("+MultiUpdateProcess.__updateStatusHistory() %s status history database load status %r\n" % (entryId, okShLoad))
             #
         except:  # noqa: E722 pylint: disable=bare-except
             if (self._verbose):
-                self._lfh.write(
-                    "+MultiUpdateProcess.__updateStatusHistory() status history update and database load failed with exception\n")  # CS 2023-11-22 remove unmapped %s
+                self._lfh.write("+MultiUpdateProcess.__updateStatusHistory() status history update and database load failed with exception\n")
                 traceback.print_exc(file=self._lfh)
             #
         #
