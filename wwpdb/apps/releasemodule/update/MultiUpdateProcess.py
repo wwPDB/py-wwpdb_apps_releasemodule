@@ -2,6 +2,7 @@
 # File:  MultiUpdateProcess.py
 # Date:  09-Oct-2016
 # Updates:
+#    2023-11-22    CS     Add logging for calling MessagingIo.autoMsg, fix Python exception handling error in __updateStatusHistory()
 ##
 """
 Class responsible for release/pull off entries
@@ -280,19 +281,32 @@ class MultiUpdateProcess(UpdateBase):
             if str(self._reqObj.getValue('option')) == 'citation_update':
                 msgOption = 'release-publ'
             #
+            # CS 2023-11-22 start adding log for calling communication
+            #
             msgIo = MessagingIo(self._reqObj, self._verbose, self._lfh)
             if emdObsList:
-                msgIo.autoMsg(emdObsList, 'obsolete', p_isEmdbEntry=True)
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() StartMessagingIo.autoMsg on emdObsList %s" % emdObsList)
+                rtrnDict = msgIo.autoMsg(emdObsList, 'obsolete', p_isEmdbEntry=True)
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() EndMessagingIo.autoMsg with rtrnDict %s" % rtrnDict)
             #
             if pdbObsList:
-                msgIo.autoMsg(pdbObsList, 'obsolete')
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() StartMessagingIo.autoMsg on pdbObsList %s" % pdbObsList)
+                rtrnDict = msgIo.autoMsg(pdbObsList, 'obsolete')
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() EndMessagingIo.autoMsg with rtrnDict %s" % rtrnDict)
             #
             if emdList:
-                msgIo.autoMsg(emdList, msgOption, p_isEmdbEntry=True)
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() StartMessagingIo.autoMsg with msgOption %s on emdList %s" % (msgOption, emdList))
+                rtrnDict = msgIo.autoMsg(emdList, msgOption, p_isEmdbEntry=True)
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() EndMessagingIo.autoMsg with rtrnDict %s" % rtrnDict)
             #
             if pdbList:
-                msgIo.autoMsg(pdbList, msgOption)
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() StartMessagingIo.autoMsg with msgOption %s on pdbList %s" % (msgOption, pdbList))
+                rtrnDict = msgIo.autoMsg(pdbList, msgOption)
+                self._lfh.write("+RelMod MultiUpdateProcess.__finalize() EndMessagingIo.autoMsg with rtrnDict %s" % rtrnDict)
             #
+            # CS 2023-11-22 end
+            #
+            
         #
         self.__loadContentDataBase(dbLoadFileList)
         #
@@ -396,7 +410,7 @@ class MultiUpdateProcess(UpdateBase):
         except:  # noqa: E722 pylint: disable=bare-except
             if (self._verbose):
                 self._lfh.write(
-                    "+MultiUpdateProcess.__updateStatusHistory() %s status history update and database load failed with exception\n")
+                    "+MultiUpdateProcess.__updateStatusHistory() status history update and database load failed with exception\n")  # CS 2023-11-22 remove unmapped %s
                 traceback.print_exc(file=self._lfh)
             #
         #
