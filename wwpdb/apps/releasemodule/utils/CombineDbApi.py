@@ -456,7 +456,7 @@ class CombineDbApi(object):
                    entry['last_release_date'] and (entry['last_release_date'] < rel_date):
                     status = 'REL'
                 #
-                pdbIdMap[entry['structure_id']] = ( entry['pdb_id'].upper(), status )
+                pdbIdMap[entry['structure_id']] = (entry['pdb_id'].upper(), status)
             #
         #
         return pdbIdMap
