@@ -30,7 +30,7 @@ import os
 import sys
 
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
-from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon, ConfigInfoAppCc
 from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
 
 
@@ -47,6 +47,7 @@ class ModuleBaseClass(object):
         self._siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self._cI = ConfigInfo(self._siteId)
         self._cICommon = ConfigInfoAppCommon(self._siteId)
+        self._cIAppCc = ConfigInfoAppCc(self._siteId)
         self._topReleaseDir = os.path.join(self._cICommon.get_for_release_path())
         self._topReleaseBetaDir = os.path.join(self._cICommon.get_for_release_beta_path())
         self._topReleaseVersionDir = os.path.join(self._cICommon.get_for_release_version_path())

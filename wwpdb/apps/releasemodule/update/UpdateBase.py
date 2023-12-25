@@ -51,7 +51,7 @@ class UpdateBase(MessageBaseClass):
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT ' + self._cICommon.get_site_annot_tools_path() + '\n')
-        f.write('setenv COMP_PATH ' + self._cICommon.get_site_cc_cvs_path() + '\n')
+        f.write('setenv COMP_PATH ' + self._cIAppCc.get_site_cc_cvs_path() + '\n')
         f.write('setenv BINPATH ${RCSBROOT}/bin\n')
         f.write('setenv LOCALBINPATH ' + os.path.join(self._cICommon.get_site_local_apps_path(), 'bin') + '\n')
         f.write('setenv DICTBINPATH ' + os.path.join(self._cICommon.get_site_packages_path(), 'dict', 'bin') + '\n')
@@ -60,7 +60,7 @@ class UpdateBase(MessageBaseClass):
 
     def _bashSetting(self):
         setting = " RCSBROOT=" + self._cICommon.get_site_annot_tools_path() + "; export RCSBROOT; " \
-            + " COMP_PATH=" + self._cICommon.get_site_cc_cvs_path() + "; export COMP_PATH; " \
+            + " COMP_PATH=" + self._cIAppCc.get_site_cc_cvs_path() + "; export COMP_PATH; " \
             + " BINPATH=${RCSBROOT}/bin; export BINPATH; " \
             + " LOCALBINPATH=" + os.path.join(self._cICommon.get_site_local_apps_path(), 'bin') + "; export LOCALBINPATH; " \
             + " DICTBINPATH=" + os.path.join(self._cICommon.get_site_packages_path(), 'dict', 'bin') + "; export DICTBINPATH; "
