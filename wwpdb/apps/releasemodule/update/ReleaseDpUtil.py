@@ -229,7 +229,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         self._processLogError("pdb", "GetPdbBundle", os.path.join(self._sessionPath, clogFile), messageType="warning")
         #
         if not os.access(os.path.join(self._sessionPath, tarFile), os.F_OK):
-            self._insertEntryMessage(errType="pdb", errMessage="Generating pdb bundle file(s) failed.", messageType="warning", uniqueFlag=True)
+            self._insertEntryMessage(errType="pdb", errMessage="PDB bundle file(s) will not be generated.", messageType="warning", uniqueFlag=True)
             return
         else:
             statinfo = os.stat(os.path.join(self._sessionPath, tarFile))

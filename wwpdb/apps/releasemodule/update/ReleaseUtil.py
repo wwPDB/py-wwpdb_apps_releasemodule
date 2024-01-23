@@ -257,7 +257,7 @@ class ReleaseUtil(EntryUpdateBase):
         #
         if (not os.access(os.path.join(self._sessionPath, outputFile), os.F_OK)) or \
            (not os.access(os.path.join(self._sessionPath, mappingFile), os.F_OK)):
-            self._insertEntryMessage(errType='pdb', errMessage='Generating pdb bundle file(s) failed.', messageType='warning', uniqueFlag=True)
+            self._insertEntryMessage(errType='pdb', errMessage='PDB bundle file(s) will not be generated.', messageType='warning', uniqueFlag=True)
             return
         #
         data = self.__readFile(os.path.join(self._sessionPath, outputFile))
