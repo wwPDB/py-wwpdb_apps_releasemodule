@@ -71,9 +71,9 @@ class CitationFinder(object):
         self.__cI = ConfigInfo(self.__siteId)
         self.__cICommon = ConfigInfoAppCommon(self.__siteId)
 
-    def searchPubmed(self):
+    def searchPubmed(self, year=2):
         Time1 = time.time()
-        self._getcandidateList()
+        self._getcandidateList(year=year)
         Time2 = time.time()
         diffTime = Time2 - Time1
         print('__candidateList=' + str(len(self.__candidateList)))
@@ -166,11 +166,11 @@ class CitationFinder(object):
     def getResult(self):
         return self.__annotEntryMap
 
-    def _getcandidateList(self):
+    def _getcandidateList(self, year=2):
         """ Get candidate list from database
         """
         connect = ContentDbApi(siteId=self.__siteId, verbose=True, log=self.__lfh)
-        self.__candidateList = connect.getPubmedSearchList()
+        self.__candidateList = connect.getPubmedSearchList(year=year)
 
     def _getAnnotatorList(self):
         """ Get active annotator initial list from da_users.status database
@@ -483,7 +483,11 @@ class CitationFinder(object):
 if __name__ == '__main__':
     startTime = time.time()
     cf = CitationFinder(siteId=sys.argv[1], path=sys.argv[2], output=sys.argv[3], log=sys.stderr, verbose=False)
-    cf.searchPubmed()
+    year = 2
+    if len(sys.argv) == 5:
+        year = int(sys.argv[4])
+    #
+    cf.searchPubmed(year=year)
     endTime = time.time()
     ldiffTime = endTime - startTime
     print(ldiffTime)
