@@ -94,7 +94,7 @@ class CitationFinder(object):
         print(diffTime)
         #
         Time1 = time.time()
-        self._runNCBIPubmedSearch()
+        self._runNCBIPubmedSearch(year=year)
         Time2 = time.time()
         diffTime = Time2 - Time1
         print('__termMap=' + str(len(self.__termMap)))
@@ -213,7 +213,7 @@ class CitationFinder(object):
             #
         #
 
-    def _runNCBIPubmedSearch(self):
+    def _runNCBIPubmedSearch(self, year=2):
         """ Run NCBI Pubmed author and DOI search
         """
         if not self.__termList:
@@ -221,7 +221,7 @@ class CitationFinder(object):
         #
         aSearch = SearchMP(siteId=self.__siteId, termList=self.__termList, log=self.__lfh, verbose=self.__verbose,
                            path=self.__sessionPath)
-        aSearch.run()
+        aSearch.run(year=year)
         self.__termMap = aSearch.getTermMap()
 
     def _getPubmedIdList(self):

@@ -35,16 +35,17 @@ class SearchWorker(multiprocessing.Process):
     """
 
     def __init__(self, path='.', processLabel='', siteId=None, taskQueue=None, resultQueue=None,
-                 mpl=None, log=sys.stderr, verbose=False):
+                 mpl=None, year=2, log=sys.stderr, verbose=False):
         multiprocessing.Process.__init__(self)
         self.__sessionPath = path
         self.__processLabel = processLabel
+        self.__siteId = siteId
         self.__taskQueue = taskQueue
         self.__resultQueue = resultQueue
+        self.__mpl = mpl
+        self.__year = year
         self.__lfh = log
         self.__verbose = verbose
-        self.__mpl = mpl
-        self.__siteId = siteId
 
     def fetchEntryList(self, term):
         search = SearchUtil(path=self.__sessionPath, processLabel=self.__processLabel,
@@ -52,7 +53,7 @@ class SearchWorker(multiprocessing.Process):
         # Speed limit
         if self.__mpl:
             self.__mpl.waitnext()
-        search.doSearch()
+        search.doSearch(year=self.__year)
         return search.getPubmedIdList()
 
     def run(self):
@@ -95,7 +96,7 @@ class SearchMP(object):
         self.__apikey = self.__cI.get('NCBI_API_KEY')
         self.__apirate = self.__cI.get('NCBI_API_RATE')
 
-    def run(self):
+    def run(self, year=2):
         numProc = multiprocessing.cpu_count() * 2
         # Leave room for other processes
         if self.__apikey:
@@ -114,10 +115,8 @@ class SearchMP(object):
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
         #
-        workers = [SearchWorker(path=self.__sessionPath, processLabel=str(i + 1), taskQueue=taskQueue,
-                                resultQueue=resultQueue, log=self.__lfh, verbose=self.__verbose,
-                                siteId=self.__siteId, mpl=mpl)
-                   for i in range(numProc)]
+        workers = [SearchWorker(path=self.__sessionPath, processLabel=str(i + 1), siteId=self.__siteId, taskQueue=taskQueue, resultQueue=resultQueue, \
+                                mpl=mpl, year=year, log=self.__lfh, verbose=self.__verbose) for i in range(numProc)]
         #
         for w in workers:
             w.start()

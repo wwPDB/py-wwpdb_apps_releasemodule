@@ -47,7 +47,7 @@ class SearchUtil(object):
         self.__cI = ConfigInfo(siteId)
         self.__apikey = self.__cI.get('NCBI_API_KEY')
 
-    def doSearch(self):
+    def doSearch(self, year=2):
         """ Create NCBI webservice URL and run pubmed author search webservice
         """
         # NCBI esearch URL
@@ -60,7 +60,7 @@ class SearchUtil(object):
         if self.__term.endswith("[aid]"):
             query += "&retmode=xml" + api
         else:
-            query += "&reldate=730&retmax=10000&retmode=xml" + api
+            query += "&reldate=%d&retmax=10000&retmode=xml" % (year * 365) + api
         #
         if self.__processLabel:
             scriptfile = 'search_' + self.__processLabel + '.csh'
