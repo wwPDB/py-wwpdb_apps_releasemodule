@@ -115,7 +115,8 @@ class SearchMP(object):
         taskQueue = multiprocessing.Queue()
         resultQueue = multiprocessing.Queue()
         #
-        workers = [SearchWorker(path=self.__sessionPath, processLabel=str(i + 1), siteId=self.__siteId, taskQueue=taskQueue, resultQueue=resultQueue, \
+        workers = [SearchWorker(path=self.__sessionPath, processLabel=str(i + 1),
+                                siteId=self.__siteId, taskQueue=taskQueue, resultQueue=resultQueue,
                                 mpl=mpl, year=year, log=self.__lfh, verbose=self.__verbose) for i in range(numProc)]
         #
         for w in workers:

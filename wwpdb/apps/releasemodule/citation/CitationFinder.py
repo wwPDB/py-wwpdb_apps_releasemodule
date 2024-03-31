@@ -480,7 +480,7 @@ class CitationFinder(object):
         fb.close()
 
 
-if __name__ == '__main__':
+def main_test():
     startTime = time.time()
     cf = CitationFinder(siteId=sys.argv[1], path=sys.argv[2], output=sys.argv[3], log=sys.stderr, verbose=False)
     year = 2
@@ -491,3 +491,7 @@ if __name__ == '__main__':
     endTime = time.time()
     ldiffTime = endTime - startTime
     print(ldiffTime)
+
+
+if __name__ == '__main__':
+    main_test()
