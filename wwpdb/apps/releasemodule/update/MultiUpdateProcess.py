@@ -206,6 +206,7 @@ class MultiUpdateProcess(UpdateBase):
         self.__updatePullbackEntryStatus(pullEntryIdList)
 
     def __getReturnContentForPullEntries(self):
+        self.__returnContent = "Task: " + self.__task
         for entryData in self.__updateList:
             self.__returnContent += '\n\nEntry ' + entryData['entry']
             if ('comb_ids' in entryData) and entryData['comb_ids']:
@@ -312,7 +313,7 @@ class MultiUpdateProcess(UpdateBase):
         if (not allSysErrors) and (not allContents):
             self.__errorContent += 'No update list found\n'
         else:
-            self.__returnContent = str(self._reqObj.getValue('task'))
+            self.__returnContent = "Task: " + self.__task
             if allSysErrors:
                 _msgType, msgText = self._getConcatMessageContent(allSysErrors)
                 self.__returnContent += '\n\nSystem related error:\n' + msgText

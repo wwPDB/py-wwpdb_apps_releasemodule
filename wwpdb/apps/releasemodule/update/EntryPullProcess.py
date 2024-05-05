@@ -47,7 +47,7 @@ class EntryPullProcess(EntryUpdateBase):
                 #
             #
         #
-        self._insertEntryMessage(errType='all', errMessage='Pulled off from release.', messageType='info', uniqueFlag=True)
+        self._insertEntryMessage(errType='all', errMessage='Entry has been pulled from release.', messageType='info', uniqueFlag=True)
         self._updateDataBase()
         self._removeExistingForReleaseDirectories()
         self._finishAndDumpPickleFiles(entryPickle)

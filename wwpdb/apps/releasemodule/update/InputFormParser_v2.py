@@ -110,6 +110,7 @@ class InputFormParser(object):
     def __cleanString(self, val):
         val = val.replace(',', ' ')
         val = val.replace('\n', ' ')
+        val = val.replace('\r', ' ')
         val = val.replace('\t', ' ')
         val = val.strip()
         return val
