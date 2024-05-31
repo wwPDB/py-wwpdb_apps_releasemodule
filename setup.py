@@ -43,7 +43,7 @@ setup(
     ],
     #
     install_requires=['mmcif', 'wwpdb.apps.msgmodule', 'wwpdb.apps.wf_engine',
-                      'wwpdb.io', 'wwpdb.utils.config ~= 0.24',
+                      'wwpdb.io', 'wwpdb.utils.config >= 0.24',
                       'wwpdb.utils.dp ~= 0.48',
                       'wwpdb.utils.emdb ~= 1.0', 'wwpdb.utils.session',
                       'wwpdb.utils.wf', 'mmcif.utils', 'wwpdb.utils.db >= 0.8',
