@@ -115,6 +115,9 @@ class RisCitationParser(object):
                 #
             #
         #
+        if "journal_abbrev" not in self.__convertedCitationData:
+            self.__convertedCitationData["journal_abbrev"] = ""
+        #
 
     def __processValue(self, ris_value, angstromFlag):
         """
