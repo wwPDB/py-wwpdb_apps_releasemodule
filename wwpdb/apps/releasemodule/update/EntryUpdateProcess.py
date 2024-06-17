@@ -325,9 +325,9 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         if self._blockErrorFlag:
             self._removeExistingForReleaseDirectories()
-            for filePath in self._outPutFiles:
-                self._insertAction('remove ' + filePath)
-                self._removeFile(filePath)
+            for filePathInfo in self._outPutFiles:
+                self._insertAction('remove ' + filePathInfo[1])
+                self._removeFile(filePathInfo[1])
             #
             for relPath, dirPath in self.__releaseDirectory.items():
                 self._removeDirectory(dirPath)
