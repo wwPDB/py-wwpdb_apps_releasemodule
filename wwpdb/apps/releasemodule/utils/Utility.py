@@ -58,7 +58,7 @@ def getCleanValue(dataDict, key):
 
 def getCombIDs(dataDict):
     comb_ids = ''
-    for item in ('pdb_id', 'bmrb_id', 'emdb_id'):
+    for item in ('ext_pdb_id', 'bmrb_id', 'emdb_id'):
         if comb_ids:
             comb_ids += '/'
         #

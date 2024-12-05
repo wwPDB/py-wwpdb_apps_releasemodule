@@ -39,7 +39,10 @@ class StatusDbApi(object):
                               + "dep_author_release_status_code_emdb author_release_status_code_em,locking,notify,title,title_emdb,author_list,"
                               + "author_list_emdb from deposition where %s",
         "GET_ENTRY_LIST_FROM_GROUP" : "select dep_set_id,group_id from group_deposition_information where group_id in ( '%s' ) order by dep_set_id",
-        "GET_MAJOR_ISSUE_ENTRY_LIST" : "select dep_set_id from remind_message_track where major_issue != '' and dep_set_id in ( '%s' )"
+        "GET_MAJOR_ISSUE_ENTRY_LIST" : "select dep_set_id from remind_message_track where major_issue != '' and dep_set_id in ( '%s' ) order "
+                                     + "by dep_set_id",
+        "GET_VALIDATION_DATE_ENTRY_LIST" : "select dep_set_id from remind_message_track where ( last_validation_sent_date <= DATE_SUB( curdate(), "
+                                         + "interval 22 day ) ) and dep_set_id in ( '%s' ) order by dep_set_id"
     }
     #
     """
@@ -153,6 +156,17 @@ class StatusDbApi(object):
             major_id_list.append(Dict['dep_set_id'])
         #
         return major_id_list
+
+    def filterWithValidationReportSentDate(self, id_list):
+        if not id_list:
+            return []
+        #
+        ret_list = self.__dbApi.selectData(key="GET_VALIDATION_DATE_ENTRY_LIST", parameter=("', '".join(id_list)))
+        return_id_list = []
+        for Dict in ret_list:
+            return_id_list.append(Dict['dep_set_id'])
+        #
+        return return_id_list
 
     def __getDataDir(self, key, parameter, idx):
         ret_list = self.__dbApi.selectData(key=key, parameter=parameter)

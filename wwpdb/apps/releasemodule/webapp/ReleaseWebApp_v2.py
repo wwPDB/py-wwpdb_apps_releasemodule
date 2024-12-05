@@ -180,6 +180,7 @@ class ReleaseWebAppWorker(object):
                            '/service/release/citation_update': '_CitationUpdatePage',
                            '/service/release/release_onhold': '_RequestReleasePage',
                            '/service/release/expired_onhold': '_ExpiredEntryPage',
+                           '/service/release/auth_rel_status': '_AuthRelEntryPage',
                            '/service/release/release_entry': '_ReleasedEntryPage',
                            # '/service/release/check_marked_pubmed_id': '_MarkedPubmedIDPage',
                            '/service/release/check_marked_pubmed_id': '_DisPlayMarkedPubmedIDOp',
@@ -480,6 +481,29 @@ class ReleaseWebAppWorker(object):
         #
         dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         entryList = dbUtil.getExpiredEntryInfo(self.__owner)
+        #
+        if entryList:
+            rC.setText(text=self.__depcitRequestForm(entryList=entryList))
+        else:
+            returnText = '<h1 style="text-align:center">' + str(self.__reqObj.getValue('task')) + '</h1></br>' \
+                + '<h2 style="text-align:center">No entry found.</h2>'
+            rC.setText(text=returnText)
+        #
+        return rC
+
+    def _AuthRelEntryPage(self):
+        """ Launch AUTH entry with REL instructions (AUTH/REL) release page based on author's input initial
+        """
+        if (self.__verbose):
+            self.__lfh.write("+ReleaseWebAppWorker._AuthRelEntryPage() Starting now\n")
+        #
+        self.__getSession()
+        #
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        #
+        dbUtil = CombineDbApi(siteId=self.__siteId, path=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
+        entryList = dbUtil.getAuthWithRelInstructionEntryInfo(self.__owner)
         #
         if entryList:
             rC.setText(text=self.__depcitRequestForm(entryList=entryList))

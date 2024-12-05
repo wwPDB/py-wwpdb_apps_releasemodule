@@ -108,6 +108,25 @@ class CombineDbApi(object):
         #
         return entryList
 
+    def getAuthWithRelInstructionEntryInfo(self, annotator):
+        self.__connectAllDB()
+        entryList = []
+        #
+        entryIdList = self.__ContentDB.getAuthWithRelInstructionEntryList(annotator)
+        if len(entryIdList) == 0:
+            return entryList
+        #
+        return_list = self.getEntryInfo(self.__StatusDB.filterWithValidationReportSentDate(entryIdList))
+        for entry in return_list:
+            if ('locking' in entry) and entry['locking']:
+                locking = entry['locking'].upper()
+                if locking.find('DEP') != -1:
+                    entryList.append(entry)
+                #
+            #
+        #
+        return entryList
+
     def getEntriesWithStatusList(self, annotator, status_list):
         self.__connectAllDB()
         return self.getEntryInfo(self.__ContentDB.getEntriesWithStatusList(annotator, "', '".join(status_list)))
@@ -327,8 +346,11 @@ class CombineDbApi(object):
         selectedEntryList = self.__ContentDB.getEntryInfo(id_string)
         em_info_map = self.__getEMInfo(id_string)
         #
-        pdbIdMap = self.__getPdbIdMap(selectedEntryList)
+        pdbIdMap,pdbIdList = self.__getPdbIdMap(selectedEntryList)
         obsprMap = self.__getObsSprMap(id_string, pdbIdMap)
+        #
+        #pdbExtIdMap = self.__ContentDB.getPdbExtIdMap(pdbIdList)
+        pdbExtIdMap = {}
         #
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         #
@@ -406,6 +428,13 @@ class CombineDbApi(object):
             if (myD['structure_id'] in obsprMap) and obsprMap[myD['structure_id']]:
                 myD['obspr'] = obsprMap[myD['structure_id']]
             #
+            if pdb_id:
+                ext_pdb_id = pdb_id
+                if (pdb_id in pdbExtIdMap) and pdbExtIdMap[pdb_id]:
+                    ext_pdb_id = pdbExtIdMap[pdb_id]
+                #
+                myD['ext_pdb_id'] = ext_pdb_id
+            #
             myD['comb_ids'] = getCombIDs(myD)
             myD['comb_status_code'], myD['author_release_status_code'], titleEM, authorListEM = getCombStatus(myD)
             if titleEM:
@@ -449,6 +478,7 @@ class CombineDbApi(object):
         rel_date = t.NextWednesday()
         #
         pdbIdMap = {}
+        pdbIdList = []
         for entry in entryList:
             if ('structure_id' in entry) and entry['structure_id'] and ('pdb_id' in entry) and entry['pdb_id']:
                 status = ""
@@ -457,9 +487,13 @@ class CombineDbApi(object):
                     status = 'REL'
                 #
                 pdbIdMap[entry['structure_id']] = (entry['pdb_id'].upper(), status)
+                pdbIdList.append(entry['pdb_id'].upper())
             #
         #
-        return pdbIdMap
+        if len(pdbIdList) > 1:
+            pdbIdList = sorted(list(set(pdbIdList)))
+        #
+        return pdbIdMap,pdbIdList
 
     def __getObsSprMap(self, id_string, pdbIdMap):
         pdbxObsSprMap = self.__getPdbxObsSprMap(id_string, pdbIdMap)

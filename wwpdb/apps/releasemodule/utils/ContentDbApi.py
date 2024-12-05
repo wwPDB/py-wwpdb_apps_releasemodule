@@ -71,6 +71,8 @@ class ContentDbApi(object):
                             + "initial_deposition_date,exp_method,author_list,date_of_RCSB_release,date_of_sf_release,date_of_mr_release,"
                             + "status_code_nmr_data,recvd_nmr_data,date_nmr_data,date_hold_nmr_data,dep_release_code_nmr_data,date_of_nmr_data_release,"
                             + "date_of_cs_release from rcsb_status where structure_id in ( '%s' ) order by structure_id",
+        "SELECT_EXT_PDB_ID_INFO": "select distinct database_code,pdbx_database_accession from database_2 where database_id = 'PDB' and pdbx_database_accession "
+                                + "is not NULL and pdbx_database_accession != '' and database_code in ( '%s' )",
         "SELECT_EM_INFO" : "select structure_id, current_status status_code_em, map_release_date date_of_EM_release, last_update last_EM_release_date, "
                          + "title title_emdb, author_list author_list_emdb from em_admin where structure_id in ( '%s' ) order by structure_id",
         "SELECT_REQUESTED_ACCESSION_TYPES" : "select structure_id, requested_accession_types from pdbx_depui_entry_details "
@@ -88,6 +90,7 @@ class ContentDbApi(object):
                                       + "((r.pdb_id is null) or (r.pdb_id = '')) and (e.deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and "
                                       + "(e.current_status in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( e.map_hold_date is null ) or "
                                       + " ( e.map_hold_date < curdate() ) ) order by r.structure_id",
+        "SELECT_ALL_AUTH_REL_ENTRY" : "select structure_id from rcsb_status where ( status_code = 'AUTH' ) and ( author_release_status_code = 'REL' ) order by structure_id",
         "SELECT_EXPIRED_PDB_ENTRY_BY_ANNOTATOR" : "select structure_id from rcsb_status where ( rcsb_annotator = '%s' ) and (pdb_id is not null) and (pdb_id != '') and "
                                                 + "( initial_deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and "
                                                 + "( status_code in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( date_hold_coordinates is null ) or "
@@ -97,6 +100,8 @@ class ContentDbApi(object):
                                                + "(e.deposition_date <= DATE_SUB( curdate(), interval 365 day ) ) and "
                                                + "(e.current_status in ( 'AUTH', 'HPUB', 'HOLD' ) ) and ( ( e.map_hold_date is null ) or "
                                                + " ( e.map_hold_date < curdate() ) ) order by r.structure_id",
+        "SELECT_AUTH_REL_ENTRY_BY_ANNOTATOR" : "select structure_id from rcsb_status where ( status_code = 'AUTH' ) and ( author_release_status_code = 'REL' ) "
+                                             + "and ( rcsb_annotator = '%s' ) order by structure_id",
         "SELECT_EMDB_ID_FROM_DATABASE_2" : "select database_code from database_2 where Structure_ID = '%s' and database_id = 'EMDB'",
         "SELECT_ENTRY_ID_FROM_DATABASE_2" : "select Structure_ID from database_2 where database_code = '%s' and database_id = 'EMDB'",
         "SELECT_EMDB_ID_FROM_DATABASE_RELATED" : "select db_id from pdbx_database_related where Structure_ID = '%s' and db_name = 'EMDB' and content_type = 'associated EM volume'",
@@ -171,6 +176,14 @@ class ContentDbApi(object):
             emList = self.__getSelectedIDList('SELECT_EXPIRED_EM_ENTRY_BY_ANNOTATOR', (annotator))
             pdbList.extend(emList)
             return sorted(set(pdbList))
+        #
+
+    def getAuthWithRelInstructionEntryList(self, annotator):
+        if annotator.strip().upper() == "ALL":
+            return self.__getSelectedIDList('SELECT_ALL_AUTH_REL_ENTRY', ())
+        else:
+            return self.__getSelectedIDList('SELECT_AUTH_REL_ENTRY_BY_ANNOTATOR', (annotator))
+        #
 
     def getCitation(self, entry_id):
         rows = self.__dbApi.selectData(key='SELECT_PRIMARY_CITATION', parameter=(entry_id))
@@ -258,6 +271,19 @@ class ContentDbApi(object):
             #
         #
         return rows
+
+    def getPdbExtIdMap(self, pdbIdList):
+        pdbExtIdMap = {}
+        if len(pdbIdList) > 0:
+            rows = self.__dbApi.selectData(key='SELECT_EXT_PDB_ID_INFO', parameter=("', '".join(pdbIdList)))
+            for row in rows:
+                if ('database_code' in row) and row['database_code'] and ('pdbx_database_accession' in row) and row['pdbx_database_accession']:
+                    pdbExtIdMap[row['database_code']] = row['pdbx_database_accession']
+                #
+            #
+        #
+        return pdbExtIdMap
+            
 
     def getEMInfo(self, id_string):
         return self.__dbApi.selectData(key='SELECT_EM_INFO', parameter=(id_string))
