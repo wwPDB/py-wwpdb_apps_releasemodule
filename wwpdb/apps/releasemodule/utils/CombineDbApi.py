@@ -1,7 +1,10 @@
 ##
 # File:  CombineDbApi.py
 # Date:  23-Sept-2016
+#
 # Updates:
+#  09-Dec-2024 zf   add 'ext_pdb_id'
+#
 ##
 """
 Providing addintaional APIs for WFE to get info from local database.
@@ -349,8 +352,7 @@ class CombineDbApi(object):
         pdbIdMap,pdbIdList = self.__getPdbIdMap(selectedEntryList)
         obsprMap = self.__getObsSprMap(id_string, pdbIdMap)
         #
-        #pdbExtIdMap = self.__ContentDB.getPdbExtIdMap(pdbIdList)
-        pdbExtIdMap = {}
+        pdbExtIdMap = self.__ContentDB.getPdbExtIdMap(pdbIdList)
         #
         pI = PathInfo(siteId=self.__siteId, sessionPath=self.__sessionPath, verbose=self.__verbose, log=self.__lfh)
         #

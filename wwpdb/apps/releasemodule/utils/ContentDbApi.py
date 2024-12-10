@@ -283,7 +283,6 @@ class ContentDbApi(object):
             #
         #
         return pdbExtIdMap
-            
 
     def getEMInfo(self, id_string):
         return self.__dbApi.selectData(key='SELECT_EM_INFO', parameter=(id_string))
