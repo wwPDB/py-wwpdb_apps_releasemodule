@@ -47,17 +47,16 @@ class UpdateUtil(EntryUpdateBase):
         #
         self.__pubmedInfo = {}
 
-    def run(self):
-        emMapTypeList = {}
+    def run(self, updateEmInfoList):
         self._loadLocalPickle()
         if self._blockErrorFlag:
-            return emMapTypeList
+            return
         #
         self.__initializeFileName()
         self.__readPubmedInfo()
-        self.__generateInputFile()
+        self.__generateInputFile(updateEmInfoList)
         self.__runContentUpdate()
-        emMapTypeList = self.__readOutputFile()
+        self.__readOutputFile()
         if self._blockErrorFlag:
             for typeList in self._fileTypeList:
                 if (not ('status_code' + typeList[1]) in self._pickleData) or (not self._pickleData['status_code' + typeList[1]]):
@@ -67,8 +66,6 @@ class UpdateUtil(EntryUpdateBase):
             #
         #
         self._dumpLocalPickle()
-        #
-        return emMapTypeList
 
     def __initializeFileName(self):
         # pylint: disable=attribute-defined-outside-init
@@ -87,7 +84,7 @@ class UpdateUtil(EntryUpdateBase):
         self.__pubmedInfo = pickle.load(fb)
         fb.close()
 
-    def __generateInputFile(self):
+    def __generateInputFile(self, updateEmInfoList):
         items = ['entry', 'pdbid', 'emdb_id', 'annotator', 'option', 'input_file', 'output_file', 'status_code', 'input_file_sf', 'output_file_sf',
                  'status_code_sf', 'input_file_mr', 'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs',
                  'input_file_nmr_data', 'output_file_nmr_data', 'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',
@@ -143,6 +140,21 @@ class UpdateUtil(EntryUpdateBase):
                 row += 1
             #
             curContainer.append(revCat)
+            hasValueFlag = True
+        #
+        if len(updateEmInfoList) > 0:
+            emCat = DataCategory("update_em_info")
+            for item in ( "data_content_type", "revision_type", "file_name", "part_number" ):
+                emCat.appendAttribute(item)
+            #
+            row = 0
+            for dataDict in updateEmInfoList:
+                for item in ( "data_content_type", "revision_type", "file_name", "part_number" ):
+                    emCat.setValue(dataDict[item], item, row)
+                #
+                row += 1
+            #
+            curContainer.append(emCat)
             hasValueFlag = True
         #
         if 'pubmed' in self._entryDir:
@@ -275,10 +287,9 @@ class UpdateUtil(EntryUpdateBase):
         return cat
 
     def __readOutputFile(self):
-        emMapTypeList = {}
         outputfile = os.path.join(self._sessionPath, self.__outputfile)
         if not os.access(outputfile, os.F_OK):
-            return emMapTypeList
+            return
         #
         cifObj = mmCIFUtil(filePath=outputfile)
         for typeList in (('error', 'error_message'), ('warning', 'warning_message')):
@@ -314,17 +325,17 @@ class UpdateUtil(EntryUpdateBase):
                 #
             #
         #
-        emMapFileTypeList = cifObj.GetValue('em_map_file_type')
-        if emMapFileTypeList:
-            for typeDict in emMapFileTypeList:
-                if ('type' not in typeDict) or (not typeDict['type']) or ('partNumber' not in typeDict) or (not typeDict['partNumber']):
-                    continue
-                #
-                if typeDict['type'] in emMapTypeList:
-                    emMapTypeList[typeDict['type']].append(typeDict['partNumber'])
-                else:
-                    emMapTypeList[typeDict['type']] = [typeDict['partNumber']]
-                #
-            #
-        #
-        return emMapTypeList
+#       emMapFileTypeList = cifObj.GetValue('em_map_file_type')
+#       if emMapFileTypeList:
+#           for typeDict in emMapFileTypeList:
+#               if ('type' not in typeDict) or (not typeDict['type']) or ('partNumber' not in typeDict) or (not typeDict['partNumber']):
+#                   continue
+#               #
+#               if typeDict['type'] in emMapTypeList:
+#                   emMapTypeList[typeDict['type']].append(typeDict['partNumber'])
+#               else:
+#                   emMapTypeList[typeDict['type']] = [typeDict['partNumber']]
+#               #
+#           #
+#       #
+#       return emMapTypeList

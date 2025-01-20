@@ -64,6 +64,7 @@ class EntryUpdateProcess(EntryUpdateBase):
              ('', '.mr', 'mr', '.mr.gz', 'yes', 'nmr-restraints'), ('', '_nmr-data.str.gz', 'nmr-data', '.str.gz', 'no', 'nmr-data-str'),
              ('', '_nmr-data.nef.gz', 'nmr-data', '.nef.gz', 'no', 'nmr-data-nef'), ('', '-sf.cif', 'sf', '.cif.gz', 'yes', 'structure-factors'))
         #
+        self.__emUtil = None
 
     def run(self):
         self.__copyArchivalFilesToSession()
@@ -74,14 +75,22 @@ class EntryUpdateProcess(EntryUpdateBase):
         else:
             self._dumpLocalPickle()
         #
-        if self.__EmEntryFlag and self.__GenEmXmlHeaderFlag:
-            emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
-            emUtil.validateXml()
+        emReleaseInfo = {}
+        if self.__EmEntryFlag:
+            self.__emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
+            emReleaseInfo = self.__emUtil.getEmReleaseInfo(self.__EmXmlHeaderOnlyFlag)
+            #
+            if self.__GenEmXmlHeaderFlag:
+                self.__emUtil.validateXml()
+            #
         #
-        emMapTypeList = {}
         if self.__updateFlag:
+            updateEmInfoList = []
+            if self.__emUtil and (not self.__EmXmlHeaderOnlyFlag):
+                updateEmInfoList = self.__emUtil.getEmUpdatedInfoList()
+            #
             updateUtil = UpdateUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
-            emMapTypeList = updateUtil.run()
+            updateUtil.run(updateEmInfoList)
         #
         if self.__releaseFlag:
             if self._processing_site == "PDBE":
@@ -92,8 +101,7 @@ class EntryUpdateProcess(EntryUpdateBase):
             releaseUtil.run()
         #
         if self.__EmEntryFlag:
-            emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
-            emUtil.run(emMapTypeList, self.__GenEmXmlHeaderFlag, self.__EmXmlHeaderOnlyFlag)
+            self.__emUtil.run(self.__GenEmXmlHeaderFlag, self.__EmXmlHeaderOnlyFlag)
         #
         self._loadLocalPickle()
         #

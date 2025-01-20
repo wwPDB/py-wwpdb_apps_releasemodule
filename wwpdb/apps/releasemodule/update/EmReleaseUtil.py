@@ -21,9 +21,7 @@ __email__ = "zfeng@rcsb.rutgers.edu"
 __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.07"
 
-import os
-import sys
-import traceback
+import json,os,sys,traceback
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.utils.config.ConfigInfoData import ConfigInfoData
@@ -35,67 +33,74 @@ class EmReleaseUtil(EntryUpdateBase):
     """
     def __init__(self, reqObj=None, entryDir=None, verbose=False, log=sys.stderr):
         super(EmReleaseUtil, self).__init__(reqObj=reqObj, entryDir=entryDir, statusDB=None, verbose=verbose, log=log)
+#       self._lfh.write("Metadata type: %s\n" % self.__emInfoList[-1][0])
+        #
+        self.__additionalStart = 4
+        #
+        # tuple[0]: audit revision data content type
+        # tuple[1]: file content type
+        # tuple[2]: file content type naming
+        # tuple[3]: file format extension
+        # tuple[4]: public file content type naming
+        # tuple[5]: release sub directory
+        # tuple[6]: has audit revision record or not
+        # tuple[7]: compress public released file or not
+        #
         # fmt: off
-        self.__additionalTypeList = [ [ 'em-mask-volume',       '_msk',        'masks',            False, True,  True  ],
-                                      [ 'em-additional-volume', '_additional', 'other',            True,  True,  True  ],
-                                      [ 'em-half-volume',       '_half_map',   'other',            True,  True,  True  ],
-                                      [ 'fsc',                  '_fsc',        'fsc',              False, False, True  ],
-                                      [ 'img-emdb',             '',            'images',           False, False, True  ],
-                                      [ 'layer-lines',          '_ll',         'layerLines',       True,  False, False ],
-                                      [ 'structure-factors',    '_sf',         'structureFactors', True,  False, False ] ]
+        self.__emInfoList = [ [ "Primary map",       "em-volume",            "em-volume",            "map", "",            "map",              True,  True  ],
+                              [ "Half map",          "em-half-volume",       "em-half-volume",       "map", "_half_map",   "other",            True,  True  ],
+                              [ "Mask",              "em-mask-volume",       "em-mask-volume",       "map", "_msk",        "masks",            True,  False ],
+                              [ "Additional map",    "em-additional-volume", "em-additional-volume", "map", "_additional", "other",            True,  True  ],
+                              [ "FSC",               "fsc",                  "fsc-xml",              "xml", "_fsc",        "fsc",              True,  False ],
+                              [ "Image",             "img-emdb",             "img-emdb",             "",    "",            "images",           True,  False ],
+                              [ "Structure factors", "structure-factors",    "sf",                   "cif", "_sf",         "structureFactors", False, True  ],
+                              [ "Layer lines",       "layer-lines",          "layer-lines",          "txt", "_ll",         "layerLines",       False, True  ],
+                              [ "EM metadata",       "model",                "model",                "cif", "",            "",                 True,  False ]
+        ]
         # fmt: on
-        self.__embdId = self._entryDir['emdb_id'].replace('-', '_').lower()
-        self.__contentD = {}
-        self.__formatD = {}
-        self.__fileExtContentTypeD = {}
-        self.__partD = {}
+        self.__newReleaseFlag = False
+        self.__map_release_date = ""
+        #
+        self.__storagePath = os.path.join(self._cI.get("SITE_ARCHIVE_STORAGE_PATH"), "archive", self._entryId)
+        self.__embdId = self._entryDir["emdb_id"].replace("-", "_").lower()
+        #
+        self.__contentTypeFileExtD = self.__getContentTypeFileExtension()
+        self.__archivalFilePathList = []
+        self.__releaseFileList = []
 
-    def run(self, emMapTypeList, GenEmXmlHeaderFlag, EmXmlHeaderOnly):
+    def getEmReleaseInfo(self, EmXmlHeaderOnly):
+        """ Get EM experimental data release information
+        """
         self._loadLocalPickle()
-        if self._blockErrorFlag or self._blockEmErrorFlag:
-            return
         #
-        if GenEmXmlHeaderFlag:
-            self._generateEmCifHeader()
-            self._generateEmXmlHeader()
+        jsonFile = self._entryId + "_em_info.json"
+        logFile = "generate_em_info_" + self._entryId + ".log"
+        clogFile = "generate_em_info_command_" + self._entryId + ".log"
+        outputList = []
+        outputList.append((jsonFile, True))
+        outputList.append((logFile, True))
+        outputList.append((clogFile, True))
+        self._dpUtilityApi(operator="annot-get-em-exp-info", inputFileName=self._pickleData["model"]["session_file"], outputFileNameTupList=outputList)
         #
-        if (not EmXmlHeaderOnly) and (not self._blockEmErrorFlag):
-            emVolumeContentInfo = self.__getFileContentDictionary(emMapTypeList)
-            # checking file matching with em_map category: DAOTHER-6570/DAOTHER-5842
-            mapFile = ""
-            fileType = ""
-            if emMapTypeList:
-                contentTypeInFileName = emVolumeContentInfo[1]
-                if (contentTypeInFileName in emMapTypeList) and emMapTypeList[contentTypeInFileName]:
-                    for part_type_info in emMapTypeList[contentTypeInFileName]:
-                        part_type_split = part_type_info.split("_")
-                        if len(part_type_split) != 2:
-                            continue
-                        #
-                        for formatType in emVolumeContentInfo[0]:
-                            if self.__formatD[formatType] == part_type_split[1]:  # file type match
-                                tmpFile = self._findArchiveFileName("em-volume", formatType, "latest", part_type_split[0])
-                                if os.access(tmpFile, os.F_OK):
-                                    mapFile = tmpFile
-                                    fileType = part_type_split[1]
-                                    break
-                                #
-                            #
-                        #
-                        if mapFile:
-                            break
-                        #
+        jsonFilePath = os.path.join(self._sessionPath, jsonFile)
+        if os.access(jsonFilePath, os.F_OK):
+            with open(jsonFilePath) as DATA:
+                emInfoObj = json.load(DATA)
+            #
+            if not EmXmlHeaderOnly:
+                self.__newReleaseFlag = True
+                #
+                if "map_release_date" in emInfoObj:
+                    self.__map_release_date = emInfoObj["map_release_date"]
+                    if self.__map_release_date:
+                        self.__newReleaseFlag = False
                     #
                 #
-            else:
-                mapFile = self._findArchiveFileName('em-volume', 'map', 'latest', '1')
-                fileType = "map"
+                self.__getEmMapFileList(emInfoObj)
             #
-            if mapFile and os.access(mapFile, os.F_OK):
-                self._insertReleseFile('em-volume', mapFile, self.__embdId + '.' + fileType, 'map', True)
-            #
-            self.__getAdditionalFilePartNumber()
-            self.__releaseAdditionalFiles()
+        #
+        if not EmXmlHeaderOnly:
+            self.__getAdditionalEmFileList()
         #
         self._dumpLocalPickle()
 
@@ -104,61 +109,198 @@ class EmReleaseUtil(EntryUpdateBase):
         if self._blockErrorFlag or self._blockEmErrorFlag:
             return
         #
-        self._generateEmXmlHeader(removeFlag=True)
+        self.__generateEmXmlHeader(removeFlag=True)
         #
         self._dumpLocalPickle()
 
-    def __getFileContentDictionary(self, emMapTypeList):
+    def getEmUpdatedInfoList(self):
+        """ Generate EM experimental file releaseing information
         """
-        """
-        em_map_selected_list = []
-        ciD = ConfigInfoData(siteId=self._siteId, verbose=self._verbose, log=self._lfh).getConfigDictionary()
-        self.__formatD = ciD['FILE_FORMAT_EXTENSION_DICTIONARY']
-        for typeList in self.__additionalTypeList:
-            # checking file matching with em_map category: DAOTHER-6570/DAOTHER-5842
-            if typeList[4]:
-                contentTypeInFileName = ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]][1]
-                if emMapTypeList and (contentTypeInFileName not in emMapTypeList):
-                    continue
-                #
-                found = False
-                for part_type_info in emMapTypeList[contentTypeInFileName]:
-                    part_type_split = part_type_info.split("_")
-                    if len(part_type_split) != 2:
-                        continue
+        updatedList = []
+        if len(self.__releaseFileList) > 0:
+            revision_type = "Data updated"
+            if self.__newReleaseFlag:
+                revision_type = "Initial release"
+            #
+            for releaseTuple in self.__releaseFileList:
+                emInfo = releaseTuple[0]
+                for fileTuple in releaseTuple[1]:
+                    fFields = str(fileTuple[0]).strip().split("/")
                     #
-                    for formatType in ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]][0]:
-                        if self.__formatD[formatType] == part_type_split[1]:  # file type match
-                            contentFormatType = typeList[0] + '_' + formatType
-                            if contentFormatType in self.__partD:
-                                if part_type_split[0] not in self.__partD[contentFormatType]:
-                                    self.__partD[contentFormatType].append(part_type_split[0])
-                                #
-                            else:
-                                self.__partD[contentFormatType] = [part_type_split[0]]
-                            #
-                            found = True
-                            break
-                        #
+                    myD = {}
+                    myD["data_content_type"] = emInfo[0]
+                    myD["revision_type"] = revision_type
+                    myD["file_name"] = fFields[-1]
+                    if len(fileTuple[3]) > 0:
+                        myD["part_number"] = fileTuple[3]
+                    else:
+                        myD["part_number"] = "?"
                     #
-                #
-                if found:
-                    em_map_selected_list.append(typeList[0])
+                    updatedList.append(myD)
                 #
             #
-            self.__contentD[typeList[0]] = ciD['CONTENT_TYPE_DICTIONARY'][typeList[0]]
         #
-        for k, v in self.__contentD.items():
-            if k in em_map_selected_list:
+        return updatedList
+
+    def run(self, GenEmXmlHeaderFlag, EmXmlHeaderOnly):
+        """ Run EM experimental data release process
+        """
+        self._loadLocalPickle()
+        if self._blockErrorFlag or self._blockEmErrorFlag:
+            return
+        #
+        if GenEmXmlHeaderFlag:
+            self.__generateEmCifHeader()
+            self.__generateEmXmlHeader()
+        #
+        if EmXmlHeaderOnly or self._blockEmErrorFlag or (len(self.__releaseFileList) == 0):
+            self._dumpLocalPickle()
+            return
+        #
+        for releaseTuple in self.__releaseFileList:
+            emInfo = releaseTuple[0]
+            for fileTuple in releaseTuple[1]:
+                fFields = str(fileTuple[0]).strip().split(".")
+                formatExt = fFields[-2]
+                #
+                partNumber = ""
+                if len(fileTuple[3]) > 0:
+                    partNumber = "_" + fileTuple[3]
+                #
+                self._insertReleseFile("em-volume", fileTuple[0], self.__embdId + emInfo[4] + partNumber + "." + formatExt, emInfo[5], emInfo[7])
+            #
+        #
+        self._dumpLocalPickle()
+
+    def __getContentTypeFileExtension(self):
+        """ Get file extension list map 
+        """
+        contentTypeFileExtD = {}
+        #
+        ciD = ConfigInfoData(siteId=self._siteId, verbose=self._verbose, log=self._lfh).getConfigDictionary()
+        #
+        formatD = ciD["FILE_FORMAT_EXTENSION_DICTIONARY"]
+        #
+        for emInfo in self.__emInfoList:
+            if emInfo[3] != "":
+                contentTypeFileExtD[emInfo[1]] = [ emInfo[3] ]
+            else:
+                extList = []
+                for formatType in ciD["CONTENT_TYPE_DICTIONARY"][emInfo[1]][0]:
+                    if formatType in formatD:
+                        extList.append(formatD[formatType])
+                    #
+                #
+                if len(extList) > 0:
+                    contentTypeFileExtD[emInfo[1]] = extList
+                #
+            #
+        #
+        return contentTypeFileExtD
+
+    def __getEmMapFileList(self, emInfoObj):
+        """ Get EM map file names from "em_map" category.
+        """
+        #
+        if "em_map" not in emInfoObj:
+            return
+        #
+        for emInfo in self.__emInfoList[:self.__additionalStart]:
+            if emInfo[0] not in emInfoObj["em_map"]:
                 continue
             #
-            for formatType in v[0]:
-                self.__fileExtContentTypeD[v[1] + '_' + self.__formatD[formatType]] = k + '_' + formatType
+            # checking file matching with em_map category using self.__releaseFileList: DAOTHER-6570/DAOTHER-5842
+            #
+            # fileInfo[0]: file_name
+            # fileInfo[1]: part_number
+            # fileInfo[2]: version_number
+            #
+            fileList = []
+            for fileInfo in emInfoObj["em_map"][emInfo[0]]:
+                filePath = os.path.join(self.__storagePath, fileInfo[0])
+                if not os.access(filePath, os.F_OK):
+                    self._insertEntryMessage(errType="em", errMessage="File '" + fileInfo[0] + \
+                               "' defined in 'em_map' category can not be found in archive directory.")
+                    continue
+                #
+                fileList.append( [ filePath, fileInfo[1], fileInfo[2], "" ] )
+            #
+            if len(fileList) > 0:
+                if len(fileList) > 1:
+                    fileList.sort(key=lambda tup: int(tup[1]))
+                    for idx,fileTup in enumerate(fileList, start=1):
+                        fileTup[3] = str(idx)
+                    # 
+                #
+                self.__releaseFileList.append( [ emInfo, fileList ] )
             #
         #
-        return ciD['CONTENT_TYPE_DICTIONARY']['em-volume']
 
-    def _generateEmCifHeader(self):
+    def __getAdditionalEmFileList(self):
+        """ Get additional EM file names
+        """ 
+        if len(self.__archivalFilePathList) == 0:
+            self.__getAarchivalFilePathList()
+        #
+        for emInfo in self.__emInfoList[self.__additionalStart:-1]:
+            if emInfo[1] not in self.__contentTypeFileExtD:
+                continue
+            #
+            fileMap = {}
+            for fileNameTuple in self.__archivalFilePathList:
+                if fileNameTuple[0].endswith(".gz"):
+                    continue
+                #
+                fFields = str(fileNameTuple[0]).strip().split(".")
+                baseName = str(fFields[0]).strip()
+                formatExt = str(fFields[1]).strip()
+                if formatExt not in self.__contentTypeFileExtD[emInfo[1]]:
+                    continue
+                # 
+                nFields = baseName.split("_")
+                if nFields[2] != emInfo[2]:
+                    continue
+                # 
+                partNumber = int(nFields[3][1:])
+                if partNumber in fileMap:
+                    fileMap[partNumber].append( [ fileNameTuple[1], nFields[3][1:], fFields[2][1:], "" ] )
+                else:
+                    fileMap[partNumber] = [ [ fileNameTuple[1], nFields[3][1:], fFields[2][1:], "" ] ]
+                #
+            #
+            if len(fileMap) == 0:
+                continue
+            #
+            fileList = []
+            for partNumber,myL in fileMap.items():
+                if len(myL) > 1:
+                    myL.sort(key=lambda tup: int(tup[2]))
+                #
+                fileList.append(myL[-1])
+                #
+            #
+            if len(fileList) > 0:
+                if len(fileList) > 1:
+                    fileList.sort(key=lambda tup: int(tup[1]))
+                    for idx,fileTup in enumerate(fileList, start=1):
+                        fileTup[3] = str(idx)
+                    # 
+                #
+                self.__releaseFileList.append(( emInfo, fileList ))
+            #
+        #
+
+    def __getAarchivalFilePathList(self):
+        """ Get all archival file name list
+        """
+        for filename in os.listdir(self.__storagePath):
+            if not filename.startswith(self._entryId):
+                continue
+            #
+            self.__archivalFilePathList.append( ( filename, os.path.join(self.__storagePath, filename) ) )
+        #
+
+    def __generateEmCifHeader(self):
         """
         """
         modelfile = os.path.join(self._sessionPath, self._entryId + self._fileTypeList[0][0])
@@ -181,41 +323,37 @@ class EmReleaseUtil(EntryUpdateBase):
         #
         self._insertReleseFile("em-volume", cifFilePath, cifFile, "metadata", True)
 
-    def _generateEmXmlHeader(self, validateFlag=True, removeFlag=False):
+    def __generateEmXmlHeader(self, validateFlag=True, removeFlag=False):
         modelfile = os.path.join(self._sessionPath, self._entryId + self._fileTypeList[0][0])
         if not os.access(modelfile, os.F_OK):
             return
             # per DAOTHER-2459's request, removed automtically generating xml header file. It is controlled by 'GenEmXmlHeaderFlag' now.
-            # modelfile = self._findArchiveFileName(self._fileTypeList[0][3], self._fileTypeList[0][4], 'latest', '1')
-            # if not os.access(modelfile, os.F_OK):
-            #    return
-            #
         #
-        xmlfile = os.path.join(self._sessionPath, self.__embdId + '_v3.xml')
+        xmlfile = os.path.join(self._sessionPath, self.__embdId + "_v3.xml")
         self._removeFile(xmlfile)
         #
         status, error = self.__cif2xmlTranslate(modelfile, xmlfile, validateFlag)
         if removeFlag:
             self._removeFile(xmlfile)
         #
-        if status == 'failed':
-            self._insertEntryMessage(errType='em', errMessage='emd -> xml translation failed:\n' + error)
-        elif error.find('ERROR') != -1:
-            self._insertEntryMessage(errType='em', errMessage=error)
-        elif error.find('WARNING') != -1:
-            self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v3.xml', 'header', False)
-            self._insertEntryMessage(errType='em', errMessage=error, messageType='warning')
+        if status == "failed":
+            self._insertEntryMessage(errType="em", errMessage="emd -> xml translation failed:\n" + error)
+        elif error.find("ERROR") != -1:
+            self._insertEntryMessage(errType="em", errMessage=error)
+        elif error.find("WARNING") != -1:
+            self._insertReleseFile("em-volume", xmlfile, self.__embdId + "_v3.xml", "header", False)
+            self._insertEntryMessage(errType="em", errMessage=error, messageType="warning")
         else:
-            self._insertReleseFile('em-volume', xmlfile, self.__embdId + '_v3.xml', 'header', False)
+            self._insertReleseFile("em-volume", xmlfile, self.__embdId + "_v3.xml", "header", False)
         #
 
     def __cif2xmlTranslate(self, ciffile, xmlfile, validateFlag):
-        logFile = 'convert_em_xml_' + self._entryId + '.log'
+        logFile = "convert_em_xml_" + self._entryId + ".log"
         logFilePath = os.path.join(self._sessionPath, logFile)
         self._removeFile(logFilePath)
         #
-        status = 'failed'
-        error = ''
+        status = "failed"
+        error = ""
         try:
             translator = CifEMDBTranslator()
             translator.set_logger_logging(log_error=True, error_log_file_name=logFilePath)
@@ -228,84 +366,23 @@ class EmReleaseUtil(EntryUpdateBase):
             translator.write_logger_logs(write_error_log=True)
             # if translator.is_translation_log_empty and os.access(xmlfile, os.F_OK):
             if os.access(xmlfile, os.F_OK):
-                status = 'ok'
+                status = "ok"
             #
         except:  # noqa: E722 pylint: disable=bare-except
             error = traceback.format_exc()
         #
         if os.access(logFilePath, os.F_OK):
-            ifh = open(logFilePath, 'r')
+            ifh = open(logFilePath, "r")
             msg = ifh.read()
             ifh.close()
             if msg:
                 if error:
-                    error += '\n'
+                    error += "\n"
                 #
                 error += msg
             #
         #
-        if (not error) and status == 'failed':
-            error = 'CifEMDBTranslator failed without error message'
+        if (not error) and status == "failed":
+            error = "CifEMDBTranslator failed without error message"
         #
         return status, error
-
-    def __getAdditionalFilePartNumber(self):
-        storagePath = os.path.join(self._cI.get('SITE_ARCHIVE_STORAGE_PATH'), 'archive', self._entryId)
-        for filename in os.listdir(storagePath):
-            if not filename.startswith(self._entryId):
-                continue
-            #
-
-            fFields = str(filename).strip().split('.')
-            baseName = str(fFields[0]).strip()
-            formatExt = str(fFields[1]).strip()
-            nFields = baseName.split('_')
-            fileExt = nFields[2] + '_' + formatExt
-            if fileExt not in self.__fileExtContentTypeD:
-                continue
-            #
-            ContentType = self.__fileExtContentTypeD[fileExt]
-            PartNumber = str(nFields[3]).strip().replace('P', '')
-            if ContentType in self.__partD:
-                if PartNumber not in self.__partD[ContentType]:
-                    self.__partD[ContentType].append(PartNumber)
-                #
-            else:
-                self.__partD[ContentType] = [PartNumber]
-            #
-        #
-
-    def __releaseAdditionalFiles(self):
-        if not self.__partD:
-            return
-        #
-        for typeList in self.__additionalTypeList:
-            if typeList[0] not in self.__contentD:
-                continue
-            #
-            for fType in self.__contentD[typeList[0]][0]:
-                contentType = typeList[0] + '_' + fType
-                if contentType not in self.__partD:
-                    continue
-                #
-                formatExt = self.__formatD[fType]
-                #
-                for part in self.__partD[contentType]:
-                    partExt = ''
-                    if typeList[2] in ['fsc', 'images']:
-                        # These files can be present with multiple but the first is considered the primary of it's type
-                        # The first is of the format name.format
-                        # All subsequent are of the format name_partnumber.format
-                        if int(part) > 1:
-                            partExt = '_' + part
-                    elif len(self.__partD[contentType]) > 1 or typeList[2] in ['masks', 'other']:
-                        partExt = '_' + part
-                    #
-                    sourcePath = self._findArchiveFileName(typeList[0], fType, 'latest', part)
-                    if (not sourcePath) or (not os.access(sourcePath, os.F_OK)):
-                        continue
-                    #
-                    self._insertReleseFile('em-volume', sourcePath, self.__embdId + typeList[1] + partExt + '.' + formatExt, typeList[2], typeList[3])
-                #
-            #
-        #

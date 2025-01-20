@@ -231,8 +231,9 @@ def ExpReleaseOption(dataDict, selectedOptions, newReleaseFlag, reObsoleteFlag, 
             if (t_list[1] in selectedOptions) and selectedOptions[t_list[1]]:
                 value = selectedOptions[t_list[1]]
             #
-        elif ('pdb_id' not in dataDict) or (not dataDict['pdb_id']):
-            value = t_list[4][1][0]
+# No default re-release selection for map-only entry
+#       elif ('pdb_id' not in dataDict) or (not dataDict['pdb_id']):
+#           value = t_list[4][1][0]
         #
         select_text, label = getReleaseManu(t_list[1] + dataDict['structure_id'], value, display_list, '', True)
         text += t_list[2] + ': &nbsp; ' + select_text
