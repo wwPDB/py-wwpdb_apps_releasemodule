@@ -144,12 +144,12 @@ class UpdateUtil(EntryUpdateBase):
         #
         if len(updateEmInfoList) > 0:
             emCat = DataCategory("update_em_info")
-            for item in ( "data_content_type", "revision_type", "file_name", "part_number" ):
+            for item in ("data_content_type", "revision_type", "file_name", "part_number"):
                 emCat.appendAttribute(item)
             #
             row = 0
             for dataDict in updateEmInfoList:
-                for item in ( "data_content_type", "revision_type", "file_name", "part_number" ):
+                for item in ("data_content_type", "revision_type", "file_name", "part_number"):
                     emCat.setValue(dataDict[item], item, row)
                 #
                 row += 1

@@ -349,7 +349,7 @@ class CombineDbApi(object):
         selectedEntryList = self.__ContentDB.getEntryInfo(id_string)
         em_info_map = self.__getEMInfo(id_string)
         #
-        pdbIdMap,pdbIdList = self.__getPdbIdMap(selectedEntryList)
+        pdbIdMap, pdbIdList = self.__getPdbIdMap(selectedEntryList)
         obsprMap = self.__getObsSprMap(id_string, pdbIdMap)
         #
         pdbExtIdMap = self.__ContentDB.getPdbExtIdMap(pdbIdList)
@@ -495,7 +495,7 @@ class CombineDbApi(object):
         if len(pdbIdList) > 1:
             pdbIdList = sorted(list(set(pdbIdList)))
         #
-        return pdbIdMap,pdbIdList
+        return pdbIdMap, pdbIdList
 
     def __getObsSprMap(self, id_string, pdbIdMap):
         pdbxObsSprMap = self.__getPdbxObsSprMap(id_string, pdbIdMap)

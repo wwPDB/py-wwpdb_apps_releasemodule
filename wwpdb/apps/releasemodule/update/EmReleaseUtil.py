@@ -21,7 +21,10 @@ __email__ = "zfeng@rcsb.rutgers.edu"
 __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.07"
 
-import json,os,sys,traceback
+import json
+import os
+import sys
+import traceback
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.utils.config.ConfigInfoData import ConfigInfoData
@@ -47,16 +50,16 @@ class EmReleaseUtil(EntryUpdateBase):
         # tuple[7]: compress public released file or not
         #
         # fmt: off
-        self.__emInfoList = [ [ "Primary map",       "em-volume",            "em-volume",            "map", "",            "map",              True,  True  ],
-                              [ "Half map",          "em-half-volume",       "em-half-volume",       "map", "_half_map",   "other",            True,  True  ],
-                              [ "Mask",              "em-mask-volume",       "em-mask-volume",       "map", "_msk",        "masks",            True,  False ],
-                              [ "Additional map",    "em-additional-volume", "em-additional-volume", "map", "_additional", "other",            True,  True  ],
-                              [ "FSC",               "fsc",                  "fsc-xml",              "xml", "_fsc",        "fsc",              True,  False ],
-                              [ "Image",             "img-emdb",             "img-emdb",             "",    "",            "images",           True,  False ],
-                              [ "Structure factors", "structure-factors",    "sf",                   "cif", "_sf",         "structureFactors", False, True  ],
-                              [ "Layer lines",       "layer-lines",          "layer-lines",          "txt", "_ll",         "layerLines",       False, True  ],
-                              [ "EM metadata",       "model",                "model",                "cif", "",            "",                 True,  False ]
-        ]
+        self.__emInfoList = [[ "Primary map",       "em-volume",            "em-volume",            "map", "",            "map",              True,  True  ],
+                             [ "Half map",          "em-half-volume",       "em-half-volume",       "map", "_half_map",   "other",            True,  True  ],
+                             [ "Mask",              "em-mask-volume",       "em-mask-volume",       "map", "_msk",        "masks",            True,  False ],
+                             [ "Additional map",    "em-additional-volume", "em-additional-volume", "map", "_additional", "other",            True,  True  ],
+                             [ "FSC",               "fsc",                  "fsc-xml",              "xml", "_fsc",        "fsc",              True,  False ],
+                             [ "Image",             "img-emdb",             "img-emdb",             "",    "",            "images",           True,  False ],
+                             [ "Structure factors", "structure-factors",    "sf",                   "cif", "_sf",         "structureFactors", False, True  ],
+                             [ "Layer lines",       "layer-lines",          "layer-lines",          "txt", "_ll",         "layerLines",       False, True  ],
+                             [ "EM metadata",       "model",                "model",                "cif", "",            "",                 True,  False ]
+                             ]
         # fmt: on
         self.__newReleaseFlag = False
         self.__map_release_date = ""
@@ -173,7 +176,7 @@ class EmReleaseUtil(EntryUpdateBase):
         self._dumpLocalPickle()
 
     def __getContentTypeFileExtension(self):
-        """ Get file extension list map 
+        """ Get file extension list map
         """
         contentTypeFileExtD = {}
         #
@@ -219,8 +222,8 @@ class EmReleaseUtil(EntryUpdateBase):
             for fileInfo in emInfoObj["em_map"][emInfo[0]]:
                 filePath = os.path.join(self.__storagePath, fileInfo[0])
                 if not os.access(filePath, os.F_OK):
-                    self._insertEntryMessage(errType="em", errMessage="File '" + fileInfo[0] + \
-                               "' defined in 'em_map' category can not be found in archive directory.")
+                    self._insertEntryMessage(errType="em", errMessage="File '" + fileInfo[0]
+                                             + "' defined in 'em_map' category can not be found in archive directory.")
                     continue
                 #
                 fileList.append( [ filePath, fileInfo[1], fileInfo[2], "" ] )
@@ -228,9 +231,9 @@ class EmReleaseUtil(EntryUpdateBase):
             if len(fileList) > 0:
                 if len(fileList) > 1:
                     fileList.sort(key=lambda tup: int(tup[1]))
-                    for idx,fileTup in enumerate(fileList, start=1):
+                    for idx, fileTup in enumerate(fileList, start=1):
                         fileTup[3] = str(idx)
-                    # 
+                    #
                 #
                 self.__releaseFileList.append( [ emInfo, fileList ] )
             #
@@ -238,7 +241,7 @@ class EmReleaseUtil(EntryUpdateBase):
 
     def __getAdditionalEmFileList(self):
         """ Get additional EM file names
-        """ 
+        """
         if len(self.__archivalFilePathList) == 0:
             self.__getAarchivalFilePathList()
         #
@@ -256,11 +259,11 @@ class EmReleaseUtil(EntryUpdateBase):
                 formatExt = str(fFields[1]).strip()
                 if formatExt not in self.__contentTypeFileExtD[emInfo[1]]:
                     continue
-                # 
+                #
                 nFields = baseName.split("_")
                 if nFields[2] != emInfo[2]:
                     continue
-                # 
+                #
                 partNumber = int(nFields[3][1:])
                 if partNumber in fileMap:
                     fileMap[partNumber].append( [ fileNameTuple[1], nFields[3][1:], fFields[2][1:], "" ] )
@@ -272,7 +275,7 @@ class EmReleaseUtil(EntryUpdateBase):
                 continue
             #
             fileList = []
-            for partNumber,myL in fileMap.items():
+            for partNumber, myL in fileMap.items():
                 if len(myL) > 1:
                     myL.sort(key=lambda tup: int(tup[2]))
                 #
@@ -282,9 +285,9 @@ class EmReleaseUtil(EntryUpdateBase):
             if len(fileList) > 0:
                 if len(fileList) > 1:
                     fileList.sort(key=lambda tup: int(tup[1]))
-                    for idx,fileTup in enumerate(fileList, start=1):
+                    for idx, fileTup in enumerate(fileList, start=1):
                         fileTup[3] = str(idx)
-                    # 
+                    #
                 #
                 self.__releaseFileList.append(( emInfo, fileList ))
             #

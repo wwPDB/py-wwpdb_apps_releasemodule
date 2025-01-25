@@ -381,7 +381,7 @@ class EntryUpdateBase(UpdateBase):
                 if (contentType == 'model') and (formatType == 'pdbx'):
                     skipVersionNumberUpdate = False
                     if ('status_code' in self._entryDir) and (self._entryDir['status_code'] == 'CITATIONUpdate'):
-#                                                             or (self._entryDir['status_code'] == 'EMHEADERUpdate')):
+                        #      or (self._entryDir['status_code'] == 'EMHEADERUpdate')):
                         skipVersionNumberUpdate = True
                     #
                     if not skipVersionNumberUpdate:

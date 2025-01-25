@@ -40,9 +40,9 @@ class StatusDbApi(object):
                               + "author_list_emdb from deposition where %s",
         "GET_ENTRY_LIST_FROM_GROUP" : "select dep_set_id,group_id from group_deposition_information where group_id in ( '%s' ) order by dep_set_id",
         "GET_MAJOR_ISSUE_ENTRY_LIST" : "select dep_set_id from remind_message_track where major_issue != '' and dep_set_id in ( '%s' ) order "
-                                     + "by dep_set_id",
+                                       + "by dep_set_id",
         "GET_VALIDATION_DATE_ENTRY_LIST" : "select dep_set_id from remind_message_track where ( last_validation_sent_date <= DATE_SUB( curdate(), "
-                                         + "interval 22 day ) ) and dep_set_id in ( '%s' ) order by dep_set_id"
+                                           + "interval 22 day ) ) and dep_set_id in ( '%s' ) order by dep_set_id"
     }
     #
     """

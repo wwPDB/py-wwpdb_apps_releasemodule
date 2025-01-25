@@ -75,10 +75,9 @@ class EntryUpdateProcess(EntryUpdateBase):
         else:
             self._dumpLocalPickle()
         #
-        emReleaseInfo = {}
         if self.__EmEntryFlag:
             self.__emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
-            emReleaseInfo = self.__emUtil.getEmReleaseInfo(self.__EmXmlHeaderOnlyFlag)
+            self.__emUtil.getEmReleaseInfo(self.__EmXmlHeaderOnlyFlag)  # Does not return value
             #
             if self.__GenEmXmlHeaderFlag:
                 self.__emUtil.validateXml()
