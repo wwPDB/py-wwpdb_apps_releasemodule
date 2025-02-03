@@ -21,7 +21,12 @@ __email__ = "zfeng@rcsb.rutgers.edu"
 __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.07"
 
-import gzip,json,os,sys,time,traceback
+import gzip
+import json
+import os
+import sys
+import time
+import traceback
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
@@ -121,7 +126,7 @@ class EmReleaseUtil(EntryUpdateBase):
     def getEmUpdatedInfoList(self):
         """ Generate EM experimental file releaseing information
         """
-        updatedList,fileNameList = self.__getMissingInitialInfoList()
+        updatedList, fileNameList = self.__getMissingInitialInfoList()
         if len(self.__releaseFileList) > 0:
             revision_type = "Data updated"
             if self.__newReleaseFlag:
@@ -250,8 +255,8 @@ class EmReleaseUtil(EntryUpdateBase):
                 #
                 if len(fileList) > 1:
                     fileList.sort(key=lambda tup: int(tup[1]))
-                    for idx, fileTup in enumerate(fileList, start=1):
-                        #fileTup[3] = str(idx)
+                    for _idx, fileTup in enumerate(fileList, start=1):
+                        # fileTup[3] = str(idx)
                         fileTup[3] = fileTup[1]
                     #
                 #
@@ -347,8 +352,8 @@ class EmReleaseUtil(EntryUpdateBase):
                 #
                 if len(fileList) > 1:
                     fileList.sort(key=lambda tup: int(tup[1]))
-                    for idx, fileTup in enumerate(fileList, start=1):
-                        #fileTup[3] = str(idx)
+                    for _idx, fileTup in enumerate(fileList, start=1):
+                        # fileTup[3] = str(idx)
                         fileTup[3] = fileTup[1]
                     #
                 #
@@ -384,7 +389,7 @@ class EmReleaseUtil(EntryUpdateBase):
         """ Generate missing initial releaseing information
         """
         if len(self.__neededInitialReleaseTypeList) == 0:
-            return [],[]
+            return [], []
         #
         if len(self.__archivalFilePathList) == 0:
             self.__getAarchivalFilePathList()
@@ -422,7 +427,7 @@ class EmReleaseUtil(EntryUpdateBase):
                 partNumber = int(nFields[3][1:])
                 #
                 # For map files, only creates initial release information for map file defined in "em_map" category
-                # 
+                #
                 if (emInfo[0] in self.__currentMapPartListMap) and (nFields[3][1:] not in self.__currentMapPartListMap[emInfo[0]]):
                     continue
                 #
@@ -438,7 +443,7 @@ class EmReleaseUtil(EntryUpdateBase):
                 continue
             #
             fileList = []
-            for partNumber,foundFileList in sorted(foundFileListMap.items()):
+            for partNumber, foundFileList in sorted(foundFileListMap.items()):
                 if emInfo[0] == "EM metadata":
                     if partNumber != 1:
                         continue
@@ -492,7 +497,7 @@ class EmReleaseUtil(EntryUpdateBase):
                 updatedList.append(myD)
             #
         #
-        return updatedList,fileNameList
+        return updatedList, fileNameList
 
     def __generateEmCifHeader(self):
         """
