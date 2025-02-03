@@ -77,7 +77,7 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         if self.__EmEntryFlag:
             self.__emUtil = EmReleaseUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
-            self.__emUtil.getEmReleaseInfo(self.__EmXmlHeaderOnlyFlag)  # Does not return value
+            self.__emUtil.getEmReleaseInfo(self.__EmXmlHeaderOnlyFlag)
             #
             if self.__GenEmXmlHeaderFlag:
                 self.__emUtil.validateXml()
@@ -85,7 +85,7 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
         if self.__updateFlag:
             updateEmInfoList = []
-            if self.__emUtil and (not self.__EmXmlHeaderOnlyFlag):
+            if self.__emUtil:
                 updateEmInfoList = self.__emUtil.getEmUpdatedInfoList()
             #
             updateUtil = UpdateUtil(reqObj=self._reqObj, entryDir=self._entryDir, verbose=self._verbose, log=self._lfh)
