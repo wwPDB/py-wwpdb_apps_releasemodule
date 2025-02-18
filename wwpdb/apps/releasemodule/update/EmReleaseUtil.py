@@ -256,7 +256,7 @@ class EmReleaseUtil(EntryUpdateBase):
                 if len(fileList) > 1:
                     fileList.sort(key=lambda tup: int(tup[1]))
                 #
-                #for _idx, fileTup in enumerate(fileList, start=1):
+                # for _idx, fileTup in enumerate(fileList, start=1):
                     # fileTup[3] = str(idx)
                 for fileTup in fileList:
                     if (len(fileList) > 1) or ( emInfo[0] in ( "Half map", "Mask", "Additional map" )):
