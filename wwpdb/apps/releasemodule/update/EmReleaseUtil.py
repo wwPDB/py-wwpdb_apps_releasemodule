@@ -69,6 +69,7 @@ class EmReleaseUtil(EntryUpdateBase):
         #
         self.__storagePath = os.path.join(self._cI.get("SITE_ARCHIVE_STORAGE_PATH"), "archive", self._entryId)
         self.__embdId = self._entryDir["emdb_id"].replace("-", "_").lower()
+        self.__entryDirPath = os.path.join(self._topReleaseDir, "emd", self._entryDir["emdb_id"])
         #
         self.__contentTypeFileExtD = self.__getContentTypeFileExtension()
         self.__archivalFilePathList = []
@@ -183,7 +184,8 @@ class EmReleaseUtil(EntryUpdateBase):
                 if len(fileTuple[3]) > 0:
                     partNumber = "_" + fileTuple[3]
                 #
-                self._insertReleseFile("em-volume", fileTuple[0], self.__embdId + emInfo[4] + partNumber + "." + formatExt, emInfo[5], emInfo[7])
+                self._insertReleseFile("release_file", "em-volume", fileTuple[0], self.__embdId + emInfo[4] + partNumber + "." + formatExt, \
+                                        self.__entryDirPath, os.path.join(self._entryDir["emdb_id"] + ".release_file", emInfo[5]), emInfo[7])
             #
         #
         self._dumpLocalPickle()
@@ -381,11 +383,12 @@ class EmReleaseUtil(EntryUpdateBase):
             self._insertEntryMessage(errType="em", errMessage="emd -> xml translation failed:\n" + error)
         elif error.find("ERROR") != -1:
             self._insertEntryMessage(errType="em", errMessage=error)
-        elif error.find("WARNING") != -1:
-            self._insertReleseFile("em-volume", xmlfile, self.__embdId + "_v3.xml", "header", False)
-            self._insertEntryMessage(errType="em", errMessage=error, messageType="warning")
         else:
-            self._insertReleseFile("em-volume", xmlfile, self.__embdId + "_v3.xml", "header", False)
+            if error.find("WARNING") != -1:
+                self._insertEntryMessage(errType="em", errMessage=error, messageType="warning")
+            #
+            self._insertReleseFile("release_file", "em-volume", xmlfile, self.__embdId + "_v3.xml", self.__entryDirPath, \
+                                   os.path.join(self._entryDir["emdb_id"] + ".release_file", "header"), False)
         #
 
     def __getMissingInitialInfoList(self):
@@ -523,7 +526,8 @@ class EmReleaseUtil(EntryUpdateBase):
             self._insertEntryMessage(errType="em", errMessage="Generating " + cifFile + " failed.")
             return
         #
-        self._insertReleseFile("em-volume", cifFilePath, cifFile, "metadata", True)
+        self._insertReleseFile("release_file", "em-volume", cifFilePath, cifFile, self.__entryDirPath, \
+                               os.path.join(self._entryDir["emdb_id"] + ".release_file", "metadata"), True)
 
     def __getAarchivalFilePathList(self):
         """ Get all archival file name list
@@ -560,9 +564,7 @@ class EmReleaseUtil(EntryUpdateBase):
             error = traceback.format_exc()
         #
         if os.access(logFilePath, os.F_OK):
-            ifh = open(logFilePath, "r")
-            msg = ifh.read()
-            ifh.close()
+            msg = self._readFile(logFilePath)
             if msg:
                 if error:
                     error += "\n"

@@ -50,20 +50,6 @@ class EntryUpdateProcess(EntryUpdateBase):
         self.__GenEmXmlHeaderFlag = False
         self.__EmXmlHeaderOnlyFlag = False
         self.__releaseDirectory = {}
-        # tuple[0]: old prefix
-        # tuple[1]: old suffix
-        # tuple[2]: new file type
-        # tuple[3]: new suffix
-        # tuple[4]: gzip flag
-        # tuple[5]: content Type
-        # still need file format convention for pdb bundle tar file
-        self.__version_file_name_conversions = \
-            (('', '.cif.gz', 'xyz', '.cif.gz', 'no', 'model'), ('', '.xml.gz', 'xyz', '.xml.gz', 'no', 'model'),
-             ('', '-noatom.xml.gz', 'xyz-no-atom', '.xml.gz', 'no', 'model'), ('', '-extatom.xml.gz', 'xyz-ext-atom', '.xml.gz', 'no', 'model'),
-             ('pdb', '.ent', 'xyz', '.pdb.gz', 'yes', 'model'), ('', '_cs.str', 'cs', '.str.gz', 'yes', 'nmr-chemical-shifts'),
-             ('', '.mr', 'mr', '.mr.gz', 'yes', 'nmr-restraints'), ('', '_nmr-data.str.gz', 'nmr-data', '.str.gz', 'no', 'nmr-data-str'),
-             ('', '_nmr-data.nef.gz', 'nmr-data', '.nef.gz', 'no', 'nmr-data-nef'), ('', '-sf.cif', 'sf', '.cif.gz', 'yes', 'structure-factors'))
-        #
         self.__emUtil = None
 
     def run(self):
@@ -258,74 +244,50 @@ class EntryUpdateProcess(EntryUpdateBase):
             #
         #
         for typeList in self._fileTypeList:
-            if (not typeList[3] in self._pickleData) or (not self._pickleData[typeList[3]]) or \
-               ('release' not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release']) or \
-               ('release_file' not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release_file']):
+            if (not typeList[3] in self._pickleData) or (not self._pickleData[typeList[3]]):
                 continue
             #
-            for_release_dir = ''
-            entry_dir = ''
-            if typeList[3] == 'em-volume':
-                for_release_dir = 'emd'
-                if emdbId:
-                    entry_dir = emdbId
-                else:
-                    self._insertEntryMessage(errType=typeList[5], errMessage='No EMDB ID found for EM entry ' + self._entryId + '.', uniqueFlag=True)
+            for releaseFileType in ( "release_file", "beta_release_file", "version_release_file" ):
+                if (releaseFileType not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]][releaseFileType]):
+                    continue
                 #
-            else:
-                if ('for_release_dir' in self._pickleData[typeList[3]]) and self._pickleData[typeList[3]]['for_release_dir']:
-                    for_release_dir = self._pickleData[typeList[3]]['for_release_dir']
-                else:
-                    self._insertEntryMessage(errType=typeList[5], errMessage="No sub-directory ( 'added', 'modified', 'obsolete', 'reloaded' ) defined for entry "
-                                             + self._entryId + '.', uniqueFlag=True)
+                for fileList in self._pickleData[typeList[3]][releaseFileType]:
+                    targetPath = os.path.join(self._sessionPath, fileList[3])
+                    self.__make_directory(targetPath)
                     #
-                #
-                if pdbId:
-                    entry_dir = pdbId
-                else:
-                    self._insertEntryMessage(errType=typeList[5], errMessage='No PDB ID found for entry ' + self._entryId + '.', uniqueFlag=True)
-                #
-            #
-            if (not for_release_dir) or (not entry_dir):
-                continue
-            #
-            for fileList in self._pickleData[typeList[3]]['release_file']:
-                releasePath = os.path.join(self._topReleaseDir, for_release_dir, entry_dir)
-                targetPath = os.path.join(self._sessionPath, entry_dir + ".tmp_dir")
-                topTargetPath = targetPath
-                if releasePath not in self.__releaseDirectory:
-                    self.__releaseDirectory[releasePath] = targetPath
-                #
-                if fileList[2]:
-                    targetPath = os.path.join(self._sessionPath, entry_dir + ".tmp_dir", fileList[2])
-                #
-                self.__make_directory(targetPath)
-                if not os.access(os.path.join(topTargetPath, self._entryId + '.summary'), os.F_OK):
-                    self._copyFileUtil(os.path.join(self._sessionPath, self._entryId + '.summary'), os.path.join(topTargetPath, self._entryId + '.summary'))
-                #
-                if fileList[3]:
-                    f_in = open(fileList[0], 'rb')
-                    f_out = gzip.open(os.path.join(targetPath, fileList[1] + '.gz'), 'wb')
-                    f_out.writelines(f_in)
-                    f_out.close()
-                    f_in.close()
-                    if not os.access(os.path.join(targetPath, fileList[1] + '.gz'), os.F_OK):
-                        self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + ".gz file to "
-                                                 + os.path.join(targetPath, fileList[1] + '.gz') + " file failed for entry "
-                                                 + self._entryId + ".", uniqueFlag=True)
+                    # Exclude EM sub-directory
+                    spList = fileList[3].split("/")
+                    topTargetPath = os.path.join(self._sessionPath, spList[0])
+                    if fileList[2] not in self.__releaseDirectory:
+                        self.__releaseDirectory[fileList[2]] =topTargetPath 
+                    #
+                    if (releaseFileType == "release_file") and (not os.access(os.path.join(topTargetPath, self._entryId + '.summary'), os.F_OK)):
+                        self._copyFileUtil(os.path.join(self._sessionPath, self._entryId + '.summary'), os.path.join(topTargetPath, self._entryId + '.summary'))
+                    #
+                    if fileList[4]:
+                        with open(fileList[0], 'rb') as f_in:
+                            with gzip.open(os.path.join(targetPath, fileList[1] + '.gz'), 'wb') as f_out:
+                                shutil.copyfileobj(f_in, f_out)
+                            #
+                        #
+                        if not os.access(os.path.join(targetPath, fileList[1] + '.gz'), os.F_OK):
+                            self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + ".gz file to "
+                                                     + os.path.join(targetPath, fileList[1] + '.gz') + " file failed for entry "
+                                                     + self._entryId + ".", uniqueFlag=True)
+                        else:
+                            self._insertAction('Copied ' + fileList[0] + '.gz to ' + os.path.join(targetPath, fileList[1] + '.gz') + '.')
+                        #
                     else:
-                        self._insertAction('Copied ' + fileList[0] + '.gz to ' + os.path.join(targetPath, fileList[1] + '.gz') + '.')
-                    #
-                else:
-                    rtn_message = self._copyFileUtil(fileList[0], os.path.join(targetPath, fileList[1]))
-                    if rtn_message == 'ok':
-                        self._insertAction('Copied ' + fileList[0] + ' to ' + os.path.join(targetPath, fileList[1]) + '.')
-                    elif rtn_message == 'not found':
-                        self._insertEntryMessage(errType=typeList[5], errMessage="Can't find " + os.path.join(targetPath, fileList[1]) + " file for entry "
-                                                 + self._entryId + ".", uniqueFlag=True)
-                    elif rtn_message == 'copy failed':
-                        self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + " file to " + os.path.join(targetPath, fileList[1])
-                                                 + " file failed for entry " + self._entryId + ".", uniqueFlag=True)
+                        rtn_message = self._copyFileUtil(fileList[0], os.path.join(targetPath, fileList[1]))
+                        if rtn_message == 'ok':
+                            self._insertAction('Copied ' + fileList[0] + ' to ' + os.path.join(targetPath, fileList[1]) + '.')
+                        elif rtn_message == 'not found':
+                            self._insertEntryMessage(errType=typeList[5], errMessage="Can't find " + os.path.join(targetPath, fileList[1]) + " file for entry "
+                                                     + self._entryId + ".", uniqueFlag=True)
+                        elif rtn_message == 'copy failed':
+                            self._insertEntryMessage(errType=typeList[5], errMessage="Copy " + fileList[0] + " file to " + os.path.join(targetPath, fileList[1])
+                                                     + " file failed for entry " + self._entryId + ".", uniqueFlag=True)
+                        #
                     #
                 #
             #
@@ -342,90 +304,7 @@ class EntryUpdateProcess(EntryUpdateBase):
         else:
             self._removeExistingForReleaseDirectories()
             for relPath, dirPath in self.__releaseDirectory.items():
-                if pdbId and os.access(os.path.join(dirPath, pdbId + '.cif.gz'), os.F_OK):
-                    #
-                    # Copying for_release_beta directory
-                    #
-                    betaDirPath = relPath.replace(self._topReleaseDir, self._topReleaseBetaDir)
-                    self._insertAction('Copied ' + dirPath + ' to ' + betaDirPath)
-                    shutil.copytree(dirPath, betaDirPath)
-                    #
-                    # Renaming v5 files in for_release_beta directory and removing v5 files in for_release directory
-                    #
-                    # """
-                    # for file_exts in ( ( '.v5.cif.gz', '.cif.gz' ), ( '.v5.xml.gz', '.xml.gz'), ( '-noatom.v5.xml.gz', '-noatom.xml.gz'), \
-                    #                    ( '-extatom.v5.xml.gz', '-extatom.xml.gz' )):
-                    #     if os.access(os.path.join(betaDirPath, pdbId + file_exts[0]), os.F_OK):
-                    #         self._insertAction('Renamed ' + os.path.join(betaDirPath, pdbId + file_exts[0]) + \
-                    #                            ' to ' + os.path.join(betaDirPath, pdbId + file_exts[1]))
-                    #         os.rename(os.path.join(betaDirPath, pdbId + file_exts[0]), os.path.join(betaDirPath, pdbId + file_exts[1]))
-                    #     #
-                    #     self._removeFile(os.path.join(dirPath, pdbId + file_exts[0]))
-                    # """
-                    #
-                    # Copying for_release_version directory
-                    #
-                    newPdbId = 'pdb_0000' + pdbId
-                    versionDirPath = betaDirPath.replace(self._topReleaseBetaDir, self._topReleaseVersionDir).replace(pdbId, newPdbId)
-                    shutil.copytree(betaDirPath, versionDirPath)
-                    #
-                    # Removing pdb format model file and renaming rest files in for_release_version directory
-                    #
-                    for file_conversion in self.__version_file_name_conversions:
-                        oldFileName = os.path.join(versionDirPath, file_conversion[0] + pdbId + file_conversion[1])
-                        if not os.access(oldFileName, os.F_OK):
-                            continue
-                        #
-                        if file_conversion[0] == 'pdb' and file_conversion[1] == '.ent':
-                            self._removeFile(oldFileName)
-                            continue
-                        #
-                        version = ''
-                        major_revision, minor_revision = self._getAuditRevisionInfo(file_conversion[5])
-                        if major_revision and minor_revision:
-                            version = '_v' + major_revision + '-' + minor_revision
-                        #
-                        newFileName = os.path.join(versionDirPath, newPdbId + '_' + file_conversion[2] + version + file_conversion[3])
-                        if file_conversion[4] == 'yes':
-                            f_in = open(oldFileName, 'rb')
-                            f_out = gzip.open(newFileName, 'wb')
-                            f_out.writelines(f_in)
-                            f_out.close()
-                            f_in.close()
-                            if os.access(newFileName, os.F_OK):
-                                self._insertAction('Renamed ' + oldFileName + '.gz to ' + newFileName)
-                                self._removeFile(oldFileName)
-                            #
-                        else:
-                            self._insertAction('Renamed ' + oldFileName + ' to ' + newFileName)
-                            os.rename(oldFileName, newFileName)
-                        #
-                    #
-                    # Finding biological assembly files
-                    #
-                    biolAssemblyList = []
-                    for filename in os.listdir(dirPath):
-                        if filename.startswith(pdbId + '-assembly'):
-                            biolAssemblyList.append(filename)
-                        #
-                    #
-                    for biolCifFile in biolAssemblyList:
-                        biolPdbFile = biolCifFile.replace('-assembly', '.pdb').replace('.cif', '')
-                        # if os.access(os.path.join(dirPath, biolPdbFile),  os.F_OK):
-                        #     # Removing cif format assembly file in for_release and for_release_beta directories
-                        #     self._removeFile(os.path.join(dirPath, biolCifFile))
-                        #     self._removeFile(os.path.join(betaDirPath, biolCifFile))
-                        #
-                        # Removing pdb format assembly file in for_release_version directory
-                        self._removeFile(os.path.join(versionDirPath, biolPdbFile))
-                        #
-                        # Renaming cif format assembly file in for_release_version directory
-                        if os.access(os.path.join(versionDirPath, biolCifFile), os.F_OK):
-                            newBiolCifFile = biolCifFile.replace(pdbId, newPdbId)
-                            os.rename(os.path.join(versionDirPath, biolCifFile), os.path.join(versionDirPath, newBiolCifFile))
-                        #
-                    #
-                #
+                self._removeDirectory(relPath)
                 self._insertAction('Copied ' + dirPath + ' to ' + relPath)
                 shutil.copytree(dirPath, relPath)
                 self._removeDirectory(dirPath)

@@ -30,6 +30,7 @@ import tarfile
 import time
 import traceback
 
+from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
 from wwpdb.apps.releasemodule.update.UpdateBase import UpdateBase
 from wwpdb.apps.wf_engine.engine.WFEapplications import killAllWF
 from wwpdb.io.locator.PathInfo import PathInfo
@@ -56,6 +57,16 @@ class EntryUpdateBase(UpdateBase):
         self.__checkEMEntry()
         #
         self._processing_site = self._cI.get("SITE_NAME").upper()
+        #
+        # key: contentType
+        # val[0]: for_release_dir value
+        # val[1]: fullReleaseDirPath
+        # val[2]: fullReleaseBetaDirPath
+        # val[3]: fullReleaseVersionDirPath
+        self._forReleaseDirPathMap = {}
+        self._errorKeyWordList = []
+        self._versionFileNameConversionMap = { ".cif": ("xyz", ".cif"), ".cif.xml": ("xyz", ".xml"), ".cif.xml-noatom": ("xyz-no-atom", ".xml"), \
+                                               ".cif.xml-extatom": ("xyz-ext-atom", ".xml") }
         #
         # Added for DAOTHER-2996
         # For map only entry, pdb_id is not set, we will create an error message that will never match
@@ -208,6 +219,62 @@ class EntryUpdateBase(UpdateBase):
             self._pickleData[contentType]['revision'] = {'major_revision' : major_revision, 'minor_revision' : minor_revision}
         #
 
+    def _readErrorKeyWordList(self):
+        errorKeyWordList = []
+        #
+        fPath = os.path.join(self._reqObj.getValue('TemplatePath'), 'cif_xml_error_list')
+        sIn = self._readFile(fPath)
+        #
+        lineList = sIn.split('\n')
+        for line in lineList:
+            if not line:
+                continue
+            #
+            if line[0] == '#':
+                continue
+            #
+            keylist = line.split(';')
+            errorKeyWordList.append(keylist)
+        #
+        return errorKeyWordList
+
+    def _getPdbReleaseInfo(self):
+        pdbId = ""
+        if ("pdb_id" in self._entryDir) and self._entryDir['pdb_id']:
+            pdbId = self._entryDir['pdb_id'].lower()
+        #
+        extendedPdbId = ""
+        if len(pdbId) == 4:
+            extendedPdbId = "pdb_0000" + pdbId
+        elif (len(pdbId) == 12) and pdbId.startswith("pdb_"):
+            extendedPdbId = pdbId
+        #
+        forReleaseDirPathMap = {}
+        contentTypeList = []
+        for contentType in ( "model", "structure-factors", "nmr-chemical-shifts", "nmr-data-str", "nmr-restraints" ):
+            if (not contentType in self._pickleData) or (not self._pickleData[contentType]):
+                continue
+            #
+            contentTypeList.append(contentType)
+            #
+            for_release_dir = ""
+            fullReleaseDirPath = ""
+            fullReleaseBetaDirPath = ""
+            fullReleaseVersionDirPath = ""
+            if ("for_release_dir" in self._pickleData[contentType]) and self._pickleData[contentType]["for_release_dir"]:
+                for_release_dir = self._pickleData[contentType]["for_release_dir"]
+                if pdbId:
+                    fullReleaseDirPath = os.path.join(self._topReleaseDir, for_release_dir, pdbId)
+                #
+                if extendedPdbId:
+                    fullReleaseBetaDirPath = os.path.join(self._topReleaseBetaDir, for_release_dir, extendedPdbId)
+                    fullReleaseVersionDirPath = os.path.join(self._topReleaseVersionDir, for_release_dir, extendedPdbId)
+                #
+            #
+            forReleaseDirPathMap[contentType] = ( for_release_dir, fullReleaseDirPath, fullReleaseBetaDirPath, fullReleaseVersionDirPath )
+        #
+        return pdbId, extendedPdbId, forReleaseDirPathMap, contentTypeList
+
     def _getAuditRevisionInfo(self, contentType):
         major_revision = ''
         minor_revision = ''
@@ -222,14 +289,56 @@ class EntryUpdateBase(UpdateBase):
         #
         return major_revision, minor_revision
 
-    def _insertReleseFile(self, contentType, sourceFile, targetFile, subdirectory, compressFlag):
+    def _releasingNefFile(self, pdbId, extendedPdbId):
+        if not self._checkReleaseFlag('nmr-data-str'):
+            return
+        #
+        internalStrFile = self._entryId + '_nmr-data-str_P1.str'
+        internalNefFile = self._entryId + '_nmr-data-nef_P1.str'
+        externalStrFile = pdbId + '_nmr-data.str'
+        externalNefFile = pdbId + '_nmr-data.nef'
+        betaStrFile = ""
+        betaNefFile = ""
+        if extendedPdbId:
+            betaStrFile = extendedPdbId + '_nmr-data.str'
+            betaNefFile = extendedPdbId + '_nmr-data.nef'
+        #
+        for fileName in (internalStrFile, internalNefFile, externalStrFile, externalNefFile, betaStrFile, betaNefFile):
+            if fileName == "":
+                continue
+            #
+            self._removeFile(os.path.join(self._sessionPath, fileName))
+        #
+        generator = NmrDataGenerator(siteId=self._siteId, workingDirPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
+        errMsg = generator.getNmrDataFiles(pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile),
+                                           os.path.join(self._sessionPath, internalNefFile))
+        #
+        for tupL in ( ( internalStrFile, '', 'nmr-data-str', ( ( pdbId, externalStrFile, 'release_file', 1, pdbId + ".release_file" ), \
+                      ( extendedPdbId, betaStrFile, 'beta_release_file', 2, extendedPdbId + ".beta_release_file" ) ) ), \
+                      ( internalNefFile, errMsg, 'nmr-data-nef', ( ( pdbId, externalNefFile, 'release_file', 1, pdbId + ".release_file" ), \
+                      ( extendedPdbId, betaNefFile, 'beta_release_file', 2, extendedPdbId + ".beta_release_file" ) ) ) ):
+            if not self._verifyGeneratingFile('nmr_data', tupL[0], errMsg=tupL[1]):
+                continue
+            #
+            for subTupL in tupL[3]:
+                if not subTupL[0]:
+                    continue
+                #
+                self.__updateNefFileDataBlockName(subTupL[0], os.path.join(self._sessionPath, tupL[0]), os.path.join(self._sessionPath, subTupL[1]))
+                self._insertReleseFile(subTupL[2], tupL[2], os.path.join(self._sessionPath, subTupL[1]), subTupL[1], \
+                                       self._forReleaseDirPathMap["nmr-data-str"][subTupL[3]], subTupL[4], True)
+                #
+            #
+        #
+
+    def _insertReleseFile(self, releaseFileType, contentType, sourceFile, targetFile, entryDirectory, subDirectory, compressFlag):
         if (contentType not in self._pickleData) or (not self._pickleData[contentType]):
             return
         #
-        if 'release_file' in self._pickleData[contentType]:
-            self._pickleData[contentType]['release_file'].append([sourceFile, targetFile, subdirectory, compressFlag])
+        if releaseFileType in self._pickleData[contentType]:
+            self._pickleData[contentType][releaseFileType].append([sourceFile, targetFile, entryDirectory, subDirectory, compressFlag])
         else:
-            self._pickleData[contentType]['release_file'] = [[sourceFile, targetFile, subdirectory, compressFlag]]
+            self._pickleData[contentType][releaseFileType] = [[sourceFile, targetFile, entryDirectory, subDirectory, compressFlag]]
         #
 
     def _processCopyFileError(self, errType, returnType, fileType, sourceFile, targetFile, entryId):
@@ -348,10 +457,12 @@ class EntryUpdateBase(UpdateBase):
 
     def _removeExistingForReleaseDirectories(self):
         if ('pdb_id' in self._entryDir) and self._entryDir['pdb_id']:
-            for subdirectory in ('added', 'modified', 'obsolete', 'reloaded'):
-                self._removeDirectory(os.path.join(self._topReleaseDir, subdirectory, self._entryDir['pdb_id'].lower()))
-                self._removeDirectory(os.path.join(self._topReleaseBetaDir, subdirectory, self._entryDir['pdb_id'].lower()))
-                self._removeDirectory(os.path.join(self._topReleaseVersionDir, subdirectory, 'pdb_0000' + self._entryDir['pdb_id'].lower()))
+            for entry_dir_id in ( self._entryDir['pdb_id'].lower(), 'pdb_0000' + self._entryDir['pdb_id'].lower() ):
+                for subdirectory in ('added', 'modified', 'obsolete', 'reloaded'):
+                    self._removeDirectory(os.path.join(self._topReleaseDir, subdirectory, entry_dir_id))
+                    self._removeDirectory(os.path.join(self._topReleaseBetaDir, subdirectory, entry_dir_id))
+                    self._removeDirectory(os.path.join(self._topReleaseVersionDir, subdirectory, entry_dir_id))
+                #
             #
         #
         # May need specific instruction for removal emd entry
@@ -522,12 +633,126 @@ class EntryUpdateBase(UpdateBase):
             #
         #
 
+    def _checkReleaseFlag(self, contentType):
+        if (contentType not in self._pickleData) or (not self._pickleData[contentType]) or \
+           ('release' not in self._pickleData[contentType]) or (not self._pickleData[contentType]['release']) or \
+           ('session_file' not in self._pickleData[contentType]) or (not self._pickleData[contentType]['session_file']):
+            return False
+        #
+        if contentType not in self._forReleaseDirPathMap:
+            self._insertEntryMessage(errType=contentType, errMessage="Can not find for_release* directories.", uniqueFlag=True)
+            return False
+        else:
+            if self._forReleaseDirPathMap[contentType][0] == "":
+                self._insertEntryMessage(errType=contentType, errMessage="added/modified/obsolete subdirectory was not defined.", uniqueFlag=True)
+                return False
+            elif self._forReleaseDirPathMap[contentType][2] == "" or self._forReleaseDirPathMap[contentType][3] == "":
+                self._insertEntryMessage(errType=contentType, errMessage="Can not find the extended PDB ID.", uniqueFlag=True)
+            #
+        #
+        return True
+
+    def _verifyGeneratingFile(self, fileType, fileName, errMsg=""):
+        filePath = os.path.join(self._sessionPath, fileName)
+        if os.access(filePath, os.F_OK):
+            return True
+        #
+        msg = 'Generating ' + fileName + ' failed.'
+        if errMsg:
+            msg = 'Generating ' + fileName + ' failed:\n' + errMsg
+        #
+        self._insertEntryMessage(errType=fileType, errMessage=msg, uniqueFlag=True)
+        return False
+
+    def _processCheckReoprt(self, errType, reportFile, sourceFile, missingFlag, warningOnlyFlag):
+        status, msg = self._getLogMessage('', os.path.join(self._sessionPath, reportFile))
+        if status == 'not found':
+            if missingFlag:
+                self._insertEntryMessage(errType=errType, errMessage='Checking releasing ' + errType + ' failed.', messageType='warning', uniqueFlag=True)
+            #
+            return
+        #
+        if not msg:
+            return
+        #
+        msg_length = len(msg)
+        msgList = msg.split('\n')
+        msg = ''
+        foudValue = False
+        block_flag = False
+        count = 0
+        for line in msgList:
+            if self.__containErrorKeyWords(line):
+                block_flag = True
+            #
+            msg += line + '\n'
+            count += 1
+            if (count > 500) and (msg_length > 10000):
+                break
+            #
+            strip_line = line.strip()
+            if strip_line == sourceFile + ' validates':
+                continue
+            elif strip_line == '':
+                continue
+            elif strip_line.startswith('stdin:'):
+                continue
+            else:
+                foudValue = True
+            #
+        #
+        if not foudValue:
+            return
+        #
+        msgType = 'warning'
+        if block_flag:
+            msgType = 'error'
+        #
+        if warningOnlyFlag:
+            msgType = 'warning'
+        #
+        self._insertEntryMessage(errType=errType, errMessage=msg, messageType=msgType)
+
     def __checkEMEntry(self):
         if ('exp_method' in self._entryDir) and ((self._entryDir['exp_method'].find("ELECTRON CRYSTALLOGRAPHY") != -1)
                                                  or (self._entryDir['exp_method'].find("ELECTRON MICROSCOPY") != -1)
                                                  or (self._entryDir['exp_method'].find("ELECTRON TOMOGRAPHY") != -1)):
             self._EMEntryFlag = True
         #
+    def __updateNefFileDataBlockName(self, pdb_id, inputFilePath, outputFilePath):
+        with open(outputFilePath, "w") as f_out:
+            with open(inputFilePath, "r") as f_in:
+                data = f_in.read()
+                dataList = data.split("\n")
+                if not dataList[-1]:
+                    dataList = dataList[:-1]
+                # 
+                first = True
+                for line in dataList:
+                    if line.strip().startswith("data_") and first:
+                        first = False
+                        f_out.write("data_nef_%s\n" % pdb_id)
+                    else:
+                        f_out.write(line + "\n")
+                    #
+                #
+            #
+        #
 
     def __setFinishTime(self):
         self._pickleData['finish_time'] = time.time()
+
+
+    def __containErrorKeyWords(self, line):
+        for keyWordList in self._errorKeyWordList:
+            count = 0
+            for keyWord in keyWordList:
+                if line.find(keyWord) != -1:
+                    count += 1
+                #
+            #
+            if len(keyWordList) == count and line.find('The expected type is "symop"') == -1:
+                return True
+            #
+        #
+        return False

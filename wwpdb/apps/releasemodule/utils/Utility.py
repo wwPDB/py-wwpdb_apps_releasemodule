@@ -306,6 +306,9 @@ def FindReleaseFiles(siteId, entry_dir):
     id_list = []
     if ('pdb_id' in entry_dir) and entry_dir['pdb_id']:
         id_list.append(entry_dir['pdb_id'].lower())
+        if len(entry_dir['pdb_id']) == 4:
+            id_list.append('pdb_0000' + entry_dir['pdb_id'].lower())
+        #
     #
     if ('emdb_id' in entry_dir) and entry_dir['emdb_id']:
         id_list.append(entry_dir['emdb_id'])
@@ -317,57 +320,60 @@ def FindReleaseFiles(siteId, entry_dir):
     opReleaseDir = cIcommon.get_for_release_path()
 
     fmap = {}
-    for id in id_list:  # pylint: disable=redefined-builtin
-        lower_id = id.lower()
+    for p_id in id_list:  # pylint: disable=redefined-builtin
+        lower_id = p_id.lower()
         for subdir in ('added', 'modified', 'obsolete', 'reloaded', 'emd'):
-            path = os.path.join(opReleaseDir, subdir, id)
-            if not os.access(path, os.F_OK):
-                continue
-            #
-            dlist = os.listdir(path)
-            for filename in dlist:
-                if filename in fmap:
+            for tupL in ( ( cIcommon.get_for_release_path(), 'releasedFiles' ), ( cIcommon.get_for_release_beta_path(), 'betaFiles' ), \
+                          ( cIcommon.get_for_release_version_path(), 'versionedFiles' ) ):
+                path = os.path.join(tupL[0], subdir, p_id)
+                if not os.access(path, os.F_OK):
                     continue
                 #
-                fmap[filename] = 'yes'
-                if filename in ('header', 'metadata', 'map', 'masks', 'other', 'fsc', 'images', 'layerLines', 'structureFactors'):
-                    path1 = os.path.join(opReleaseDir, subdir, id, filename)
-                    list1 = os.listdir(path1)
-                    for filename1 in list1:
-                        if filename1 in fmap:
-                            continue
-                        #
-                        fmap[filename1] = 'yes'
-                        fullname = os.path.join(path1, filename1)
-                        if 'releasedFiles' in returnMap:
-                            returnMap['releasedFiles'].append(fullname)
-                        else:
-                            tlist = []
-                            tlist.append(fullname)
-                            returnMap['releasedFiles'] = tlist
-                        #
+                dlist = os.listdir(path)
+                for filename in dlist:
+                    if filename in fmap:
+                        continue
                     #
-                else:
-                    fullname = os.path.join(path, filename)
-                    if filename.endswith('.summary'):
-                        returnMap['summary'] = fullname
-                    else:
-                        if 'releasedFiles' in returnMap:
-                            returnMap['releasedFiles'].append(fullname)
-                        else:
-                            tlist = []
-                            tlist.append(fullname)
-                            returnMap['releasedFiles'] = tlist
+                    fmap[filename] = 'yes'
+                    if filename in ('header', 'metadata', 'map', 'masks', 'other', 'fsc', 'images', 'layerLines', 'structureFactors'):
+                        path1 = os.path.join(tupL[0], subdir, p_id, filename)
+                        list1 = os.listdir(path1)
+                        for filename1 in list1:
+                            if filename1 in fmap:
+                                continue
+                            #
+                            fmap[filename1] = 'yes'
+                            fullname = os.path.join(path1, filename1)
+                            if tupL[1] in returnMap:
+                                returnMap[tupL[1]].append(fullname)
+                            else:
+                                tlist = []
+                                tlist.append(fullname)
+                                returnMap[tupL[1]] = tlist
+                            #
                         #
-                        if (filename.startswith('pdb') and filename.endswith('.ent')) or filename == lower_id + '.cif.gz' or \
-                           filename == lower_id + '.cif' or filename == lower_id + '.xml':
-                            returnMap['coor'] = True
-                        elif filename.endswith('-sf.cif'):
-                            returnMap['sf'] = True
-                        elif filename.endswith('.mr'):
-                            returnMap['mr'] = True
-                        elif filename.endswith('-cs.cif') or filename.endswith('_cs.str'):
-                            returnMap['cs'] = True
+                    else:
+                        fullname = os.path.join(path, filename)
+                        if filename.endswith('.summary'):
+                            returnMap['summary'] = fullname
+                        else:
+                            if tupL[1] in returnMap:
+                                returnMap[tupL[1]].append(fullname)
+                            else:
+                                tlist = []
+                                tlist.append(fullname)
+                                returnMap[tupL[1]] = tlist
+                            #
+                            if (filename.startswith('pdb') and filename.endswith('.ent')) or filename == lower_id + '.cif.gz' or \
+                               filename == lower_id + '.cif' or filename == lower_id + '.xml':
+                                returnMap['coor'] = True
+                            elif filename.endswith('-sf.cif'):
+                                returnMap['sf'] = True
+                            elif filename.endswith('.mr'):
+                                returnMap['mr'] = True
+                            elif filename.endswith('-cs.cif') or filename.endswith('_cs.str'):
+                                returnMap['cs'] = True
+                            #
                         #
                     #
                 #

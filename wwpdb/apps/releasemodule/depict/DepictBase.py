@@ -216,9 +216,7 @@ class DepictBase(ModuleBaseClass):
         """
         tPath = self._reqObj.getValue("TemplatePath")
         fPath = os.path.join(tPath, fn)
-        ifh = open(fPath, 'r')
-        sIn = ifh.read()
-        ifh.close()
+        sIn = self._readFile(fPath)
         #
         tmp_list = sIn.split('\n')
         item_list = []

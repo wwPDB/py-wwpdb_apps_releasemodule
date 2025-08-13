@@ -86,7 +86,7 @@ class UpdateUtil(EntryUpdateBase):
 
     def __generateInputFile(self, updateEmInfoList):
         items = ['entry', 'pdbid', 'emdb_id', 'annotator', 'option', 'input_file', 'output_file', 'status_code', 'input_file_sf', 'output_file_sf',
-                 'status_code_sf', 'input_file_mr', 'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs',
+                 'status_code_sf', 'beta_sf_file', 'input_file_mr', 'output_file_mr', 'status_code_mr', 'input_file_cs', 'output_file_cs', 'status_code_cs',
                  'input_file_nmr_data', 'output_file_nmr_data', 'status_code_nmr_data', 'status_code_em', 'approval_type', 'revdat_tokens', 'obsolete_ids',
                  'supersede_ids', 'obspr_details', 'da_status_code', 'da_status_code_em', 'wf_status_code', 'wf_status_code_em']
         #
@@ -103,8 +103,16 @@ class UpdateUtil(EntryUpdateBase):
             curCat.appendAttribute(item)
         #
         hasValueFlag = False
+        hasSfFileFlag = False
+        hasRelSfStatusFlag = False
         for item in items:
             if self._blockEmErrorFlag and (item == 'status_code_em'):
+                continue
+            #
+            if item == 'beta_sf_file':
+                if hasSfFileFlag and hasRelSfStatusFlag:
+                    curCat.setValue("Y", item, 0)
+                #
                 continue
             #
             if item == 'pdbid':
@@ -114,6 +122,12 @@ class UpdateUtil(EntryUpdateBase):
             #
             if (item1 in self._entryDir) and self._entryDir[item1] and self._entryDir[item1] != 'CITATIONUpdate':
                 # and self._entryDir[item1] != 'EMHEADERUpdate':
+                if item == 'input_file_sf':
+                    hasSfFileFlag = True
+                #
+                if (item == 'status_code_sf') and (self._entryDir[item] == "REL"):
+                    hasRelSfStatusFlag = True
+                #
                 if item1.startswith("input_file") and (self._processing_site == "PDBE"):
                     curCat.setValue(os.path.join(self._sessionPath, self._entryDir[item1]), item, 0)
                 else:

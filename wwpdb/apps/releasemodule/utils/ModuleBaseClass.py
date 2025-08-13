@@ -81,6 +81,13 @@ class ModuleBaseClass(object):
         pickle.dump(pickleData, fb)
         fb.close()
 
+    def _readFile(self, filePath):
+        ifh = open(filePath, 'r')
+        data = ifh.read()
+        ifh.close()
+        #
+        return data
+
     def __getIndexPath(self):
         index_path = os.path.join(self._topReleaseDir, 'index')
         if not os.path.exists(index_path):
@@ -157,9 +164,7 @@ class ModuleBaseClass(object):
 
         tPath = self._reqObj.getValue("TemplatePath")
         fPath = os.path.join(tPath, fn)
-        ifh = open(fPath, 'r')
-        sIn = ifh.read()
-        ifh.close()
+        sIn = self._readFile(fPath)
         return (  sIn % parameterDict )
 
     def _getReleaseOptionFromPickle(self, pickleData):

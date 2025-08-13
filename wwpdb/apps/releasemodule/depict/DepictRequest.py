@@ -123,26 +123,25 @@ class DepictRequest(DepictBase):
         myD['id'] = str(count)
         myD['cols'] = self.__cols
         myD['summary'] = self.__getSummaryInfo(FileInfo)
-        myD['rows'] = self.__getReleasedFilesLink(FileInfo)
+        myD['rows'] = self.__getReleasedFilesLink('releasedFiles', FileInfo)
+        myD['beta_rows'] = self.__getReleasedFilesLink('betaFiles', FileInfo)
+        myD['versioned_rows'] = self.__getReleasedFilesLink('versionedFiles', FileInfo)
         return self._processTemplate('request/release_info_tmplt.html', myD)
 
     def __getSummaryInfo(self, FileInfo):
         summary = ''
         if 'summary' in FileInfo:
-            f = open(FileInfo['summary'], 'r')
-            data = f.read()
-            f.close()
+            data = self._readFile(FileInfo['summary'])
             summary = data.strip()
-            #
         #
         return summary
 
-    def __getReleasedFilesLink(self, FileInfo):
+    def __getReleasedFilesLink(self, key, FileInfo):
         rows = ''
-        if 'releasedFiles' not in FileInfo:
+        if key not in FileInfo:
             return rows
         #
-        num = len(FileInfo['releasedFiles'])
+        num = len(FileInfo[key])
         num_per_line = 5
         lines = int(num / num_per_line)
         x = num % num_per_line
@@ -157,7 +156,7 @@ class DepictRequest(DepictBase):
             #
             rows += '<tr>\n'
             for j in range(n):
-                filepath = FileInfo['releasedFiles'][i * num_per_line + j]
+                filepath = FileInfo[key][i * num_per_line + j]
                 (_path, filename) = os.path.split(filepath)
                 rows += '<td style="text-align:left;border-style:none">' \
                     + '<a href="/service/release/download_file_with_filepath?filepath=' \
