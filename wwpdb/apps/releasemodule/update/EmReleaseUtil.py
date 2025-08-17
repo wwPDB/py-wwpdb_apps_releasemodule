@@ -184,8 +184,8 @@ class EmReleaseUtil(EntryUpdateBase):
                 if len(fileTuple[3]) > 0:
                     partNumber = "_" + fileTuple[3]
                 #
-                self._insertReleseFile("release_file", "em-volume", fileTuple[0], self.__embdId + emInfo[4] + partNumber + "." + formatExt, \
-                                        self.__entryDirPath, os.path.join(self._entryDir["emdb_id"] + ".release_file", emInfo[5]), emInfo[7])
+                self._insertReleseFile("release_file", "em-volume", fileTuple[0], self.__embdId + emInfo[4] + partNumber + "." + formatExt,
+                                       self.__entryDirPath, os.path.join(self._entryDir["emdb_id"] + ".release_file", emInfo[5]), emInfo[7])
             #
         #
         self._dumpLocalPickle()
@@ -387,7 +387,7 @@ class EmReleaseUtil(EntryUpdateBase):
             if error.find("WARNING") != -1:
                 self._insertEntryMessage(errType="em", errMessage=error, messageType="warning")
             #
-            self._insertReleseFile("release_file", "em-volume", xmlfile, self.__embdId + "_v3.xml", self.__entryDirPath, \
+            self._insertReleseFile("release_file", "em-volume", xmlfile, self.__embdId + "_v3.xml", self.__entryDirPath,
                                    os.path.join(self._entryDir["emdb_id"] + ".release_file", "header"), False)
         #
 
@@ -526,7 +526,7 @@ class EmReleaseUtil(EntryUpdateBase):
             self._insertEntryMessage(errType="em", errMessage="Generating " + cifFile + " failed.")
             return
         #
-        self._insertReleseFile("release_file", "em-volume", cifFilePath, cifFile, self.__entryDirPath, \
+        self._insertReleseFile("release_file", "em-volume", cifFilePath, cifFile, self.__entryDirPath,
                                os.path.join(self._entryDir["emdb_id"] + ".release_file", "metadata"), True)
 
     def __getAarchivalFilePathList(self):
@@ -536,7 +536,7 @@ class EmReleaseUtil(EntryUpdateBase):
             if not filename.startswith(self._entryId):
                 continue
             #
-            self.__archivalFilePathList.append( ( filename, os.path.join(self.__storagePath, filename) ) )
+            self.__archivalFilePathList.append((filename, os.path.join(self.__storagePath, filename)))
         #
 
     def __cif2xmlTranslate(self, ciffile, xmlfile, validateFlag):

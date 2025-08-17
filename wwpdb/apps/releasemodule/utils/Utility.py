@@ -317,14 +317,14 @@ def FindReleaseFiles(siteId, entry_dir):
         return returnMap
     #
     cIcommon = ConfigInfoAppCommon(siteId)
-    opReleaseDir = cIcommon.get_for_release_path()
 
     fmap = {}
     for p_id in id_list:  # pylint: disable=redefined-builtin
         lower_id = p_id.lower()
         for subdir in ('added', 'modified', 'obsolete', 'reloaded', 'emd'):
-            for tupL in ( ( cIcommon.get_for_release_path(), 'releasedFiles' ), ( cIcommon.get_for_release_beta_path(), 'betaFiles' ), \
-                          ( cIcommon.get_for_release_version_path(), 'versionedFiles' ) ):
+            for tupL in ((cIcommon.get_for_release_path(), 'releasedFiles'),
+                         (cIcommon.get_for_release_beta_path(), 'betaFiles'),
+                         (cIcommon.get_for_release_version_path(), 'versionedFiles')):
                 path = os.path.join(tupL[0], subdir, p_id)
                 if not os.access(path, os.F_OK):
                     continue

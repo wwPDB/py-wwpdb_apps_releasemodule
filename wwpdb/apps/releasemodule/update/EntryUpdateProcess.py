@@ -225,8 +225,8 @@ class EntryUpdateProcess(EntryUpdateBase):
         #
 
     def __copyFilesToForReleaseDirectory(self):
-        pdbId = ''
-        emdbId = ''
+        pdbId = ''  # pylint: disable=unused-variable
+        emdbId = ''  # pylint: disable=unused-variable
         for typeList in self._fileTypeList:
             if (not typeList[3] in self._pickleData) or (not self._pickleData[typeList[3]]) or \
                ('release' not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]]['release']) or \
@@ -235,11 +235,11 @@ class EntryUpdateProcess(EntryUpdateBase):
             #
             if typeList[3] == 'em-volume':
                 if ('emdb_id' in self._entryDir) and self._entryDir['emdb_id'] and ('emdb_release' in self._entryDir) and self._entryDir['emdb_release']:
-                    emdbId = self._entryDir['emdb_id']
+                    emdbId = self._entryDir['emdb_id']  # noqa: F841
                 #
             else:
                 if ('pdb_id' in self._entryDir) and self._entryDir['pdb_id']:
-                    pdbId = self._entryDir['pdb_id'].lower()
+                    pdbId = self._entryDir['pdb_id'].lower()  # noqa: F841
                 #
             #
         #
@@ -247,7 +247,7 @@ class EntryUpdateProcess(EntryUpdateBase):
             if (not typeList[3] in self._pickleData) or (not self._pickleData[typeList[3]]):
                 continue
             #
-            for releaseFileType in ( "release_file", "beta_release_file", "version_release_file" ):
+            for releaseFileType in ("release_file", "beta_release_file", "version_release_file"):
                 if (releaseFileType not in self._pickleData[typeList[3]]) or (not self._pickleData[typeList[3]][releaseFileType]):
                     continue
                 #
@@ -259,7 +259,7 @@ class EntryUpdateProcess(EntryUpdateBase):
                     spList = fileList[3].split("/")
                     topTargetPath = os.path.join(self._sessionPath, spList[0])
                     if fileList[2] not in self.__releaseDirectory:
-                        self.__releaseDirectory[fileList[2]] =topTargetPath 
+                        self.__releaseDirectory[fileList[2]] = topTargetPath
                     #
                     if (releaseFileType == "release_file") and (not os.access(os.path.join(topTargetPath, self._entryId + '.summary'), os.F_OK)):
                         self._copyFileUtil(os.path.join(self._sessionPath, self._entryId + '.summary'), os.path.join(topTargetPath, self._entryId + '.summary'))

@@ -27,6 +27,7 @@ import tarfile
 
 from wwpdb.apps.releasemodule.update.EntryUpdateBase import EntryUpdateBase
 
+
 class ReleaseDpUtil(EntryUpdateBase):
     """ Class responsible for generating and checking release files
     """
@@ -95,14 +96,14 @@ class ReleaseDpUtil(EntryUpdateBase):
         cifFile = self.__pdbId + ".cif"
         if self.__generateCIFFile(cifFile, "", ""):
             self._insertFileStatus("cif", True)
-            self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, cifFile), cifFile, forRelDirPathTupl[1], \
+            self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, cifFile), cifFile, forRelDirPathTupl[1],
                                    self.__pdbId + ".release_file", True)
             self.__checkCIFFile("cif", cifFile, "_v5", False)
             #
             if self.__extendedPdbId:
                 betaCifFile = self.__extendedPdbId + ".cif"
                 if self.__generateCIFFile(betaCifFile, "_beta_", "-extendedids"):
-                    self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, betaCifFile), betaCifFile, \
+                    self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, betaCifFile), betaCifFile,
                                            forRelDirPathTupl[2], self.__extendedPdbId + ".beta_release_file", True)
                 #
                 versionFileInfoTupl = self._versionFileNameConversionMap[".cif"]
@@ -111,7 +112,7 @@ class ReleaseDpUtil(EntryUpdateBase):
                     versionInfo = "_v" + self.__major_revision + "-" + self.__minor_revision
                 #
                 versionCifFile = self.__extendedPdbId + "_" + versionFileInfoTupl[0] + versionInfo + versionFileInfoTupl[1]
-                self._insertReleseFile("version_release_file", "model", os.path.join(self._sessionPath, cifFile), versionCifFile, forRelDirPathTupl[3], \
+                self._insertReleseFile("version_release_file", "model", os.path.join(self._sessionPath, cifFile), versionCifFile, forRelDirPathTupl[3],
                                        self.__extendedPdbId + ".version_release_file", True)
             #
         #
@@ -140,11 +141,11 @@ class ReleaseDpUtil(EntryUpdateBase):
         self._insertFileStatus("xml", True)
         #
         if self.__extendedPdbId:
-            self.__generateXMLFiles(self.__extendedPdbId, "_beta_",  False)
+            self.__generateXMLFiles(self.__extendedPdbId, "_beta_", False)
         #
         for xmlType in ((".cif.xml", ".xml"), (".cif.xml-noatom", "-noatom.xml"), (".cif.xml-extatom", "-extatom.xml")):
             if self._verifyGeneratingFile("xml", self.__pdbId + xmlType[0]):
-                self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, self.__pdbId + xmlType[0]), self.__pdbId + xmlType[1], \
+                self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, self.__pdbId + xmlType[0]), self.__pdbId + xmlType[1],
                                        forRelDirPathTupl[1], self.__pdbId + ".release_file", True)
                 #
                 if xmlType[0].endswith(".xml-noatom"):
@@ -157,12 +158,12 @@ class ReleaseDpUtil(EntryUpdateBase):
                         versionInfo = "_v" + self.__major_revision + "-" + self.__minor_revision
                     #
                     versionXmlFile = self.__extendedPdbId + "_" + versionFileInfoTupl[0] + versionInfo + versionFileInfoTupl[1]
-                    self._insertReleseFile("version_release_file", "model", os.path.join(self._sessionPath, self.__pdbId + xmlType[0]), versionXmlFile, \
+                    self._insertReleseFile("version_release_file", "model", os.path.join(self._sessionPath, self.__pdbId + xmlType[0]), versionXmlFile,
                                            forRelDirPathTupl[3], self.__extendedPdbId + ".version_release_file", True)
                 #
             #
             if self.__extendedPdbId and self._verifyGeneratingFile("xml", self.__extendedPdbId + xmlType[0]):
-                self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, self.__extendedPdbId + xmlType[0]), \
+                self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, self.__extendedPdbId + xmlType[0]),
                                        self.__extendedPdbId + xmlType[1], forRelDirPathTupl[2], self.__extendedPdbId + ".beta_release_file", True)
             #
         #
@@ -235,11 +236,11 @@ class ReleaseDpUtil(EntryUpdateBase):
         #
         self._insertFileStatus("pdb", True)
         self._insertArchivalFile("model", "pdb", pdbFile, False)
-        self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, pdbFile), "pdb" + self.__pdbId + ".ent", \
+        self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, pdbFile), "pdb" + self.__pdbId + ".ent",
                                forRelDirPathTupl[1], self.__pdbId + ".release_file", False)
         #
         if self.__extendedPdbId:
-            self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, pdbFile), self.__extendedPdbId + ".pdb", \
+            self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, pdbFile), self.__extendedPdbId + ".pdb",
                                    forRelDirPathTupl[2], self.__extendedPdbId + ".beta_release_file", True)
         #
         self.__checkPDBFile(pdbFile)
@@ -275,7 +276,7 @@ class ReleaseDpUtil(EntryUpdateBase):
                 #
             #
         #
-        self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, tarFile), tarFile, forRelDirPathTupl[1], \
+        self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, tarFile), tarFile, forRelDirPathTupl[1],
                                self.__pdbId + ".release_file", False)
 
     def __releasingBioAssemblyFiles(self, program, fileType, forRelDirPathTupl):
@@ -313,12 +314,12 @@ class ReleaseDpUtil(EntryUpdateBase):
             if not fileName:
                 continue
             #
-            self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, fileName), fileName, \
+            self._insertReleseFile("release_file", "model", os.path.join(self._sessionPath, fileName), fileName,
                                    forRelDirPathTupl[1], self.__pdbId + ".release_file", True)
             #
             if (fileType == "cif") and self.__extendedPdbId:
                 betaFileName = fileName.replace(self.__pdbId, self.__extendedPdbId)
-                self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, fileName), betaFileName, \
+                self._insertReleseFile("beta_release_file", "model", os.path.join(self._sessionPath, fileName), betaFileName,
                                        forRelDirPathTupl[2], self.__extendedPdbId + ".beta_release_file", True)
             #
         #
@@ -327,7 +328,7 @@ class ReleaseDpUtil(EntryUpdateBase):
         if not self._checkReleaseFlag("structure-factors"):
             return
         #
-        self._insertReleseFile("release_file", "structure-factors", self._pickleData["structure-factors"]["session_file"], self.__pdbId + "-sf.cif", \
+        self._insertReleseFile("release_file", "structure-factors", self._pickleData["structure-factors"]["session_file"], self.__pdbId + "-sf.cif",
                                self._forReleaseDirPathMap["structure-factors"][1], self.__pdbId + ".release_file", False)
         self.__checkingExperimentalDataFile("CheckSFFile", "sf", self._pickleData["structure-factors"]["session_file"])
         if self._entryDir["status_code_sf"] == "REL":
@@ -337,8 +338,8 @@ class ReleaseDpUtil(EntryUpdateBase):
             if self.__extendedPdbId:
                 generatedBetaSfFile = os.path.join(self._sessionPath, self._entryId + "-" + self.__extendedPdbId + "-sf.cif")
                 if os.access(generatedBetaSfFile, os.F_OK):
-                    self._insertReleseFile("beta_release_file", "structure-factors", generatedBetaSfFile, self.__extendedPdbId + "-sf.cif", \
-                               self._forReleaseDirPathMap["structure-factors"][2], self.__extendedPdbId + ".beta_release_file", True)
+                    self._insertReleseFile("beta_release_file", "structure-factors", generatedBetaSfFile, self.__extendedPdbId + "-sf.cif",
+                                           self._forReleaseDirPathMap["structure-factors"][2], self.__extendedPdbId + ".beta_release_file", True)
                 else:
                     self._insertEntryMessage(errType="sf", errMessage="Generating " + self.__extendedPdbId + "-sf.cif failed.", uniqueFlag=True)
                 #
@@ -349,12 +350,12 @@ class ReleaseDpUtil(EntryUpdateBase):
         if not self._checkReleaseFlag("nmr-restraints"):
             return
         #
-        self._insertReleseFile("release_file", "nmr-restraints", self._pickleData["nmr-restraints"]["session_file"], self.__pdbId + ".mr", \
+        self._insertReleseFile("release_file", "nmr-restraints", self._pickleData["nmr-restraints"]["session_file"], self.__pdbId + ".mr",
                                self._forReleaseDirPathMap["nmr-restraints"][1], self.__pdbId + ".release_file", False)
         self.__checkingExperimentalDataFile("CheckMRFile", "mr", self._pickleData["nmr-restraints"]["session_file"])
         #
         if self.__extendedPdbId:
-            self._insertReleseFile("beta_release_file", "nmr-restraints", self._pickleData["nmr-restraints"]["session_file"], self.__extendedPdbId + ".mr", \
+            self._insertReleseFile("beta_release_file", "nmr-restraints", self._pickleData["nmr-restraints"]["session_file"], self.__extendedPdbId + ".mr",
                                    self._forReleaseDirPathMap["nmr-restraints"][2], self.__extendedPdbId + ".beta_release_file", True)
         #
 
@@ -362,8 +363,8 @@ class ReleaseDpUtil(EntryUpdateBase):
         if not self._checkReleaseFlag("nmr-chemical-shifts"):
             return
         #
-        for tupL in ( ( self.__pdbId, ".log", True, "release_file", 1, self.__pdbId + ".release_file", False ), \
-                      ( self.__extendedPdbId, "_beta.log", False, "beta_release_file", 2, self.__extendedPdbId + ".beta_release_file", True ) ):
+        for tupL in ((self.__pdbId, ".log", True, "release_file", 1, self.__pdbId + ".release_file", False),
+                     (self.__extendedPdbId, "_beta.log", False, "beta_release_file", 2, self.__extendedPdbId + ".beta_release_file", True)):
             if not tupL[0]:
                 continue
             #
@@ -381,7 +382,7 @@ class ReleaseDpUtil(EntryUpdateBase):
             if not self._verifyGeneratingFile("cs", strFile):
                 return
             #
-            self._insertReleseFile(tupL[3], "nmr-chemical-shifts", os.path.join(self._sessionPath, strFile), strFile, \
+            self._insertReleseFile(tupL[3], "nmr-chemical-shifts", os.path.join(self._sessionPath, strFile), strFile,
                                    self._forReleaseDirPathMap["nmr-chemical-shifts"][tupL[4]], tupL[5], tupL[6])
             if tupL[2]:
                 self.__checkingExperimentalDataFile("CheckCSFile", "cs", self._pickleData["nmr-chemical-shifts"]["session_file"])

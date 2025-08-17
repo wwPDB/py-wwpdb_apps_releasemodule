@@ -65,8 +65,8 @@ class EntryUpdateBase(UpdateBase):
         # val[3]: fullReleaseVersionDirPath
         self._forReleaseDirPathMap = {}
         self._errorKeyWordList = []
-        self._versionFileNameConversionMap = { ".cif": ("xyz", ".cif"), ".cif.xml": ("xyz", ".xml"), ".cif.xml-noatom": ("xyz-no-atom", ".xml"), \
-                                               ".cif.xml-extatom": ("xyz-ext-atom", ".xml") }
+        self._versionFileNameConversionMap = {".cif": ("xyz", ".cif"), ".cif.xml": ("xyz", ".xml"), ".cif.xml-noatom": ("xyz-no-atom", ".xml"),
+                                              ".cif.xml-extatom": ("xyz-ext-atom", ".xml")}
         #
         # Added for DAOTHER-2996
         # For map only entry, pdb_id is not set, we will create an error message that will never match
@@ -251,8 +251,8 @@ class EntryUpdateBase(UpdateBase):
         #
         forReleaseDirPathMap = {}
         contentTypeList = []
-        for contentType in ( "model", "structure-factors", "nmr-chemical-shifts", "nmr-data-str", "nmr-restraints" ):
-            if (not contentType in self._pickleData) or (not self._pickleData[contentType]):
+        for contentType in ("model", "structure-factors", "nmr-chemical-shifts", "nmr-data-str", "nmr-restraints"):
+            if (contentType not in self._pickleData) or (not self._pickleData[contentType]):
                 continue
             #
             contentTypeList.append(contentType)
@@ -271,7 +271,7 @@ class EntryUpdateBase(UpdateBase):
                     fullReleaseVersionDirPath = os.path.join(self._topReleaseVersionDir, for_release_dir, extendedPdbId)
                 #
             #
-            forReleaseDirPathMap[contentType] = ( for_release_dir, fullReleaseDirPath, fullReleaseBetaDirPath, fullReleaseVersionDirPath )
+            forReleaseDirPathMap[contentType] = (for_release_dir, fullReleaseDirPath, fullReleaseBetaDirPath, fullReleaseVersionDirPath)
         #
         return pdbId, extendedPdbId, forReleaseDirPathMap, contentTypeList
 
@@ -313,10 +313,10 @@ class EntryUpdateBase(UpdateBase):
         errMsg = generator.getNmrDataFiles(pdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, internalStrFile),
                                            os.path.join(self._sessionPath, internalNefFile))
         #
-        for tupL in ( ( internalStrFile, '', 'nmr-data-str', ( ( pdbId, externalStrFile, 'release_file', 1, pdbId + ".release_file" ), \
-                      ( extendedPdbId, betaStrFile, 'beta_release_file', 2, extendedPdbId + ".beta_release_file" ) ) ), \
-                      ( internalNefFile, errMsg, 'nmr-data-nef', ( ( pdbId, externalNefFile, 'release_file', 1, pdbId + ".release_file" ), \
-                      ( extendedPdbId, betaNefFile, 'beta_release_file', 2, extendedPdbId + ".beta_release_file" ) ) ) ):
+        for tupL in ((internalStrFile, '', 'nmr-data-str', ((pdbId, externalStrFile, 'release_file', 1, pdbId + ".release_file"),
+                                                            (extendedPdbId, betaStrFile, 'beta_release_file', 2, extendedPdbId + ".beta_release_file"))),
+                     (internalNefFile, errMsg, 'nmr-data-nef', ((pdbId, externalNefFile, 'release_file', 1, pdbId + ".release_file"),
+                                                                (extendedPdbId, betaNefFile, 'beta_release_file', 2, extendedPdbId + ".beta_release_file")))):
             if not self._verifyGeneratingFile('nmr_data', tupL[0], errMsg=tupL[1]):
                 continue
             #
@@ -325,7 +325,7 @@ class EntryUpdateBase(UpdateBase):
                     continue
                 #
                 self.__updateNefFileDataBlockName(subTupL[0], os.path.join(self._sessionPath, tupL[0]), os.path.join(self._sessionPath, subTupL[1]))
-                self._insertReleseFile(subTupL[2], tupL[2], os.path.join(self._sessionPath, subTupL[1]), subTupL[1], \
+                self._insertReleseFile(subTupL[2], tupL[2], os.path.join(self._sessionPath, subTupL[1]), subTupL[1],
                                        self._forReleaseDirPathMap["nmr-data-str"][subTupL[3]], subTupL[4], True)
                 #
             #
@@ -457,7 +457,7 @@ class EntryUpdateBase(UpdateBase):
 
     def _removeExistingForReleaseDirectories(self):
         if ('pdb_id' in self._entryDir) and self._entryDir['pdb_id']:
-            for entry_dir_id in ( self._entryDir['pdb_id'].lower(), 'pdb_0000' + self._entryDir['pdb_id'].lower() ):
+            for entry_dir_id in (self._entryDir['pdb_id'].lower(), 'pdb_0000' + self._entryDir['pdb_id'].lower()):
                 for subdirectory in ('added', 'modified', 'obsolete', 'reloaded'):
                     self._removeDirectory(os.path.join(self._topReleaseDir, subdirectory, entry_dir_id))
                     self._removeDirectory(os.path.join(self._topReleaseBetaDir, subdirectory, entry_dir_id))
@@ -719,6 +719,7 @@ class EntryUpdateBase(UpdateBase):
                                                  or (self._entryDir['exp_method'].find("ELECTRON TOMOGRAPHY") != -1)):
             self._EMEntryFlag = True
         #
+
     def __updateNefFileDataBlockName(self, pdb_id, inputFilePath, outputFilePath):
         with open(outputFilePath, "w") as f_out:
             with open(inputFilePath, "r") as f_in:
@@ -726,7 +727,7 @@ class EntryUpdateBase(UpdateBase):
                 dataList = data.split("\n")
                 if not dataList[-1]:
                     dataList = dataList[:-1]
-                # 
+                #
                 first = True
                 for line in dataList:
                     if line.strip().startswith("data_") and first:
@@ -741,7 +742,6 @@ class EntryUpdateBase(UpdateBase):
 
     def __setFinishTime(self):
         self._pickleData['finish_time'] = time.time()
-
 
     def __containErrorKeyWords(self, line):
         for keyWordList in self._errorKeyWordList:
