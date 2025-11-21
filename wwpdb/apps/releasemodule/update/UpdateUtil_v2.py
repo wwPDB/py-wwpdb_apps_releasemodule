@@ -104,13 +104,13 @@ class UpdateUtil(EntryUpdateBase):
         #
         hasValueFlag = False
         hasSfFileFlag = False
-        hasRelSfStatusFlag = False
+        hasBetaSfFileFlag = False
         for item in items:
             if self._blockEmErrorFlag and (item == 'status_code_em'):
                 continue
             #
             if item == 'beta_sf_file':
-                if hasSfFileFlag and hasRelSfStatusFlag:
+                if hasSfFileFlag and hasBetaSfFileFlag:
                     curCat.setValue("Y", item, 0)
                 #
                 continue
@@ -125,8 +125,8 @@ class UpdateUtil(EntryUpdateBase):
                 if item == 'input_file_sf':
                     hasSfFileFlag = True
                 #
-                if (item == 'status_code_sf') and (self._entryDir[item] == "REL"):
-                    hasRelSfStatusFlag = True
+                if (item == 'status_code_sf') and (self._entryDir[item] in ( "REL", "REREL", "OBS" )):
+                    hasBetaSfFileFlag = True
                 #
                 if item1.startswith("input_file") and (self._processing_site == "PDBE"):
                     curCat.setValue(os.path.join(self._sessionPath, self._entryDir[item1]), item, 0)

@@ -289,18 +289,18 @@ class ReleaseUtil(EntryUpdateBase):
         self._insertReleseFile("release_file", 'structure-factors', self._pickleData['structure-factors']['session_file'], self.__pdbId + '-sf.cif',
                                self._forReleaseDirPathMap["structure-factors"][1], self.__pdbId + ".release_file", False)
         self.__checkingExperimentalDataFile('CheckSFFile', 'sf', self._pickleData['structure-factors']['session_file'])
+        #
         if self._entryDir['status_code_sf'] == 'REL':
             dList = self._pickleData['structure-factors']['session_file'].split('/')
             self.__checkCIFFile('sf', dList[-1], self.__dictBase + '.sdb', '', True)
-            #
-            if self.__extendedPdbId:
-                generatedBetaSfFile = os.path.join(self._sessionPath, self._entryId + "-" + self.__extendedPdbId + "-sf.cif")
-                if os.access(generatedBetaSfFile, os.F_OK):
-                    self._insertReleseFile("beta_release_file", 'structure-factors', generatedBetaSfFile, self.__extendedPdbId + "-sf.cif",
-                                           self._forReleaseDirPathMap["structure-factors"][2], self.__extendedPdbId + ".beta_release_file", True)
-                else:
-                    self._insertEntryMessage(errType='sf', errMessage='Generating ' + self.__extendedPdbId + '-sf.cif failed.', uniqueFlag=True)
-                #
+        #
+        if self.__extendedPdbId:
+            generatedBetaSfFile = os.path.join(self._sessionPath, self._entryId + "-" + self.__extendedPdbId + "-sf.cif")
+            if os.access(generatedBetaSfFile, os.F_OK):
+                self._insertReleseFile("beta_release_file", 'structure-factors', generatedBetaSfFile, self.__extendedPdbId + "-sf.cif",
+                                       self._forReleaseDirPathMap["structure-factors"][2], self.__extendedPdbId + ".beta_release_file", True)
+            else:
+                self._insertEntryMessage(errType='sf', errMessage='Generating ' + self.__extendedPdbId + '-sf.cif failed.', uniqueFlag=True)
             #
         #
 

@@ -334,15 +334,14 @@ class ReleaseDpUtil(EntryUpdateBase):
         if self._entryDir["status_code_sf"] == "REL":
             dList = self._pickleData["structure-factors"]["session_file"].split("/")
             self.__checkCIFFile("sf", dList[-1], "", True)
-            #
-            if self.__extendedPdbId:
-                generatedBetaSfFile = os.path.join(self._sessionPath, self._entryId + "-" + self.__extendedPdbId + "-sf.cif")
-                if os.access(generatedBetaSfFile, os.F_OK):
-                    self._insertReleseFile("beta_release_file", "structure-factors", generatedBetaSfFile, self.__extendedPdbId + "-sf.cif",
-                                           self._forReleaseDirPathMap["structure-factors"][2], self.__extendedPdbId + ".beta_release_file", True)
-                else:
-                    self._insertEntryMessage(errType="sf", errMessage="Generating " + self.__extendedPdbId + "-sf.cif failed.", uniqueFlag=True)
-                #
+        #
+        if self.__extendedPdbId:
+            generatedBetaSfFile = os.path.join(self._sessionPath, self._entryId + "-" + self.__extendedPdbId + "-sf.cif")
+            if os.access(generatedBetaSfFile, os.F_OK):
+                self._insertReleseFile("beta_release_file", "structure-factors", generatedBetaSfFile, self.__extendedPdbId + "-sf.cif",
+                                       self._forReleaseDirPathMap["structure-factors"][2], self.__extendedPdbId + ".beta_release_file", True)
+            else:
+                self._insertEntryMessage(errType="sf", errMessage="Generating " + self.__extendedPdbId + "-sf.cif failed.", uniqueFlag=True)
             #
         #
 
