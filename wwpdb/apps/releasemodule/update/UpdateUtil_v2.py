@@ -125,7 +125,7 @@ class UpdateUtil(EntryUpdateBase):
                 if item == 'input_file_sf':
                     hasSfFileFlag = True
                 #
-                if (item == 'status_code_sf') and (self._entryDir[item] in ( "REL", "REREL", "OBS" )):
+                if (item == 'status_code_sf') and (self._entryDir[item] in ("REL", "REREL", "OBS")):
                     hasBetaSfFileFlag = True
                 #
                 if item1.startswith("input_file") and (self._processing_site == "PDBE"):
