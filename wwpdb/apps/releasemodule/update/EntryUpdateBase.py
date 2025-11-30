@@ -315,26 +315,26 @@ class EntryUpdateBase(UpdateBase):
         #
         tupleList = []
         if self._verifyGeneratingFile('nmr_data', internalStrFile, errMsg=''):
-            tupleList.append( ( 'release_file', 'nmr-data-str', os.path.join(self._sessionPath, internalStrFile), externalStrFile, \
-                                self._forReleaseDirPathMap['nmr-data-str'][1], pdbId + '.release_file' ) )
+            tupleList.append(('release_file', 'nmr-data-str', os.path.join(self._sessionPath, internalStrFile), externalStrFile,
+                              self._forReleaseDirPathMap['nmr-data-str'][1], pdbId + '.release_file'))
         #
         if extendedPdbId:
             generator.getNmrDataStrFile(extendedPdbId, self._pickleData['nmr-data-str']['session_file'], os.path.join(self._sessionPath, betaStrFile))
             if self._verifyGeneratingFile('nmr_data', betaStrFile, errMsg=''):
-                tupleList.append( ( 'beta_release_file', 'nmr-data-str', os.path.join(self._sessionPath, betaStrFile), betaStrFile, \
-                                    self._forReleaseDirPathMap['nmr-data-str'][2], extendedPdbId + '.beta_release_file' ) )
+                tupleList.append(('beta_release_file', 'nmr-data-str', os.path.join(self._sessionPath, betaStrFile), betaStrFile,
+                                  self._forReleaseDirPathMap['nmr-data-str'][2], extendedPdbId + '.beta_release_file'))
             #
         #
         if self._verifyGeneratingFile('nmr_data', internalNefFile, errMsg=errMsg):
             self.__updateNefFileDataBlockName(pdbId, os.path.join(self._sessionPath, internalNefFile), os.path.join(self._sessionPath, externalNefFile))
             if self._verifyGeneratingFile('nmr_data', externalNefFile, errMsg=''):
-                tupleList.append( ( 'release_file', 'nmr-data-nef', os.path.join(self._sessionPath, externalNefFile), externalNefFile, \
-                                    self._forReleaseDirPathMap['nmr-data-str'][1], pdbId + '.release_file' ) )
+                tupleList.append(('release_file', 'nmr-data-nef', os.path.join(self._sessionPath, externalNefFile), externalNefFile,
+                                  self._forReleaseDirPathMap['nmr-data-str'][1], pdbId + '.release_file'))
             if betaNefFile:
                 self.__updateNefFileDataBlockName(extendedPdbId, os.path.join(self._sessionPath, internalNefFile), os.path.join(self._sessionPath, betaNefFile))
                 if self._verifyGeneratingFile('nmr_data', betaNefFile, errMsg=''):
-                    tupleList.append( ( 'beta_release_file', 'nmr-data-str', os.path.join(self._sessionPath, betaNefFile), betaNefFile, \
-                                        self._forReleaseDirPathMap['nmr-data-str'][2], extendedPdbId + '.beta_release_file' ) )
+                    tupleList.append(('beta_release_file', 'nmr-data-str', os.path.join(self._sessionPath, betaNefFile), betaNefFile,
+                                      self._forReleaseDirPathMap['nmr-data-str'][2], extendedPdbId + '.beta_release_file'))
                 #
             #
         #
