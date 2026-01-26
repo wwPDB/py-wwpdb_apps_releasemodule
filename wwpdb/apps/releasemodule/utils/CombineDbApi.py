@@ -195,7 +195,7 @@ class CombineDbApi(object):
                 id_type = 'pdb_id'
             elif len(id) == 5:
                 id_type = 'bmrb_id'
-            elif ((len(id) == 8) or (len(id) == 9) or (len(id) == 10)) and str(id).upper().startswith("EMD"):
+            elif len(id) >= 8 and str(id).upper().startswith("EMD-"):
                 id_type = 'emdb_id'
             #
             if not id_type:
