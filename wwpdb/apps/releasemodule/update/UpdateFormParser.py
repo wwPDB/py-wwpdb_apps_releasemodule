@@ -29,6 +29,7 @@ from operator import itemgetter
 from wwpdb.apps.releasemodule.citation.FetchResultParser import UniCodeHandler
 from wwpdb.apps.releasemodule.utils.CombineDbApi import CombineDbApi
 from wwpdb.apps.releasemodule.utils.TimeUtil import TimeUtil
+from wwpdb.apps.releasemodule.utils.Utility import getCleanValue
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 from wwpdb.io.locator.PathInfo import PathInfo
 #
@@ -474,7 +475,8 @@ class UpdateFormParser(object):
     def __checkPreviousCoordinateRelease(self, entry, dataDict):
         """
         """
-        if "pdb_id" not in dataDict:
+        pdb_id = getCleanValue(dataDict, "pdb_id")
+        if not pdb_id:
             return
         #
         hasExperimentalDataRelease = False
