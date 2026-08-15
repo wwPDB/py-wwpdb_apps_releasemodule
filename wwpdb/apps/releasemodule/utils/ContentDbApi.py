@@ -133,6 +133,9 @@ class ContentDbApi(object):
         self.__endDate = t.EndDay()
         self.__releaseDate = t.NextWednesday()
 
+    def close(self):
+        self.__dbApi.close()
+
     def getEntriesWithStatusList(self, annotator, status_list):
         pdb_entries = self.__getSelectedIDList('SELECT_PDB_ENTRY_BY_STATUS', (annotator, status_list))
         em_map_only_entries = self.__getSelectedIDList('SELECT_EM_ONLY_ENTRY_BY_STATUS', (annotator, status_list))

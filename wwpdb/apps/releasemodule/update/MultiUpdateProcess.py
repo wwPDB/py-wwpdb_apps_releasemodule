@@ -137,7 +137,10 @@ class MultiUpdateProcess(UpdateBase):
     def runMultiProcess(self, dataList, procName, optionsD, workingDir):  # pylint: disable=unused-argument
         """
         """
-        statusDbUtil = StatusDbApi(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
+        statusDbUtil = None
+        if self.__task == 'Entries in release pending': 
+            statusDbUtil = StatusDbApi(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
+        #
         rList = []
         for entryData in dataList:
             if self.__task == 'Entries in release pending':
@@ -150,6 +153,9 @@ class MultiUpdateProcess(UpdateBase):
                 updateProcess.run()
             #
             rList.append(entryData['entry'])
+        #
+        if statusDbUtil is not None:
+            statusDbUtil.close()
         #
         return rList, rList, []
 
@@ -356,6 +362,7 @@ class MultiUpdateProcess(UpdateBase):
                 entryData['status_code_em'] = emStatusMap[entryData['entry']]
             #
         #
+        contentDB.close()
 
     def __getStatusMap(self, InfoList):
         status_map = {}

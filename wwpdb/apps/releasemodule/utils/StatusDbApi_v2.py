@@ -66,6 +66,9 @@ class StatusDbApi(object):
                                  dbSocket=self.__dbSocket, dbPort=self.__dbPort, verbose=self.__verbose, log=self.__lfh)
         self.__dbApi.setSchemaMap(self.__schemaMap)
 
+    def close(self):
+        self.__dbApi.close()
+
     def runUpdate(self, table=None, where=None, data=None):
         return self.__dbApi.runUpdate(table=table, where=where, data=data)
 

@@ -32,6 +32,7 @@ import traceback
 
 from wwpdb.apps.releasemodule.update.NmrDataGenerator import NmrDataGenerator
 from wwpdb.apps.releasemodule.update.UpdateBase import UpdateBase
+from wwpdb.apps.releasemodule.utils.StatusDbApi_v2 import StatusDbApi
 from wwpdb.apps.wf_engine.engine.WFEapplications import killAllWF
 from wwpdb.io.locator.PathInfo import PathInfo
 from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
@@ -441,6 +442,11 @@ class EntryUpdateBase(UpdateBase):
                 status_map['status_code_emdb'] = self._entryDir['status_code_em']
             #
         #
+        localStatusDBFlag = False
+        if self.__statusDB is None:
+            self.__statusDB = StatusDbApi(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
+            localStatusDBFlag = True
+        #
         msgType = 'info'
         message = ''
         if status_map and self.__statusDB:
@@ -451,6 +457,10 @@ class EntryUpdateBase(UpdateBase):
             else:
                 message += " failed."
                 msgType = 'error'
+            #
+            if localStatusDBFlag:
+                self.__statusDB.close()
+                self.__statusDB = None
             #
         #
         returnStatus = killAllWF(self._entryId, 'RelMod')
