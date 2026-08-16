@@ -28,6 +28,7 @@ import time
 import datetime
 import MySQLdb
 
+
 class DbApiUtil(object):
     def __init__(self, dbServer=None, dbHost=None, dbName=None, dbUser=None, dbPw=None, dbSocket=None, dbPort=None, verbose=False, log=sys.stderr):
         """
@@ -62,17 +63,17 @@ class DbApiUtil(object):
         """
         try:
             if self.__dbSocket is None:
-                self.__dbcon = MySQLdb.connect(db="%s" % self.__dbName, user="%s" % self.__dbUser, passwd="%s" % self.__dbPw, \
+                self.__dbcon = MySQLdb.connect(db="%s" % self.__dbName, user="%s" % self.__dbUser, passwd="%s" % self.__dbPw,
                                                port=self.__dbPort, host="%s" % self.__dbHost, local_infile=1, connect_timeout=5)
             else:
-                self.__dbcon = MySQLdb.connect(db="%s" % self.__dbName, user="%s" % self.__dbUser, passwd="%s" % self.__dbPw, \
-                          port=self.__dbPort, host="%s" % self.__dbHost, unix_socket="%s" % self.__dbSocket, local_infile=1, connect_timeout=5)
+                self.__dbcon = MySQLdb.connect(db="%s" % self.__dbName, user="%s" % self.__dbUser, passwd="%s" % self.__dbPw,
+                                               port=self.__dbPort, host="%s" % self.__dbHost, unix_socket="%s" % self.__dbSocket, local_infile=1, connect_timeout=5)
             #
             self.__dbState = 0
         except MySQLdb.Error as e:
             self.__lfh.write("+DbApiUtil.getConnect(): Connection error %d: %s\n" % (e.args[0], e.args[1]))
-            self.__lfh.write("+DbApiUtil.getConnect(): Connection failed using server %s host %s dsn %s user %s pw %s port %d socket %s\n" \
-                          % (self.__dbServer, self.__dbHost, self.__dbName, self.__dbUser, self.__dbPw, self.__dbPort, self.__dbSocket, ))
+            self.__lfh.write("+DbApiUtil.getConnect(): Connection failed using server %s host %s dsn %s user %s pw %s port %d socket %s\n"
+                             % (self.__dbServer, self.__dbHost, self.__dbName, self.__dbUser, self.__dbPw, self.__dbPort, self.__dbSocket, ))
             self.__dbcon = None
         #
 

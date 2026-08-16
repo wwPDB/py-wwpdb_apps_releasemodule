@@ -138,7 +138,7 @@ class MultiUpdateProcess(UpdateBase):
         """
         """
         statusDbUtil = None
-        if self.__task == 'Entries in release pending': 
+        if self.__task == 'Entries in release pending':
             statusDbUtil = StatusDbApi(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
         #
         rList = []
