@@ -26,12 +26,28 @@ try:
 except ImportError:
     import pickle as pickle
 
+import html
 import os
 import sys
 
 from wwpdb.apps.releasemodule.citation.StringUtil import calStringSimilarity
 from wwpdb.apps.releasemodule.depict.DepictBase import DepictBase
+from wwpdb.apps.releasemodule.depict.PublicationGroups import escape_text, group_entries_by_publication, status_needs_alert
 from wwpdb.apps.releasemodule.utils.Utility import getFileName
+
+_VIEW_TOGGLE = (
+    '<td style="text-align:center; border-style:none">'
+    '<input type="button" class="view-toggle active" data-view="entry" value="Entry View" /> '
+    '<input type="button" class="view-toggle" data-view="publication" value="Publication View" />'
+    "</td>"
+)
+_FILTER_BAR = (
+    '<div class="pub-bar">'
+    '<input id="citation-filter" type="search" '
+    'placeholder="Filter: entry ID, PDB, DOI, journal, PubMed ID, title..." aria-label="Filter" />'
+    ' <span id="citation-filter-count" class="pub-tally"></span>'
+    "</div>"
+)
 
 
 class DepictCitation(DepictBase):
@@ -50,10 +66,17 @@ class DepictCitation(DepictBase):
         pubmed_file = getFileName(self._sessionPath, myD['owner'] , 'db')
         #
         myD['pubmed_file'] = pubmed_file
+        myD['view_toggle'] = ''
+        myD['filter_bar'] = ''
+        myD['publication_info'] = ''
         if finderFlag:
             pubmedInfoMap = self.__getFinderPubmedInfoMap()
             myD['entry_info'] = self.__getFinderEntryInfo()
-            myD['finder_summary'] = self.__getFinderSummary()
+            groups = group_entries_by_publication(self._resultList)
+            myD['publication_info'] = self.__getPublicationInfo(groups)
+            myD['view_toggle'] = _VIEW_TOGGLE
+            myD['filter_bar'] = _FILTER_BAR
+            myD['finder_summary'] = self.__getFinderSummary(len(groups))
         else:
             pubmedInfoMap = self.__getRequestPubmedInfoMap()
             myD['entry_info'] = self.__getRequestEntryInfo()
@@ -87,12 +110,15 @@ class DepictCitation(DepictBase):
         p_items = self._getItemList('citation_finder/pubmed_citation_item_list')
         text = ''
         count = 0
+        entry_order = 0
         flag = True
         for dataDict in self._resultList:
             if 'pubmed' not in dataDict:
                 continue
             #
             myD, selectedData = self._initialEntryDict(dataDict, items, False, False, 'None')
+            if status_needs_alert(myD.get('comb_status_code')):
+                myD['status_color'] = '#FF0000'
             selectedData['JRNL'] = 'checked'
             selectedData['Citation'] = 'checked'
             myD['comment_start'] = ''
@@ -142,6 +168,9 @@ class DepictCitation(DepictBase):
                 myD['revision'] = self._getRevisionInfo(dataDict['structure_id'], count, selectedData, '2', '', '', 'border-style:none;', 'none')
             else:
                 myD['revision'] = ''
+            myD['entry_order'] = str(entry_order)
+            myD['search_text'] = self.__entrySearchText(dataDict)
+            entry_order += 1
             text += self._processTemplate('citation_finder/entry_tmplt.html', myD)
             #
             self._IdList.append('entry_' + dataDict['structure_id'])
@@ -156,13 +185,100 @@ class DepictCitation(DepictBase):
         #
         return ''
 
-    def __getFinderSummary(self):
+    def __entrySearchText(self, dataDict):
+        parts = []
+        for key in ('structure_id', 'pdb_id', 'ext_pdb_id', 'emdb_id', 'comb_status_code', 'title', 'journal_abbrev'):
+            value = dataDict.get(key)
+            if value:
+                parts.append(str(value))
+        for candidate in dataDict.get('pubmed') or []:
+            for key in ('pdbx_database_id_PubMed', 'pdbx_database_id_DOI', 'title', 'journal_abbrev'):
+                value = candidate.get(key)
+                if value:
+                    parts.append(str(value))
+        return html.escape(' '.join(parts).lower(), quote=True)
+
+    def __getFinderSummary(self, publicationCount):
         myD = {}
         myD['total'] = str(len(self._IdList))
         myD['high_count'] = str(self.__high_count)
         myD['middle_count'] = str(self.__middle_count)
         myD['lower_count'] = str(self.__lower_count)
+        myD['publication_count'] = str(publicationCount)
         return self._processTemplate('citation_finder/citation_finder_summary_tmplt.html', myD)
+
+    def __getPublicationInfo(self, groups):
+        text = ''
+        for index, group in enumerate(groups):
+            myD = {}
+            myD['index'] = str(index + 1)
+            myD['stripe'] = 'even' if index % 2 == 0 else 'odd'
+            myD['preprint_class'] = ' preprint' if group['preprint'] else ''
+            myD['badge'] = '<span class="pub-badge">preprint</span>' if group['preprint'] else ''
+            myD['search'] = self.__publicationSearch(group)
+            label = group['doi'] or (group['pubmed_ids'][0] if group['pubmed_ids'] else 'publication')
+            myD['doi_label'] = escape_text(label)
+            myD['entry_ids'] = escape_text(' '.join(group['entry_ids']))
+            count = len(group['entry_ids'])
+            myD['count_label'] = '1 entry' if count == 1 else '%d entries' % count
+            myD['unwanted'] = self.__unwantedButton(group)
+            myD['rows'] = self.__publicationRows(group)
+            text += self._processTemplate('citation_finder/publication_tmplt.html', myD)
+        return text
+
+    def __publicationSearch(self, group):
+        parts = []
+        parts.extend(group['entry_ids'])
+        parts.extend(group['pdb_ids'])
+        parts.extend(group['emdb_ids'])
+        parts.extend(group['pubmed_ids'])
+        parts.extend(group['statuses'])
+        parts.extend([group['doi'], group['title'], group['journal']])
+        return html.escape(' '.join(part for part in parts if part).lower(), quote=True)
+
+    def __unwantedButton(self, group):
+        if not group['pubmed_ids']:
+            return ''
+        pubmed_id = group['pubmed_ids'][0]
+        return (
+            '<input type="button" class="pub-unwanted" data-pubmed="%s" value="Mark %s as unwanted" />'
+            % (escape_text(pubmed_id), escape_text(pubmed_id))
+        )
+
+    def __publicationField(self, label, inner_html, copy_text, copy=True):
+        button = ''
+        if copy:
+            button = '<input type="button" class="pub-copy" value="Copy" data-value="%s" />' % escape_text(copy_text)
+        return '<div class="field"><div class="k">%s</div><div class="v">%s</div>%s</div>' % (escape_text(label), inner_html, button)
+
+    def __publicationRows(self, group):
+        rows = []
+        pubmed_links = [self.__processPubmedURL(pubmed_id) for pubmed_id in group['pubmed_ids']]
+        rows.append(self.__publicationField('PubMed ID', ', '.join(pubmed_links) if pubmed_links else 'None', ', '.join(group['pubmed_ids'])))
+        rows.append(self.__publicationField('DOI', self.__processDOIURL(group['doi']) if group['doi'] else 'None', group['doi']))
+        rows.append(self.__publicationField('PubMed Title', escape_text(group['title']) or 'None', group['title']))
+        rows.append(self.__publicationField('PubMed Journal', escape_text(group['journal']) or 'None', group['journal']))
+        rows.append(self.__publicationField('Entry IDs', escape_text(', '.join(group['entry_ids'])), ', '.join(group['entry_ids'])))
+        if group['pdb_ids']:
+            rows.append(self.__publicationField('PDB IDs', escape_text(', '.join(group['pdb_ids'])), ', '.join(group['pdb_ids'])))
+        if group['emdb_ids']:
+            emdb_links = [
+                '<a href="https://www.ebi.ac.uk/emdb/%s" target="_blank">%s</a>' % (escape_text(emdb_id), escape_text(emdb_id))
+                for emdb_id in group['emdb_ids']
+            ]
+            rows.append(self.__publicationField('EMDB IDs', ', '.join(emdb_links), ', '.join(group['emdb_ids'])))
+        status_html = []
+        for status in group['statuses']:
+            shown = escape_text(status)
+            if status_needs_alert(status):
+                shown = '<span class="status-alert">%s</span>' % shown
+            status_html.append(shown)
+        rows.append(self.__publicationField('Status', ', '.join(status_html), '', copy=False))
+        score_html = []
+        for score in group['scores']:
+            score_html.append('<span style="color:%s">%s</span>' % (self.__getColorCode(score), escape_text(score)))
+        rows.append(self.__publicationField('CitFinder Score', ', '.join(score_html), '', copy=False))
+        return ''.join(rows)
 
     def __getRequestPubmedInfoMap(self):
         pubmedInfoMap = {}
