@@ -132,12 +132,11 @@ jobs:
     - script: python -m pip install --upgrade pip tox wheel
       displayName: 'Install tools'
       #
-    - task: Cache@2
+g    - task: Cache@2
       inputs:
-        key: 'python | "$(Agent.OS)" | "$(python.version)" | requirements.txt'
+        key: 'python | "$(Agent.OS)" | "${{ parameters.python }}" | requirements.txt'
         restoreKeys: | 
-          python | "$(Agent.OS)"
-          python
+          python | "$(Agent.OS)" | "${{ parameters.python }}"
         path: $(PIP_CACHE_DIR)
       displayName: Cache pip packages
 
