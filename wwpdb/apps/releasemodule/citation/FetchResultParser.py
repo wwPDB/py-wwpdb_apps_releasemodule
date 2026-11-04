@@ -1059,12 +1059,16 @@ class FetchResultParser(object):
                     #
                 #
             #
-            if not initial or not lastName:
+            #if not initial or not lastName:
+            # Allow initial is empty (See Pubmed# 42906913)
+            if not lastName:
                 continue
             #
             initialWithDot = ''
-            for c in initial:
-                initialWithDot += c + '.'
+            if initial:
+                for c in initial:
+                    initialWithDot += c + '.'
+                #
             #
             if suffix:
                 lastName += ' ' + suffix
