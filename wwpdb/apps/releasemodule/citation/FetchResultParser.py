@@ -1059,7 +1059,7 @@ class FetchResultParser(object):
                     #
                 #
             #
-            #if not initial or not lastName:
+            # if not initial or not lastName:
             # Allow initial is empty (See Pubmed# 42906913)
             if not lastName:
                 continue
