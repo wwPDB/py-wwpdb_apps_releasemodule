@@ -7,6 +7,7 @@ Without configuration the pool size is half the CPUs the process may use (at lea
 compute cluster is enabled.  The resource allocation file can set a count for this step.  The tests replace the process
 pool, the site configuration and the CPU counts, so nothing real is started.
 """
+
 # pylint: disable=protected-access,unused-argument
 
 import json
