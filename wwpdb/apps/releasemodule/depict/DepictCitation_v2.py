@@ -249,7 +249,7 @@ class DepictCitation(DepictBase):
         button = ''
         if copy:
             button = '<input type="button" class="pub-copy" value="Copy" data-value="%s" />' % escape_text(copy_text)
-        return '<div class="field"><div class="k">%s</div><div class="v">%s</div>%s</div>' % (escape_text(label), inner_html, button)
+        return '<div class="field">%s<div class="k">%s</div><div class="v">%s</div></div>' % (button, escape_text(label), inner_html)
 
     def __publicationRows(self, group):
         rows = []
