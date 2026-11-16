@@ -22,13 +22,13 @@ __email__ = "zfeng@rcsb.rutgers.edu"
 __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.07"
 
-import multiprocessing
 import os
 import sys
 import time
 import traceback
 
 from rcsb.utils.multiproc.MultiProcUtil import MultiProcUtil
+from wwpdb.io.misc.ResourceAllocation import ResourceAllocation
 from wwpdb.apps.msgmodule.io.MessagingIo import MessagingIo
 from wwpdb.utils.db.DBLoadUtil import DBLoadUtil
 from wwpdb.utils.db.StatusHistoryUtils import StatusHistoryUtils
@@ -52,9 +52,10 @@ class MultiUpdateProcess(UpdateBase):
         self.__errorContent = ''
         self.__returnContent = ''
         if self._cI.get('USE_COMPUTE_CLUSTER'):
-            self.__numProc = len(self.__updateList)
+            defaultNumProc = len(self.__updateList)
         else:
-            self.__numProc = int(multiprocessing.cpu_count() / 2)
+            defaultNumProc = "cpus / 2"
+        self.__numProc = ResourceAllocation(config_info=self._cI).get_worker_count("releasemodule.update", defaultNumProc)
         #
         #
         self.__statusHUtils = None
